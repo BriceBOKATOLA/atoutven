@@ -101,4 +101,4 @@ Toutes les productions déposées sur ce dépôt doivent être publiées sous li
 Pour toute question, privilégiez Slack. En cas de problème de connexion, vous pouvez solliciter : 
 
 - [laurane@datactivist.coop](mailto:laurane@datactivist.coop)
-- - [maelle@datactivist.coop](mailto:maelle@datactivist.coop)
+- [maelle@datactivist.coop](mailto:maelle@datactivist.coop)
