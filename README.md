@@ -92,7 +92,7 @@ _Vous pouvez également joindre une courte vidéo de démonstration de votre dat
 
 Rappel : 
 - **Pour le README, veuillez [utiliser ce modèle](https://github.com/hackathons-mobilites/hackaviz_2026/blob/main/Docs/Template%20README%202026.md)** (il vous servira pour l'envoi de votre projet à la fin du Hackaviz.
-- Ajoutez le topic *hackathonmobilites2025* à la description de votre répertoire (voir image ci-dessous)
+- Ajoutez le topic *hackathonmobilites2026* à la description de votre répertoire (voir image ci-dessous)
 - **Ajoutez le lien de votre répertoire** dans vos diapositives de pitch + vos canal slack en message épinglé
 
 ### L'accessibilité des datavisualisations
