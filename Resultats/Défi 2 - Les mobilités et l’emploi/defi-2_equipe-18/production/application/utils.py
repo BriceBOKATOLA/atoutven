@@ -50,7 +50,7 @@ PAGES = [
     ("pages/p1_metiers.py", "Ceux qui ne télétravaillent pas", "1", "Qui ne peut pas télétravailler ?"),
     ("pages/p2_gares.py", "Loin des gares", "2", "Où sont leurs emplois ?"),
     ("pages/p3_voiture.py", "Comment ils vont travailler", "3", "Comment vont-ils travailler ?"),
-    ("pages/p4_nuit.py", "Les trajets de nuit", "4", "Que reste-t-il du réseau la nuit ?"),
+    ("pages/p4_nuit.py", "Les trajets de nuit", "4", "Que reste-t-il de l'offre de transport la nuit ?"),
     ("pages/p5_solutions.py", "Les solutions", "5", "Quelles solutions, et où en priorité ?"),
     ("pages/p6_commune.py", "Chercher ma commune", "6", "Chercher ma commune"),
     ("pages/conclusion.py", "Conclusion", "", ""),
@@ -80,6 +80,9 @@ ICONES = {
                '.4-1.8 1-2.3A7 7 0 0 0 12 2z"/>',
     "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
     "loupe": '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+    "metro": '<path d="M5 19V5l7 8 7-8v14"/>',
+    "tram": '<rect x="6" y="6" width="12" height="11" rx="2"/><path d="M6 12h12"/><path d="M9 3h6"/><path d="M12 3v3"/>'
+            '<path d="M9 20l-2 2"/><path d="M15 20l2 2"/>',
 }
 
 
@@ -117,6 +120,8 @@ def appliquer_style(nuit: bool = False) -> None:
 .stApp p, .stApp li, .stApp label, .stApp td, .stApp th, [data-testid="stMarkdownContainer"] {{
   font-family: 'Plus Jakarta Sans', sans-serif; color: {encre}; font-size: 16px; }}
 [data-testid="stIconMaterial"] {{ font-family: 'Material Symbols Rounded' !important; }}
+/* Largeur du contenu limitée à 1 100 px : choix gardé par Melvyn le 2026-11-11 après essai de la pleine largeur
+   (sur un écran large, les cartes et graphiques, qui suivent la largeur, devenaient énormes). */
 .block-container {{ max-width: 1100px; padding-top: 2.2rem; }}
 h1.titre {{ font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 38px; line-height: 1.15;
   color: {encre}; margin: 4px 0 8px; padding: 0; }}
@@ -143,6 +148,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {{ outline: 3px sol
 /* Blocs à déplier : bordure et flèche visibles aussi sur fond nuit (on doit voir que c'est cliquable) */
 [data-testid="stExpander"] details {{ border: 1px solid {"#5A6386" if nuit else bord} !important; border-radius: 12px; background: {carte}; }}
 [data-testid="stExpander"] summary [data-testid="stIconMaterial"] {{ color: {encre}; }}
+[data-testid="stExpander"] summary, [data-testid="stExpander"] details > div {{ background: {carte} !important; }}
 /* Espacement régulier entre les blocs, comme sur les maquettes (22 px) */
 [data-testid="stMain"] [data-testid="stVerticalBlock"] {{ gap: 22px; }}
 .description {{ margin-bottom: 4px !important; }}
@@ -170,6 +176,14 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [data-testid="stPa
   .trait-ligne {{ display: none !important; }}
   h1.titre {{ font-size: 30px; }}
 }}
+/* Cartes agrandissables (zoom_cartes.js) : le cadre coupe la carte agrandie ; boutons ronds en haut à droite */
+.cadre-carte {{ position: relative; overflow: hidden; border-radius: 10px; touch-action: pan-y; }}
+.cadre-carte.zoom-actif {{ cursor: grab; touch-action: none; }}
+.cadre-carte:focus-visible {{ outline: 3px solid {"#8FC3DE" if nuit else "#1F6A8C"}; outline-offset: 3px; }}
+.zoom-boutons {{ position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 2; }}
+.zoom-bouton {{ width: 44px; height: 44px; border-radius: 50%; border: 2px solid {encre}; background: {carte};
+  color: {encre}; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }}
+.zoom-bouton:disabled {{ opacity: .45; cursor: default; }}
 </style>""", unsafe_allow_html=True)
 
 
@@ -177,11 +191,21 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [data-testid="stPa
 # Composants
 # ---------------------------------------------------------------------------
 
-def menu(fichier_courant: str, nuit: bool = False) -> None:
-    """Menu latéral en forme de ligne de métro : une station par chapitre, la station courante signalée.
+# Bande de couleur verticale à gauche du contenu, une couleur par page : reprise des maquettes validées
+BANDES = {"pages/accueil.py": "#E4572E", "pages/p1_metiers.py": "#E4572E", "pages/p2_gares.py": "#B23A86",
+          "pages/p3_voiture.py": "#1B1F2A", "pages/p4_nuit.py": "#CF5CA6", "pages/p5_solutions.py": "#1B1F2A",
+          "pages/p6_commune.py": "#3A8FB7", "pages/conclusion.py": "#1B1F2A"}
 
-    st.page_link donne de vrais liens, utilisables au clavier et annoncés par les lecteurs d'écran.
+
+def menu(fichier_courant: str, nuit: bool = False) -> None:
+    """Menu latéral en forme de ligne de métro, et bande de couleur de la page (comme sur les maquettes validées).
+
+    Les stations sont de vrais liens, utilisables au clavier et annoncés par les lecteurs d'écran.
+    Sur l'Accueil seulement, la maquette ajoute une phrase d'aide en bas du menu.
     """
+    # Bande de 6 px collée au menu, sur toute la hauteur du contenu (ombre intérieure : elle suit le défilement)
+    st.markdown(f'<div class="bande-page" aria-hidden="true"></div><style>[data-testid="stMain"] '
+                f'{{ box-shadow: inset 6px 0 0 {BANDES[fichier_courant]}; }}</style>', unsafe_allow_html=True)
     with st.sidebar:
         st.markdown(f'<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'
                     f'{badge_mode("train", 42, nuit)}<div><div style="font-family:Poppins,sans-serif;font-weight:800;'
@@ -189,6 +213,10 @@ def menu(fichier_courant: str, nuit: bool = False) -> None:
                     f'<div style="font-size:14px;color:{"#9AA0B2" if nuit else GRIS_TEXTE}">Hackaviz IDFM 2026 · Défi 2</div>'
                     f'</div></div>', unsafe_allow_html=True)
         st.markdown(_ligne_de_metro(fichier_courant, nuit), unsafe_allow_html=True)
+        if fichier_courant == "pages/accueil.py":
+            st.markdown(f'<p style="font-size:14px;line-height:1.5;color:{"#9AA0B2" if nuit else GRIS_TEXTE};'
+                        f'margin-top:28px">Chaque chapitre est une station. Suivez la ligne, ou cliquez sur une '
+                        f'station.</p>', unsafe_allow_html=True)
 
 
 def _ligne_de_metro(fichier_courant: str, nuit: bool) -> str:
@@ -221,6 +249,10 @@ def _ligne_de_metro(fichier_courant: str, nuit: bool) -> str:
             f'bottom:14px;width:4px;background:{encre};border-radius:2px"></div>' + "".join(stations) + '</nav>')
 
 
+# Script du zoom des cartes, lu une fois au démarrage (fichier séparé : plus lisible et commenté)
+ZOOM_CARTES_JS = (DOSSIER / "zoom_cartes.js").read_text(encoding="utf-8")
+
+
 def bouton_ecouter(texte: str, nuit: bool = False) -> None:
     """Bouton « Écouter cette page » : lit le texte avec la synthèse vocale du navigateur (Web Speech API).
 
@@ -247,6 +279,14 @@ try {{
     if (a.textContent.trim() === 'Skip to main content') a.textContent = 'Aller au contenu';
   }});
   traduire(); setTimeout(traduire, 1500);   // le lien d'évitement peut être dessiné après ce script
+}} catch (e) {{}}
+// Zoom des cartes : le script (zoom_cartes.js) est installé une fois dans la page principale, où il reste actif
+// d'une page à l'autre ; s'il est déjà là, rien n'est refait.
+try {{
+  const d = window.parent.document;
+  if (!window.parent.__zoomCartes) {{
+    const s = d.createElement('script'); s.textContent = {json.dumps(ZOOM_CARTES_JS)}; d.head.appendChild(s);
+  }}
 }} catch (e) {{}}
 const texte = {json.dumps(texte)};
 const b = document.getElementById('b'), t = document.getElementById('t');
@@ -340,6 +380,88 @@ def tableau(df: pd.DataFrame, titre: str = "Voir les données du graphique") -> 
 def lire(nom: str) -> pd.DataFrame:
     """Lit un fichier de résultats du dossier donnees/ (une seule lecture, partagée par toutes les pages)."""
     return pd.read_csv(DONNEES / nom, encoding="utf-8-sig")
+
+
+@st.cache_data
+def svg_base64(nom: str) -> str:
+    """Contenu d'une image SVG du dossier donnees/, encodé pour une balise <img>.
+
+    On passe par <img> plutôt que st.image : st.image ne permet pas d'écrire un texte alternatif (attribut alt),
+    indispensable pour les lecteurs d'écran.
+    """
+    import base64
+    return base64.b64encode((DONNEES / nom).read_bytes()).decode("ascii")
+
+
+# Silhouettes blanches des métiers (dessins des maquettes) : cravate pour les cadres, badge pour les employés,
+# casque pour les ouvriers. Elles complètent la couleur : le métier se reconnaît aussi à la forme.
+_SILHOUETTES = {
+    "Cadres": '<circle cx="12" cy="7" r="4.2" fill="#FFFFFF"/><path d="M4 23v-4a8 8 0 0 1 16 0v4z" fill="#FFFFFF"/>'
+              '<path d="M11 13h2l.6 2.4L12 21l-1.6-5.6z" fill="#1B1F2A"/>',
+    "Employés": '<circle cx="12" cy="7" r="4.2" fill="#FFFFFF"/><path d="M4 23v-4a8 8 0 0 1 16 0v4z" fill="#FFFFFF"/>'
+                '<rect x="13.5" y="16" width="4.5" height="3.2" rx="0.8" fill="#1B1F2A"/>',
+    "Ouvriers": '<circle cx="12" cy="7.5" r="4.2" fill="#FFFFFF"/><path d="M4 23v-4a8 8 0 0 1 16 0v4z" fill="#FFFFFF"/>'
+                '<path d="M7 6.6a5 4.6 0 0 1 10 0z" fill="#1B1F2A"/><rect x="5.6" y="5.8" width="12.8" height="1.8" '
+                'rx="0.9" fill="#1B1F2A"/>',
+}
+
+
+def libelle_metier(metier: str) -> str:
+    """Rond de couleur du métier avec sa silhouette, suivi de son nom (en-tête de ligne des graphiques des maquettes)."""
+    c = METIERS[metier]
+    return (f'<div style="display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;color:{c["texte"]}">'
+            f'<span aria-hidden="true" style="width:30px;height:30px;border-radius:50%;background:{c["donnee"]};'
+            f'display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" '
+            f'viewBox="0 0 24 24">{_SILHOUETTES[metier]}</svg></span>{metier}</div>')
+
+
+def pastille_legende(libelle: str, style_echantillon: str, nuit: bool = False) -> str:
+    """Une entrée de légende de carte : un échantillon de couleur (ou un cercle) suivi de son libellé écrit."""
+    fond = "#262E48" if nuit else "#F2F3F0"
+    return (f'<span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;'
+            f'background:{fond}"><span aria-hidden="true" style="{style_echantillon}"></span>{libelle}</span>')
+
+
+def figure_carte(nom_svg: str, alt: str, legende: list, titre: str = "", note: str = "", nuit: bool = False) -> str:
+    """Carte d'origine des maquettes (image SVG de donnees/), avec texte alternatif, titre et légende écrite.
+
+    legende = liste de (libellé, style CSS de l'échantillon). Les couleurs ne portent jamais seules l'information :
+    chaque classe a son libellé.
+    """
+    haut = f'<figcaption style="font-size:15px;font-weight:600">{titre}</figcaption>' if titre else ""
+    bas = f'<figcaption style="font-size:14px;line-height:1.4;color:{"#C9CDD8" if nuit else "#4E5466"}">{note}</figcaption>' if note else ""
+    return (f'<figure style="margin:0;display:flex;flex-direction:column;gap:10px">{haut}'
+            f'<div class="cadre-carte"><img class="carte-zoomable" src="data:image/svg+xml;base64,{svg_base64(nom_svg)}" '
+            f'alt="{html.escape(alt)}" style="width:100%;height:auto;display:block"></div>{bas}'
+            f'<div style="display:flex;flex-wrap:wrap;gap:6px;font-size:14px;font-weight:600">'
+            + "".join(pastille_legende(l, s, nuit) for l, s in legende) + '</div></figure>')
+
+
+def picto_ligne(ligne: str) -> str:
+    """Pictogramme d'une ligne ferrée (« RER D », « Métro 7 », « Tram T12 »…) : carré encre du mode + pastille à la
+    couleur officielle de la ligne (IDFM, référentiel des lignes, ODbL ; preparation/preparer_couleurs_lignes.py).
+
+    Pas les logos officiels (absents des données ouvertes, et ce sont des marques). Pastille en carré arrondi : le rond
+    de couleur est réservé aux métiers. Le nom complet est lu par les lecteurs d'écran (aria-label) et s'affiche au
+    survol (title) ; seul le numéro ou la lettre est écrit dans la pastille, comme sur les plans du réseau.
+    """
+    couleurs = lire("couleurs_lignes.csv").set_index("ligne")
+    if ligne not in couleurs.index:   # ligne inconnue du référentiel : on écrit son nom, rien n'est caché
+        return f'<span style="font-weight:700">{html.escape(ligne)}</span>'
+    c = couleurs.loc[ligne]
+    contour = ";box-shadow:inset 0 0 0 1.5px #1B1F2A" if c["contour"] else ""
+    return (f'<span class="picto-ligne" role="img" aria-label="{html.escape(ligne)}" title="{html.escape(ligne)}" '
+            f'style="display:inline-flex;align-items:center;gap:4px">{badge_mode(c["mode"], 34)}'
+            f'<span aria-hidden="true" style="height:34px;min-width:34px;box-sizing:border-box;padding:0 7px;border-radius:9px;'
+            f'background:{c["fond"]};color:{c["texte"]};display:inline-flex;align-items:center;justify-content:center;'
+            f'font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:19px{contour}">{html.escape(str(c["court"]))}'
+            f'</span></span>')
+
+
+def echantillon(couleur: str, bord: str = "") -> str:
+    """Style d'un carré de légende de 14 px (avec un contour si la couleur est proche du fond)."""
+    return (f"width:14px;height:14px;border-radius:3px;background:{couleur}"
+            + (f";box-shadow:inset 0 0 0 1px {bord}" if bord else ""))
 
 
 def part_nuit_pct() -> float:
