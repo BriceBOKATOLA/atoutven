@@ -1,0 +1,7 @@
+# Dépendances Python du projet (installer avec : pip install -r requirements.txt)
+# Versions minimales : celles testées sur ce projet le 2026-10-24.
+
+# pandas : manipulation des tableaux de données (filtrer, regrouper, pondérer)
+pandas>=3.1
+# pyarrow : lecture des fichiers .parquet de l'INSEE (pandas s'appuie dessus)
+pyarrow>=26.0
