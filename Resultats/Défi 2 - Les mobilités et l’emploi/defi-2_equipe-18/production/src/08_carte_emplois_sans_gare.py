@@ -30,6 +30,7 @@ SORTIE = RACINE / "resultats" / "08_cartes"
 # Dimensions du dessin, en pixels SVG
 LARGEUR_PX = 640
 MARGE_PX = 10
+DISTANCE_MIN_PX = 1.5        # simplification des contours : écart invisible à l'œil à cette taille
 
 # Cercles : rayon du plus gros cercle, en pixels. La surface (pas le rayon) est
 # proportionnelle au nombre d'emplois, sinon l'œil surestime les grandes valeurs.
@@ -90,14 +91,28 @@ def projeteur(contours: dict):
     return projeter, hauteur
 
 
+def simplifier(points: list) -> list:
+    """Garde un point seulement s'il est à au moins DISTANCE_MIN_PX du dernier point gardé.
+
+    Les contours officiels ont des milliers de points par commune, invisibles à
+    cette échelle : sans simplification, le fichier SVG pèse plus de 3 Mo.
+    """
+    gardes = [points[0]]
+    for x, y in points[1:]:
+        if math.hypot(x - gardes[-1][0], y - gardes[-1][1]) >= DISTANCE_MIN_PX:
+            gardes.append((x, y))
+    return gardes
+
+
 def chemin_svg(geometrie: dict, projeter) -> str:
-    """Convertit un polygone GeoJSON en attribut d du SVG (coordonnées arrondies : fichier plus léger)."""
+    """Convertit un polygone GeoJSON en attribut d du SVG (points simplifiés, coordonnées arrondies)."""
     polygones = [geometrie["coordinates"]] if geometrie["type"] == "Polygon" else geometrie["coordinates"]
     morceaux = []
     for poly in polygones:
         for anneau in poly:
-            points = [projeter(lon, lat) for lon, lat in anneau]
-            morceaux.append("M" + "L".join(f"{x:.1f},{y:.1f}" for x, y in points) + "Z")
+            points = simplifier([projeter(lon, lat) for lon, lat in anneau])
+            if len(points) >= 3:   # un anneau réduit à 2 points ne dessine rien
+                morceaux.append("M" + "L".join(f"{x:.1f},{y:.1f}" for x, y in points) + "Z")
     return "".join(morceaux)
 
 
