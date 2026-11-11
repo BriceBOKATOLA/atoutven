@@ -1,0 +1,7 @@
+# Bibliothèques de l'application (versions testées le 2026-11-11, Python 3.13)
+# streamlit : l'application web (licence Apache 2.0)
+streamlit==1.67.0
+# altair : graphiques accessibles (description lue par les lecteurs d'écran) ; installé avec streamlit
+altair==6.3.0
+# pandas : lecture des fichiers de résultats
+pandas==3.1.0
