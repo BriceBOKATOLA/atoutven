@@ -5,3 +5,5 @@
 pandas>=3.1
 # pyarrow : lecture des fichiers .parquet de l'INSEE (pandas s'appuie dessus)
 pyarrow>=26.0
+# openpyxl : lecture du fichier Excel de l'enquête Besoins en main-d'œuvre de France Travail (script 10)
+openpyxl>=3.1

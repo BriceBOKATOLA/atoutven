@@ -83,6 +83,24 @@ SOURCES = [
     ("geo_communes_idf", "communes_idf_contours.geojson",
      url(GEO, codeRegion="11", format="geojson", geometry="contour", fields="code,nom"),
      "Contours des communes d'Île-de-France (cartes)"),
+    # France Travail, enquête Besoins en main-d'œuvre 2026 (Licence Ouverte, fichier officiel de la page open data) :
+    # projets de recrutement et projets jugés difficiles, par bassin d'emploi et par métier (script 10)
+    ("francetravail_bmo", "Base-open-data-BMO-2026.xlsx",
+     "https://www.francetravail.org/files/live/sites/peorg/files/documents/Statistiques-et-analyses/Open-data/BMO/"
+     "Base-open-data-BMO-2026.xlsx",
+     "Besoins en main-d'œuvre 2026 : recrutements prévus et jugés difficiles, par bassin d'emploi et métier"),
+    # IDFM, référentiel des lignes (licence ODbL) : couleurs officielles des lignes ferrées (pictogrammes, page 6)
+    ("idfm_referentiel_lignes", "referentiel_lignes_ferrees.csv",
+     url(f"{IDFM}/referentiel-des-lignes/exports/csv", delimiter=";",
+         select="transportmode,transportsubmode,networkname,shortname_line,colourweb_hexa,textcolourweb_hexa,status",
+         where='transportmode in ("rail","metro","tram")'),
+     "Couleurs officielles des lignes de métro, RER, train et tram (licence ODbL)"),
+    # SNCF, régularité mensuelle Transilien (licence ODbL) : ponctualité par mois et par ligne, RER et Transilien
+    # (script 11 ; idée et premier travail de Maroua Zoubir). API du portail open data de la SNCF.
+    ("sncf_ponctualite", "ponctualite_mensuelle_transilien.csv",
+     url("https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/ponctualite-mensuelle-transilien/exports/csv",
+         delimiter=";"),
+     "Ponctualité mensuelle des RER et Transilien depuis 2013 (licence ODbL)"),
 ]
 
 
