@@ -10,7 +10,6 @@ Visuel principal : haltères. Rond creux = avec gare, rond plein = sans gare : l
 pas seulement la couleur.
 """
 
-import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -33,47 +32,67 @@ u.entete(FICHIER, 'Sans gare, <span style="color:#C0401A">tout le monde</span> p
                    "employés et ouvriers vont travailler, depuis une autre commune de banlieue, dans une commune sans gare",
                    "#E4572E", "#C0401A", "train_barre"))
 
-# --- Visuel principal : haltères
+# --- Visuel principal : jauges de la proposition validée le 2026-11-11 (canevas « Proposition p3 : jauges »,
+# inspirée de HAP Express : on met en avant l'information clé). Par rapport aux haltères de la maquette :
+#   - barres épaisses et arrondies (14 px) au lieu d'un trait fin : l'écart entre les deux situations se voit ;
+#   - le chiffre « sans gare » en gros, dans la couleur du métier ; le chiffre « avec gare » plus discret ;
+#   - une bande grise verticale couvre les 3 ronds pleins, avec la pastille « Sans gare : 71 à 77 %, quel que soit le
+#     métier » : c'est le message du titre, qu'on lit sans comparer les chiffres un à un. Bornes calculées.
+# Rond creux = lieu de travail avec gare, rond plein = sans gare : la forme distingue les deux, pas seulement la couleur.
 metiers = ["Cadres", "Employés", "Ouvriers"]
 large = v.pivot(index="groupe", columns="commune_de_travail", values="part_voiture_pct").loc[metiers].reset_index()
 large.columns = ["Métier", "avec", "sans"]
-long = v.rename(columns={"groupe": "Métier", "commune_de_travail": "Lieu de travail", "part_voiture_pct": "part"})
-long["Lieu de travail"] = long["Lieu de travail"].map({"avec gare": "a une gare", "sans gare": "n'a pas de gare"})
-long["étiquette"] = long["part"].map(lambda x: f"{x:.0f} %")
+BAS, HAUT = round(large["sans"].min()), round(large["sans"].max())
+LIBELLE_PX, MARGE_DROITE_PX = 184, 24   # colonne du métier (170 px + 14 d'écart) ; place pour « 100 % en voiture »
+PISTE = f"(100% - {LIBELLE_PX + MARGE_DROITE_PX}px)"   # largeur de la piste, pour placer la bande au bon endroit
 
-echelle = alt.Scale(domain=metiers, range=[u.METIERS[m]["donnee"] for m in metiers])
-y = alt.Y("Métier:N", sort=metiers, title=None, axis=alt.Axis(labelFontSize=16, labelFontWeight="bold",
-                                                              labelColor=u.ENCRE, labelPadding=12, ticks=False, domain=False))
-x = alt.X("part:Q", title="Part des trajets faits en voiture (%)", scale=alt.Scale(domain=[0, 100]),
-          axis=alt.Axis(values=[0, 25, 50, 75, 100], labelFontSize=14, titleFontSize=14, grid=True,
-                        gridColor="#EEF0EC", titleColor=u.GRIS_TEXTE, labelColor=u.GRIS_TEXTE))
-trait = alt.Chart(large).mark_rule(strokeWidth=6).encode(
-    y=y, x=alt.X("avec:Q", scale=alt.Scale(domain=[0, 100])), x2="sans:Q",
-    color=alt.Color("Métier:N", scale=echelle, legend=None))
-points = alt.Chart(long).mark_point(size=420, strokeWidth=4, opacity=1).encode(
-    y=y, x=x, color=alt.Color("Métier:N", scale=echelle, legend=None),
-    fill=alt.condition("datum['Lieu de travail'] == \"n'a pas de gare\"", alt.Color("Métier:N", scale=echelle),
-                       alt.value("#FFFFFF")),
-    shape=alt.value("circle"),
-    tooltip=[alt.Tooltip("Métier:N"), alt.Tooltip("Lieu de travail:N"), alt.Tooltip("étiquette:N", title="En voiture")])
-etiquettes = alt.Chart(long).mark_text(dy=-24, fontSize=16, fontWeight="bold", color=u.ENCRE).encode(
-    y=y, x="part:Q", text="étiquette:N")
-graphique = (trait + points + etiquettes).properties(
-    height=260, description="Part des trajets en voiture entre communes de banlieue, avec puis sans gare au lieu "
-    "de travail. " + " ".join(f"{r.Métier} : {r.avec:.0f} % et {r.sans:.0f} %." for r in large.itertuples())
-).configure_view(strokeWidth=0).configure(background="transparent")
 
-# Titre, légende et graphique dans une même carte blanche (style des conteneurs « carte_ » dans utils)
-with st.container(border=True, key="carte_halteres"):
-    st.markdown(f'<h2 class="sous-titre">Part des trajets faits en voiture, de banlieue à banlieue, selon le lieu de '
-                f'travail</h2><div style="display:flex;flex-wrap:wrap;gap:22px;font-size:15px;font-weight:600">'
-                f'<span style="display:inline-flex;align-items:center;gap:8px">{u.badge_mode("train")}'
-                f'<span aria-hidden="true" style="width:18px;height:18px;border-radius:50%;border:4px solid #1B1F2A;'
-                f'box-sizing:border-box;display:inline-block"></span>Le lieu de travail a une gare</span>'
-                f'<span style="display:inline-flex;align-items:center;gap:8px">{u.badge_mode("train_barre")}'
-                f'<span aria-hidden="true" style="width:18px;height:18px;border-radius:50%;background:#1B1F2A;'
-                f'display:inline-block"></span>Il n\'en a pas</span></div>', unsafe_allow_html=True)
-    st.altair_chart(graphique, theme=None, width="stretch")
+def ligne_jauge(metier: str, avec: float, sans: float) -> str:
+    """Une ligne : métier, piste grise, segment pâle entre les deux valeurs, rond creux (avec gare), rond plein (sans)."""
+    c, texte = u.METIERS[metier]["donnee"], u.METIERS[metier]["texte"]
+    return (f'<div role="img" aria-label="{metier} : {avec:.0f} % en voiture quand le lieu de travail a une gare, '
+            f'{sans:.0f} % quand il n\'en a pas" style="display:grid;grid-template-columns:170px 1fr {MARGE_DROITE_PX}px;'
+            f'align-items:center;height:78px;position:relative">{u.libelle_metier(metier)}'
+            f'<div aria-hidden="true" style="position:relative;height:78px;margin-left:14px">'
+            f'<div style="position:absolute;left:0;right:0;top:44px;height:14px;border-radius:7px;background:#EEF0EC"></div>'
+            f'<div style="position:absolute;top:44px;height:14px;border-radius:7px;background:{c};opacity:.35;'
+            f'left:{avec:.1f}%;width:{sans - avec:.1f}%"></div>'
+            f'<div style="position:absolute;top:10px;left:calc({avec:.1f}% - 40px);width:80px;text-align:center;'
+            f'font-size:16px;font-weight:600;color:#5E6475">{avec:.0f} %</div>'
+            f'<div style="position:absolute;top:2px;left:calc({sans:.1f}% - 40px);width:80px;text-align:center;'
+            f'font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:28px;line-height:1.1;color:{texte}">'
+            f'{sans:.0f} %</div>'
+            f'<span style="position:absolute;top:37px;left:calc({avec:.1f}% - 14px);width:28px;height:28px;border-radius:50%;'
+            f'background:#FFFFFF;border:4px solid {c};box-sizing:border-box"></span>'
+            f'<span style="position:absolute;top:35px;left:calc({sans:.1f}% - 16px);width:32px;height:32px;border-radius:50%;'
+            f'background:{c};box-shadow:0 0 0 3px #FFFFFF"></span></div><span></span></div>')
+
+
+bande_gauche = f"calc({LIBELLE_PX}px + {PISTE} * {BAS / 100:.2f} - 18px)"
+bande_largeur = f"calc({PISTE} * {(HAUT - BAS) / 100:.2f} + 36px)"
+st.markdown(f'<section style="background:#FFFFFF;border:1px solid #E7EAE4;border-radius:16px;padding:22px 28px;'
+            f'display:flex;flex-direction:column;gap:10px"><h2 class="sous-titre" style="margin:0">Part des trajets faits '
+            f'en voiture, de banlieue à banlieue, selon le lieu de travail</h2>'
+            f'<div style="display:flex;flex-wrap:wrap;gap:22px;font-size:15px;font-weight:600">'
+            f'<span style="display:inline-flex;align-items:center;gap:8px">{u.badge_mode("train")}'
+            f'<span aria-hidden="true" style="width:18px;height:18px;border-radius:50%;border:3px solid #1B1F2A;'
+            f'box-sizing:border-box;display:inline-block"></span>Le lieu de travail a une gare</span>'
+            f'<span style="display:inline-flex;align-items:center;gap:8px">{u.badge_mode("train_barre")}'
+            f'<span aria-hidden="true" style="width:20px;height:20px;border-radius:50%;background:#1B1F2A;'
+            f'display:inline-block"></span>Il n\'en a pas</span></div>'
+            f'<div style="position:relative;padding-top:44px">'
+            f'<div aria-hidden="true" style="position:absolute;top:0;bottom:26px;left:{bande_gauche};width:{bande_largeur};'
+            f'background:#EEF0EC;border-radius:14px"></div>'
+            f'<div style="position:absolute;top:8px;left:{bande_gauche};width:{bande_largeur};display:flex;'
+            f'justify-content:center"><span style="white-space:nowrap;background:#1B1F2A;color:#FFFFFF;border-radius:999px;'
+            f'padding:4px 14px;font-size:14px;font-weight:700">Sans gare : {BAS} à {HAUT} %, quel que soit le métier</span></div>'
+            f'<div style="position:relative">' + "".join(ligne_jauge(r.Métier, r.avec, r.sans) for r in large.itertuples())
+            + f'</div><div aria-hidden="true" style="display:grid;grid-template-columns:170px 1fr {MARGE_DROITE_PX}px;'
+              f'font-size:14px;color:#5E6475;padding-top:6px"><span></span><div style="position:relative;height:22px;'
+              f'margin-left:14px;border-top:1px solid #DADDD6"><span style="position:absolute;left:0;top:4px">0 %</span>'
+              f'<span style="position:absolute;left:50%;top:4px;transform:translateX(-50%)">50 %</span>'
+              f'<span style="position:absolute;right:-24px;top:4px">100 % en voiture</span></div><span></span></div>'
+              f'</div></section>', unsafe_allow_html=True)
 u.tableau(pd.DataFrame({"Métier": metiers,
                         "Lieu de travail avec gare (%)": [f"{a:.0f}" for a in large["avec"]],
                         "Lieu de travail sans gare (%)": [f"{s:.0f}" for s in large["sans"]]}))
