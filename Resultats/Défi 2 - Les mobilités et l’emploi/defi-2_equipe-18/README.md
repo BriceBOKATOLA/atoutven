@@ -4,9 +4,33 @@
 **Mail(s) de contact :** melvynmotho@gmail.com
 **Défi :** Défi 2 : Les mobilités et l'emploi
 
-## Notre question
+## La problématique
 
-Les transports en commun d'Île-de-France permettent-ils d'atteindre les lieux où travaillent les employés et les ouvriers, qui ne peuvent presque pas télétravailler ? Et où des solutions complémentaires (vélo, navettes, covoiturage) seraient-elles les plus utiles ?
+**Les deux questions du défi 2 :** les transports en commun permettent-ils d'accéder à l'emploi ? Sur quels territoires d'autres solutions de mobilité seraient-elles utiles ?
+
+**Pourquoi nous regardons les employés et les ouvriers :** le télétravail a changé les trajets des cadres, pas les leurs. Ils sont 2 millions en Île-de-France à ne presque jamais pouvoir télétravailler (cuisine, soin, nettoyage, logistique, sécurité, bâtiment…) : pour eux, chaque journée de travail commence par un trajet. Si l'offre de transport ne les mène pas à leur lieu de travail, ou ne circule pas à leurs horaires, ils n'ont pas d'autre solution que la voiture.
+
+**Notre problématique :**
+
+> **L'offre de transport en commun d'Île-de-France mène-t-elle les employés et les ouvriers jusqu'à leur lieu de travail, et à leurs horaires ? Sinon, où et pour qui d'autres solutions seraient-elles les plus utiles ?**
+
+Elle se découpe en cinq questions, une par page de l'application :
+
+| Page | Question | Ce que nous mesurons |
+|---|---|---|
+| 1 | Qui ne peut pas télétravailler ? | Part du télétravail par métier |
+| 2 | Où sont leurs emplois ? | Part des emplois situés dans une commune sans gare (ni métro, ni RER, ni train, ni tram) |
+| 3 | Comment vont-ils travailler ? | Part de la voiture selon que le lieu de travail a une gare ou non |
+| 4 | Que reste-t-il de l'offre de transport la nuit ? | Passages prévus heure par heure, communes sans aucune offre de nuit |
+| 5 | Quelles solutions, et où ? | Trajets courts en voiture (vélo), emplois sans gare (navettes), recrutements jugés difficiles par territoire |
+
+Une sixième page permet à chacun de chercher sa commune.
+
+**Petite et grande couronne :** la petite couronne regroupe les Hauts-de-Seine, la Seine-Saint-Denis et le Val-de-Marne ; la grande couronne, la Seine-et-Marne, les Yvelines, l'Essonne et le Val-d'Oise.
+
+**D'où viennent nos trois catégories :** cadres, employés et ouvriers ne sont pas un classement fait par nous. C'est la nomenclature officielle de l'INSEE, la variable « groupe socioprofessionnel en 6 postes » du recensement (codes 3, 5 et 6 de la PCS 2020), présente pour chaque actif dans le fichier des mobilités professionnelles. Toutes nos hypothèses tirées du recensement ont été testées sur ces groupes (l'analyse des recrutements difficiles utilise, elle, les familles de métiers publiées par France Travail). Ce que recouvre chaque groupe : les **cadres** (ingénieurs, cadres d'entreprise, professeurs…), les **employés** (métiers de bureau, de commerce et de service : vendeurs, caissiers, aides-soignants, agents d'accueil, agents de sécurité…) et les **ouvriers** (usine, chantier, entrepôt, conduite de véhicules…). Un salarié d'usine est donc un ouvrier, pas un employé. Nous en gardons trois sur six : les employés et les ouvriers, qui ne peuvent presque pas télétravailler, et les cadres comme point de comparaison. Les trois autres groupes sont écartés : les agriculteurs, les artisans, commerçants et chefs d'entreprise (souvent installés sur leur lieu de travail), et les professions intermédiaires (un groupe mélangé, entre les deux).
+
+**Ce que nous ne traitons pas** (et pourquoi) : la durée réelle des trajets et les correspondances (aucune donnée ouverte ne les donne par trajet domicile-travail), la fréquentation de nuit (on connaît l'offre prévue, pas qui la prend), les raisons des difficultés de recrutement (l'enquête de France Travail ne les donne pas par territoire).
 
 ## Ce que montrent les données
 
@@ -15,8 +39,11 @@ Les transports en commun d'Île-de-France permettent-ils d'atteindre les lieux o
 - Hors de Paris, **1 emploi d'ouvrier sur 4** se trouve dans une commune sans gare (ni métro, ni RER, ni train, ni tram), contre **1 emploi de cadre sur 8**.
 - Pour aller d'une commune de banlieue à une autre, la voiture passe d'environ un trajet sur deux quand le lieu de travail a une gare à près de trois sur quatre quand il n'en a pas, **pour tous les métiers, cadres compris** (77 % sans gare).
 - Ce résultat **ne s'explique pas par le revenu** : à niveau de vie égal de la commune de résidence, l'absence de gare fait toujours monter la voiture de 17 à 28 points.
-- La nuit, il passe **13 fois moins** de bus et de trains qu'à l'heure de pointe, partout en Île-de-France ; or les ouvriers travaillent deux fois plus souvent la nuit que les cadres.
-- Deux cibles pour réduire la voiture : **339 000 trajets en voiture de moins de 5 km** entre communes de banlieue (vélo), et **322 000 emplois d'employés et d'ouvriers dans des communes sans gare** (navettes, covoiturage), dont Gonesse, Guyancourt, Bonneuil-sur-Marne et Les Ulis.
+- La nuit, l'offre de transport est **13 fois moins** importante qu'entre 7h et 10h, sur l'ensemble de l'Île-de-France, et 6 communes sur 10 n'en ont plus aucune ; or les ouvriers travaillent deux fois plus souvent la nuit que les cadres.
+- Chaque territoire a sa solution :
+  - **le vélo en petite couronne** : 22 % des trajets en voiture d'une commune de banlieue à une autre font moins de 5 km (339 000 sur 1,54 million), et 31 % en petite couronne ;
+  - **des navettes en grande couronne** : hors de Paris, 20 % des postes d'employés et d'ouvriers sont dans une commune sans gare (322 000 sur 1,59 million), et 32 % en grande couronne. Les plus grands pôles sont Gonesse, Guyancourt, Bonneuil-sur-Marne et Les Ulis.
+- Les employeurs de grande couronne jugent 41 % de leurs recrutements difficiles, contre 29 % à Paris (France Travail, 2026). C'est une coïncidence géographique : l'enquête ne dit pas que le transport en est la cause.
 
 ## Notre visualisation
 
@@ -42,7 +69,7 @@ Une application web en forme de récit : une page par question, à parcourir com
 | Offre de transport la nuit et le dimanche | `05` | 7,6 % des passages de la pointe la nuit, 47 % le dimanche, partout |
 | Trajets courts en voiture, pôles d'emploi sans desserte de nuit | `06` | 22 % des trajets en voiture entre banlieues font moins de 5 km |
 | Emplois dans une commune sans gare | `07` | 23 % des emplois d'ouvriers hors Paris, 13 % de ceux des cadres |
-| Carte des emplois sans gare | `08` | 154 communes sans gare comptent au moins 500 emplois d'employés et d'ouvriers |
+| Carte des emplois sans gare | `08` | 154 communes sans gare comptent au moins 500 postes d'employés et d'ouvriers |
 | Revenu et choix de la voiture | `09` | L'effet de la gare tient à tout niveau de revenu |
 
 ## Les données utilisées
@@ -90,10 +117,16 @@ streamlit run app.py                          # lance l'application
 
 ## Et la suite ?
 
-- **La ponctualité des lignes** : avoir une gare ne suffit pas, encore faut-il que le train soit à l'heure. Une analyse de la ponctualité des lignes RER et Transilien est en cours (branche de travail de l'équipe).
+- **La ponctualité de tout le réseau** : notre analyse couvre les 13 lignes de RER et Transilien publiées par la SNCF ; le métro, le tram et le bus, publiés à part, compléteraient le tableau.
 - **Des temps de trajet réels**, porte à porte, pour remplacer la présence d'une gare dans la commune.
 - **Une analyse plus fine que la commune**, au niveau du quartier.
 
+## Qui a fait quoi
+
+- **Melvyn MOTHO** : hypothèses et protocoles de test, analyses des données (scripts 00 à 11), maquettes et application.
+- **Pierre THAI** : relecture critique des maquettes, à partir de captures annotées. Ses recommandations ont donné le titre de l'Accueil (« Quand le lieu de travail impose la voiture »), la formulation « 13 fois moins » à la place d'un pourcentage mal compris, le titre, le sous-titre et le « À retenir » de la page sur le télétravail, et une description plus exacte de la page « Loin des gares » (« presque deux fois plus souvent »). Il a aussi proposé l'hypothèse sur le revenu (« la voiture comme luxe ? », script 09), qui est devenue le contrôle du résultat principal : à revenu égal, l'absence de gare fait toujours monter la voiture.
+- **Maroua Zoubir** : idée et premier travail sur la ponctualité des lignes de RER et de train, repris dans le script 11 et la page « Loin des gares ».
+
 ## Licence
 
-Code sous licence [MIT](https://github.com/hackathons-mobilites/hackaviz_2026/blob/main/Docs/License.md). Résultats et données dérivées sous Licence Ouverte 2.0. Textes et visuels sous licence CC-BY 4.0.
+Code sous licence [MIT](https://github.com/hackathons-mobilites/hackaviz_2026/blob/main/Docs/License.md). Résultats et données dérivées sous Licence Ouverte 2.0, sauf ceux tirés de sources sous ODbL, qui restent sous ODbL : ponctualité des lignes (`production/resultats/11_h24/`, `application/donnees/ponctualite_lignes.csv`) et couleurs des lignes (`application/donnees/couleurs_lignes.csv`). Textes et visuels sous licence CC-BY 4.0.
