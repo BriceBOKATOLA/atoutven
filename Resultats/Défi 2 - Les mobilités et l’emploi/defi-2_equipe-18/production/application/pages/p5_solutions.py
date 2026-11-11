@@ -61,7 +61,7 @@ with droite, st.container(border=True, key="carte_navette"):
                 f'd\'emplois d\'employés et d\'ouvriers dans les communes sans gare ({nb_cercles} communes en comptent au '
                 f'moins 500). Gris moyen : commune avec gare ; gris clair : sans gare.</p>', unsafe_allow_html=True)
     u.tableau(communes.head(NB_COMMUNES).assign(emplois_sur_place=lambda d: d["emplois_sur_place"].map(lambda x: u.fr(round(x, -2))))
-              .rename(columns={"nom": "Commune", "emplois_sur_place": "Emplois sur place"})[["Commune", "Emplois sur place"]],
+              .rename(columns={"nom": "Commune", "emplois_sur_place": "Emplois d'employés et d'ouvriers"})[["Commune", "Emplois d'employés et d'ouvriers"]],
               f"Voir le tableau : les {NB_COMMUNES} communes sans gare qui en comptent le plus")
 
 u.encadres(retenir, "Des potentiels, pas des prévisions. Distances à vol d'oiseau (plus courtes que par la route) ; une "

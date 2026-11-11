@@ -1,5 +1,6 @@
 """
-utils.py : tout ce qui est commun aux pages de l'application « Sur place, loin du réseau ».
+utils.py : tout ce qui est commun aux pages de l'application « Le lieu de travail décide ».
+(Nom provisoire, choisi le 11/11 pour remplacer « Sur place, loin du réseau » : « sur place » était du jargon.)
 
 - la charte (couleurs, polices) et le style CSS appliqué à chaque page ;
 - les composants réutilisés : en-tête de page, panneau-chiffre, encadrés « À retenir » et « Limite »,
@@ -184,7 +185,7 @@ def menu(fichier_courant: str, nuit: bool = False) -> None:
     with st.sidebar:
         st.markdown(f'<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'
                     f'{badge_mode("train", 42, nuit)}<div><div style="font-family:Poppins,sans-serif;font-weight:800;'
-                    f'font-size:16px;color:{"#F1F2F6" if nuit else ENCRE}">Sur place, loin du réseau</div>'
+                    f'font-size:16px;color:{"#F1F2F6" if nuit else ENCRE}">Le lieu de travail décide</div>'
                     f'<div style="font-size:14px;color:{"#9AA0B2" if nuit else GRIS_TEXTE}">Hackaviz IDFM 2026 · Défi 2</div>'
                     f'</div></div>', unsafe_allow_html=True)
         st.markdown(_ligne_de_metro(fichier_courant, nuit), unsafe_allow_html=True)

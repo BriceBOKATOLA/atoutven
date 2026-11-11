@@ -22,7 +22,7 @@ h21 = u.lire("h21_emplois_sans_gare.csv").set_index("groupe")
 v = u.lire("voiture_selon_gare_destination.csv").set_index(["groupe", "commune_de_travail"])["part_voiture_pct"]
 h16 = u.lire("h16_trajets_courts_voiture.csv").set_index("groupe")
 
-description = ("Les emplois des métiers sur place sont plus souvent dans des communes sans gare. Là, tout le monde "
+description = ("Les emplois des employés et ouvriers sont plus souvent dans des communes sans gare. Là, tout le monde "
                "prend la voiture, cadres compris. Ce n'est donc pas le métier qui éloigne du réseau, c'est le lieu "
                "de travail.")
 u.entete(FICHIER, 'Le réseau mène à Paris, <span style="color:#C0401A">pas aux emplois de banlieue</span>', description)
@@ -30,7 +30,7 @@ u.entete(FICHIER, 'Le réseau mène à Paris, <span style="color:#C0401A">pas au
 # (icône, page, nom, chiffre, texte, correspondance)
 stations = [
     ("personnes", "pages/p1_metiers.py", "Ceux qui ne télétravaillent pas",
-     f"{(actifs['Employé'] + actifs['Ouvrier']) / 1e6:.0f} millions", "d'actifs exercent un métier qui se fait sur place", False),
+     f"{(actifs['Employé'] + actifs['Ouvrier']) / 1e6:.0f} millions", "d'actifs ne peuvent presque pas télétravailler", False),
     ("repere", "pages/p2_gares.py", "Loin des gares", f"{h21.loc['Ouvriers', 'part_sans_gare_pct']:.0f} %",
      f"des emplois d'ouvriers hors Paris sont sans gare (cadres : {h21.loc['Cadres', 'part_sans_gare_pct']:.0f} %)", True),
     ("voiture", "pages/p3_voiture.py", "Comment ils vont travailler", f"{v[('Cadres', 'sans gare')]:.0f} %",
@@ -82,7 +82,7 @@ with g:
                 unsafe_allow_html=True)
 with d:
     st.markdown('<div class="encadre" style="background:#FFFFFF;border:1px solid #E7EAE4"><div style="font-weight:700;'
-                'margin-bottom:6px">Notre méthode</div><p style="margin:0">13 hypothèses testées, dont 5 réfutées en tout '
+                'margin-bottom:6px">Notre méthode</div><p style="margin:0">14 hypothèses testées, dont 5 réfutées en tout '
                 'ou en partie, avec un critère écrit avant d\'ouvrir les données. Une erreur dans les données (gares sans '
                 'code commune) a été trouvée et corrigée. Données ouvertes, code open source, chaque chiffre vient d\'un '
                 'script.</p></div>', unsafe_allow_html=True)

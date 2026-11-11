@@ -23,8 +23,8 @@ u.menu(FICHIER)
 
 v = u.lire("voiture_selon_gare_destination.csv")
 trajets_sans_gare = v[(v["commune_de_travail"] == "sans gare") & v["groupe"].isin(["Employés", "Ouvriers"])]["trajets"].sum()
-retenir = ("Ce n'est pas le métier qui met en voiture, c'est l'absence de gare au lieu de travail. Les métiers "
-           "sur place en souffrent plus, parce que leurs emplois sont plus souvent sans gare.")
+retenir = ("Ce n'est pas le métier qui met en voiture, c'est l'absence de gare au lieu de travail. Les employés et ouvriers "
+           "en souffrent plus, parce que leurs emplois sont plus souvent sans gare.")
 
 u.entete(FICHIER, 'Sans gare, <span style="color:#C0401A">tout le monde</span> prend la voiture',
          "Entre deux communes de banlieue, la voiture passe d'environ un trajet sur deux quand le lieu de travail a "
