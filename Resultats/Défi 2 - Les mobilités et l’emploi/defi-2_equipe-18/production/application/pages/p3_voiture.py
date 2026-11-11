@@ -25,9 +25,9 @@ trajets_sans_gare = v[(v["commune_de_travail"] == "sans gare") & v["groupe"].isi
 retenir = ("Ce n'est pas le métier qui met en voiture, c'est l'absence de gare au lieu de travail. Les employés et ouvriers "
            "en souffrent plus, parce que leurs emplois sont plus souvent sans gare.")
 
-u.entete(FICHIER, 'Sans gare, <span style="color:#C0401A">tout le monde</span> prend la voiture',
-         "Entre deux communes de banlieue, la voiture passe d'environ un trajet sur deux quand le lieu de travail a "
-         "une gare à près de trois sur quatre quand il n'en a pas, quel que soit le métier.", retenir,
+u.entete(FICHIER, 'Sans gare, <span style="color:#C0401A">près de 3 trajets sur 4</span> se font en voiture',   # espaces insécables : le « 4 » ne passe pas seul à la ligne
+         "Entre deux communes de banlieue, la voiture fait environ un trajet sur deux quand le lieu de travail a une "
+         "gare ; quand il n'en a pas, elle l'emporte quel que soit le métier, cadres compris.", retenir,
          u.panneau("Personnes concernées", u.fr(round(trajets_sans_gare, -3)),
                    "employés et ouvriers vont travailler, depuis une autre commune de banlieue, dans une commune sans gare",
                    "#E4572E", "#C0401A", "train_barre"))
@@ -104,7 +104,7 @@ with st.expander("Pour aller plus loin : la voiture selon la destination (habita
     m = m[m["GS"].isin(metiers)].pivot(index="destination", columns="GS", values="part_voiture_pct")[metiers]
     st.dataframe(m.map(lambda val: f"{u.fr(val, 1)} %").reset_index().rename(columns={"destination": "Destination"}),
                  hide_index=True, width="stretch")
-    st.caption("Vers Paris, employés et cadres prennent aussi peu la voiture (16 %) ; entre banlieues, tous la prennent.")
+    st.caption("Vers Paris, employés et cadres prennent aussi peu la voiture (16 %) ; entre banlieues, plus de 7 sur 10 la prennent.")
 
 # Contrôle du résultat principal par le revenu (script 09) : réponse à « et si c'était une question d'argent ? »
 with st.expander("Et si c'était simplement une question de revenu ? Le contrôle"):

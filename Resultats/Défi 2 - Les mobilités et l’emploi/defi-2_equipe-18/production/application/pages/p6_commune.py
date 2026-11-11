@@ -119,6 +119,30 @@ def pct(x: float) -> str:
     return f"{u.fr(x, 1 if x < 10 else 0)} %"
 
 
+# Prépositions devant un nom de commune (relecture du 12/11 : « d'habitants de Évry-Courcouronnes » était fautif).
+# 131 communes commencent par une voyelle, 55 par « Le » ou « Les ». Le « H » est laissé de côté : l'élision dépend
+# du mot (h muet ou aspiré), on garde « de » pour ne pas se tromper.
+VOYELLES = tuple("AEIOUYÂÀÉÈÊÎÏÔÛ")
+
+
+def de_commune(nom: str) -> str:
+    """« de » accordé au nom : d'Évry-Courcouronnes, du Chesnay-Rocquencourt, des Ulis, de La Garenne-Colombes."""
+    if nom.startswith("Le "):
+        return "du " + nom[3:]
+    if nom.startswith("Les "):
+        return "des " + nom[4:]
+    return ("d'" if nom.startswith(VOYELLES) else "de ") + nom
+
+
+def a_commune(nom: str) -> str:
+    """« à » accordé au nom : au Chesnay-Rocquencourt, aux Ulis, à Évry-Courcouronnes."""
+    if nom.startswith("Le "):
+        return "au " + nom[3:]
+    if nom.startswith("Les "):
+        return "aux " + nom[4:]
+    return "à " + nom
+
+
 def libelle(code: str) -> str:
     """Libellé d'une commune dans la liste de recherche : nom, département et numéro."""
     r = residence.loc[code]
@@ -173,7 +197,7 @@ else:
                       f"{int(r['communes_au_moins_0_25_pct'])} communes pèsent au moins 0,25 %", "#3A8FB7")
 st.markdown('<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:6px 0 18px">'
             + tuile("Employés et ouvriers", arrondi(r["employes_ouvriers"]), f"qui habitent {nom}", "#E4572E")
-            + tuile("Restent dans la commune", pct(r["part_meme_commune_pct"]), f"travaillent à {nom} même", "#B23A86")
+            + tuile("Restent dans la commune", pct(r["part_meme_commune_pct"]), f"travaillent {a_commune(nom)} même", "#B23A86")
             + troisieme + '</div>', unsafe_allow_html=True)
 
 # --- Carte et colonne de droite (principales communes, gare) ---
@@ -183,7 +207,7 @@ if len(noms_top) >= 2:
     enumeration = "surtout " + ", ".join(noms_top[:-1]) + " et " + noms_top[-1]
 else:
     enumeration = f"surtout {noms_top[0]}" if noms_top else "aucune commune ne dépasse 0,25 %"
-alt = f"Carte des communes où travaillent les employés et ouvriers de {r['nom']} : {enumeration}."
+alt = f"Carte des communes où travaillent les employés et ouvriers {de_commune(r['nom'])} : {enumeration}."
 legende = "".join(u.pastille_legende(lib, f"width:12px;height:12px;border-radius:3px;background:{c}")
                   for _, lib, c in CLASSES)
 legende += u.pastille_legende("Moins de 0,25 %", f"width:12px;height:12px;border-radius:3px;background:{SANS_COULEUR};"
@@ -193,10 +217,10 @@ autres = list(dest.loc[dest["code_travail"] != code, "nom_travail"].head(2))
 suite = f", les autres vont surtout vers {' et '.join(html.escape(a) for a in autres)}" if autres else ""
 titre_carte = (f'<div style="font-family:Poppins,sans-serif;font-size:20px;font-weight:800;line-height:1.5">'
                f'<span style="background:#C0401A;color:#FFFFFF;border-radius:14px;padding:0 12px">'
-               f'{pct(r["part_meme_commune_pct"])}</span> restent à {nom}{suite}</div>')
+               f'{pct(r["part_meme_commune_pct"])}</span> restent {a_commune(nom)}{suite}</div>')
 # Interrupteur plutôt que bouton dans la carte : un vrai widget, atteignable au clavier et lu par les lecteurs d'écran
 entiere = st.toggle("Voir toute l'Île-de-France sur la carte", key="vue_entiere")
-lecture = (f"plus la commune est foncée, plus elle attire d'habitants de {nom}. La carte est cadrée sur leurs lieux de "
+lecture = (f"plus la commune est foncée, plus elle attire d'habitants {de_commune(nom)}. La carte est cadrée sur leurs lieux de "
            "travail ; l'interrupteur au-dessus montre toute la région.")
 figure = (f'<figure style="margin:0;background:#FFFFFF;border:1px solid #E7EAE4;border-radius:16px;padding:18px 20px;'
           f'display:flex;flex-direction:column;gap:12px">{titre_carte}<figcaption style="font-size:15px;font-weight:600;'

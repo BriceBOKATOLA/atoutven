@@ -22,8 +22,8 @@ h21 = u.lire("h21_emplois_sans_gare.csv").set_index("groupe")
 v = u.lire("voiture_selon_gare_destination.csv").set_index(["groupe", "commune_de_travail"])["part_voiture_pct"]
 h16 = u.lire("h16_trajets_courts_voiture.csv").set_index("groupe")
 
-description = ("Les emplois des employés et ouvriers sont plus souvent dans des communes sans gare. Là, tout le monde "
-               "prend la voiture, cadres compris. Ce n'est donc pas le métier qui éloigne du réseau, c'est le lieu "
+description = ("Les emplois des employés et ouvriers sont plus souvent dans des communes sans gare. Là, près de 3 trajets sur 4 se "
+               "font en voiture, cadres compris. Ce n'est donc pas le métier qui éloigne du réseau, c'est le lieu "
                "de travail.")
 u.entete(FICHIER, 'Le réseau mène à Paris, <span style="color:#C0401A">pas aux emplois de banlieue</span>', description)
 
@@ -98,15 +98,16 @@ with d:
                 f'font-weight:700"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" '
                 f'stroke="#1B1F2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/>'
                 f'<path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span style="margin-left:8px">Notre méthode</span></h2>'
-                f'<p style="margin:0;font-size:15px;line-height:1.55"><strong>14 hypothèses testées</strong>, dont '
+                f'<p style="margin:0;font-size:15px;line-height:1.55"><strong>15 hypothèses testées</strong>, dont '
                 f'<strong>5 réfutées en tout ou en partie</strong>, toutes publiées avec leurs critères, écrits avant '
                 f"d'ouvrir les données pour les tests principaux. Une erreur dans les données (gares sans code commune) "
                 f'a été trouvée et corrigée.</p>'
                 f'<div style="display:flex;flex-wrap:wrap;gap:6px"><span class="pastille" style="{pastille}">Données '
                 f'ouvertes</span><span class="pastille" style="{pastille}">Code open source</span><span class="pastille" '
                 f'style="{pastille}">Chaque chiffre vient d\'un script</span></div>'
-                f'<p style="margin:0;font-size:14px;color:#4E5466">Code, données et journal des choix : dépôt GitHub '
-                f'[lien à venir]</p></section>', unsafe_allow_html=True)
+                f'<p style="margin:0;font-size:14px;color:#4E5466">Code et données : <a style="color:#1B1F2A" '
+                f'href="https://github.com/Melvy-hub/hackaviz_2026-equipe-18">dépôt GitHub de l\'équipe</a></p>'
+                f'</section>', unsafe_allow_html=True)
 
 u.navigation_bas(FICHIER)
 u.sources("INSEE (recensement 2023, enquête Emploi 2025) ; Île-de-France Mobilités (offre 2025, référentiel des arrêts) ; "

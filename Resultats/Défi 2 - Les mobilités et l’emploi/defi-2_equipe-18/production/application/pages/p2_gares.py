@@ -161,7 +161,7 @@ with st.expander("Pour aller plus loin : de banlieue à banlieue"):
         f'département, contre {u.fr(dest_cat.loc[("Cadres", "Leur département")], 1)} % des cadres ; à l\'inverse, '
         f'{u.fr(dest_cat.loc[("Cadres", "Paris")], 1)} % des cadres vont à Paris, contre '
         f'{u.fr(dest_cat.loc[("Ouvriers", "Paris")], 1)} % des ouvriers. Ces trajets de proximité, de banlieue à banlieue, '
-        f'sont ceux que le réseau, tourné vers Paris, dessert le moins bien.</p>', unsafe_allow_html=True)
+        f'sont ceux où la voiture est la plus utilisée (station suivante).</p>', unsafe_allow_html=True)
     st.dataframe(dest_cat.unstack()[DESTINATIONS].reset_index().rename(columns={"categorie": "Catégorie"})
                  .assign(**{d: lambda df, d=d: df[d].map(lambda x: f"{u.fr(x, 1)} %") for d in DESTINATIONS}),
                  hide_index=True, width="stretch")
@@ -270,7 +270,7 @@ with st.expander("Pour aller plus loin : la ponctualité des lignes de RER et de
         f'border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 34px;'
         f'color:#F1F2F6"><div>{colonne(lignes_triees[:moitie])}</div><div>{colonne(lignes_triees[moitie:])}</div></div>'
         f'<p style="margin:12px 0 0;font-size:15px;line-height:1.5"><strong>Lecture :</strong> lignes classées de la '
-        f'moins ponctuelle à la plus ponctuelle (12 derniers mois). « En retard : 1 sur 6 » = un voyageur sur six arrive '
+        f'moins ponctuelle à la plus ponctuelle (novembre 2025 à octobre 2026). « En retard : 1 sur 6 » = un voyageur sur six arrive '
         f'en retard. « Dessert le plus de postes » : les 4 lignes qui desservent le plus de postes d\'employés et '
         f'd\'ouvriers hors de Paris ; elles sont à {u.fr(haut, 1)} % à l\'heure, les 9 autres à {u.fr(autres, 1)} %. Ce '
         f'sont surtout des RER, moins ponctuels que les Transilien.</p>'

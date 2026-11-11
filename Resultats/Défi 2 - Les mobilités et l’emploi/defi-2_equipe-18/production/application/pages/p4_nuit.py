@@ -40,8 +40,7 @@ dimanche = 100 * offre["passages_dimanche"].sum() / offre["passages_semaine"].su
 # compte tous les passages prévus (bus, métros, trains, trams)
 retenir = (f"L'offre de transport de nuit s'affaiblit sur l'ensemble de l'Île-de-France, pas seulement là où travaillent "
            f"les ouvriers. Ce qui "
-           f"change, c'est qui en a besoin : les ouvriers, deux fois plus souvent de nuit que les cadres "
-           f"({TRAVAIL_NUIT_PCT['Ouvriers']} % contre {TRAVAIL_NUIT_PCT['Cadres']} %).")
+           f"change, c'est qui en a besoin : les ouvriers, deux fois plus souvent de nuit que les cadres.")
 # « 13 fois moins » plutôt que « 8 % des passages » : le pourcentage avait été mal compris (remarque de Pierre THAI, 11/11)
 u.entete(FICHIER, f'La nuit, une offre de transport <span style="color:{ROSE_NUIT}">{round(100 / rapport)} fois moins'
                   f'</span> importante',
@@ -122,13 +121,13 @@ svg = (
     f'<rect x="{xs0:.1f}" y="{Y0 - 44}" width="{xn0 - xs0 - 4:.1f}" height="{BASE - Y0 + 44}" rx="10" fill="{SOIR}" '
     f'fill-opacity="0.14"/>'
     f'<text x="{(xs0 + xn0) / 2:.1f}" y="{Y0 - 20}" text-anchor="middle" font-size="17" font-weight="700" '
-    f'fill="{SOIR}">Soir 20h-0h</text>'
+    f'fill="{SOIR}">Soir 20h-minuit</text>'
     f'<rect x="{xn0:.1f}" y="{Y0 - 44}" width="{xn1 - xn0:.1f}" height="{BASE - Y0 + 44}" rx="10" fill="{ROSE_NUIT}" '
     f'fill-opacity="0.13"/>'
     f'<text x="{(xp0 + xp1) / 2:.1f}" y="{Y0 - 20}" text-anchor="middle" font-size="17" font-weight="700" '
     f'fill="#F1F2F6">7h-10h</text>'
     f'<text x="{xm:.1f}" y="{Y0 - 20}" text-anchor="middle" font-size="17" font-weight="700" fill="{ROSE_NUIT}">'
-    f'Nuit 0h-5h</text>'
+    f'Nuit minuit-5h</text>'
     # Courbe : aire claire, trait de journée, aire et trait de nuit, un point par heure de nuit
     f'<path d="{lisse(pts)}L{pts[-1][0]:.1f},{BASE}L{pts[0][0]:.1f},{BASE}Z" fill="{GRIS_JOUR}" fill-opacity="0.18"/>'
     f'<path d="{lisse(pts[:s0 + 1])}" fill="none" stroke="#C9CDD8" stroke-width="3" stroke-linecap="round"/>'

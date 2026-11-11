@@ -57,7 +57,7 @@ ATTENDU = {
     ],
     "pages/p3_voiture.py": [
         ("bande de couleur à gauche de la page", 'class="bande-page"'),
-        ("titre", "tout le monde"),
+        ("titre nuancé (relecture du 2026-11-12 : 71 à 77 %, pas « tout le monde »)", "trajets sur 4"),
         ("panneau-chiffre", "Personnes concernées"),
         ("haltères avec légende gare / sans gare", "Le lieu de travail a une gare"),
         ("jauges dessinées comme la maquette (axe 0 / 50 / 100 %)", "100 % en voiture"),
@@ -70,7 +70,7 @@ ATTENDU = {
         ("panneau-chiffre", "Travaillent la nuit"),
         ("offre de transport heure par heure (libellé validé le 2026-11-11)", "Offre de transport prévue chaque heure"),
         ("niveau moyen de 7h à 10h écrit sur le graphique (libellé corrigé le 2026-11-11)", "De 7h à 10h :"),
-        ("courbe de la variante A validée le 2026-11-11 : zone de nuit nommée", "Nuit 0h-5h"),
+        ("courbe de la variante A validée le 2026-11-11 : zone de nuit nommée (« minuit » depuis le 2026-11-12)", "Nuit minuit-5h"),
         ("courbe de la variante A validée le 2026-11-11 : pastille du rapport", "fois moins</text>"),
         ("carte de la nuit par commune (image d'origine)", "Carte nocturne des communes"),
         ("carte de la nuit en 2 couleurs avec titre-message (changement validé le 2026-11-11)",

@@ -59,7 +59,9 @@ retenir = ("Pour le défi : le vélo en petite couronne, où les trajets en voit
 u.entete(FICHIER,
          f'<span style="display:block;line-height:1.45">Le vélo pour '
          f'{pastille(pct(courts["part_moins_5km_pct"]), ORANGE_TEXTE)} des trajets en voiture, des navettes '
-         f'pour {pastille(pct(sans_gare["part_sans_gare_pct"]), ROSE)} des emplois sans gare</span>',
+         f'pour les {pastille(pct(sans_gare["part_sans_gare_pct"]), ROSE)} d\'emplois sans gare</span>',
+         # « les 20 % d'emplois sans gare » et non « 20 % des emplois sans gare », qui se lisait comme
+         # « 20 % des emplois qui sont sans gare » (relecture du 12/11)
          "Chaque territoire a sa solution : le vélo là où les trajets en voiture sont courts, des navettes là où les "
          "emplois sont loin des gares.", retenir)
 
@@ -152,7 +154,7 @@ with st.container(border=True, key="carte_navette"):
         f"{pct(pc['emplois_eo_sans_gare_pct'])})",
         f"Hors de Paris : {pct(sans_gare['part_sans_gare_pct'])}, soit {u.fr(round(sans_gare['emplois_sans_gare'], -3))} "
         f"emplois sur {u.fr(round(sans_gare['emplois'], -3))}. Les employeurs de grande couronne jugent "
-        f"{pct(gc['part_A_pct'])} de leurs recrutements difficiles (Paris : {pct(paris['part_A_pct'])}).",
+        f"{pct(gc['part_A_pct'])} de leurs projets de recrutement difficiles (Paris : {pct(paris['part_A_pct'])}).",
         f'{pastille(str(compte["communes_sans_gare_500_emplois"]) + " communes", ROSE)} sans gare comptent au moins 500 '
         f'postes d\'employés et d\'ouvriers',
         "carte_navettes_lisible",
