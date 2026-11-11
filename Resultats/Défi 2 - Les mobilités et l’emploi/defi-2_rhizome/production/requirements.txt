@@ -1,0 +1,7 @@
+# Dépendances des scripts de cartes. PyQGIS nécessite une installation QGIS.
+adjustText
+geopandas
+matplotlib
+numpy
+pandas
+scipy

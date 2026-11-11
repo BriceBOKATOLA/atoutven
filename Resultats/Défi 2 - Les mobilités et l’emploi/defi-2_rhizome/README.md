@@ -8,36 +8,35 @@
 
 ## Par où commencer
 
-1. Définissez votre question dans [projet.md](projet.md).
-2. Recensez les sources et leurs conditions d'utilisation dans [donnees.md](donnees.md).
-3. Placez les fichiers de la visualisation dans [production/](production/README.md).
-4. Complétez les sections ci-dessous pour présenter le rendu.
+1. Consultez le [cadrage du projet](projet.md).
+2. Retrouvez les sources et leurs conditions d'utilisation dans [donnees.md](donnees.md).
+3. Explorez les cartes et leur documentation dans [production/](production/README.md).
 
 Ce dossier est placé dans le répertoire du défi 2. Il contient ce README et `production/`, comme demandé dans les [instructions de dépôt](../../README.md).
 
 ## Notre question
 
-À compléter : quelle question la visualisation permet-elle d'explorer ?
+Comment l'évolution des transports franciliens se situe-t-elle par rapport à celle de l'emploi entre 2015 et 2025 ? La présentation propose aussi d'examiner les zones qui gagnent en accessibilité et celles qui restent à l'écart. Les données présentées ne mesurent pas directement l'accessibilité et ne permettent pas d'attribuer une évolution de l'emploi au développement des transports.
 
 ## Notre visualisation
 
-À compléter : présentez la solution, son public et son fonctionnement. Ajoutez le lien public ou décrivez les fichiers déposés.
+Les [planches](production/docs/visualisation.md) présentent l’évolution du réseau ferré et des indicateurs d’emploi en Île-de-France. Les six cartes disponibles sont fournies en PDF et en PNG, avec leurs données et scripts. Elles décrivent des évolutions sans établir de relation causale.
 
 ## Les données utilisées
 
-À compléter : indiquez les sources, les jeux de données et leurs liens. Le détail du travail sur les données se trouve dans [donnees.md](donnees.md).
+Les [sources et leurs conditions d’utilisation](donnees.md) sont répertoriées avec leurs fichiers locaux. Le [catalogue des fichiers](production/docs/catalogue_fichiers.md) décrit leurs champs et leurs limites.
 
 ## Les outils employés
 
-À compléter : indiquez les logiciels, bibliothèques et outils utilisés.
+Les cartes utilisent Python, GeoPandas, pandas, NumPy, Matplotlib, SciPy et adjustText. Des projets cartographiques sont également fournis pour QGIS. Le script de création des projets utilise PyQGIS.
 
 ## Difficultés et suite du projet
 
-À compléter : décrivez les limites des données, les difficultés rencontrées et les pistes pour la suite.
+L'emploi Urssaf concerne les salariés du secteur privé. Les autres indicateurs couvrent des populations et des périodes différentes. La présence d'une gare dans une commune ne mesure pas l'accès réel à l'emploi. Certaines étapes de préparation des données ne sont pas disponibles, et la comparaison communale pour 2019 reste à documenter. Les [limites des sources](production/docs/visualisation.md#méthode-et-limites) et les [étapes manquantes pour la reproduction](production/docs/execution.md#ce-qui-manque-pour-une-reproduction-complète) précisent ces points.
 
 ## Installation et utilisation
 
-À compléter si le projet comprend du code ou une application.
+Les [instructions d'exécution](production/docs/execution.md) décrivent l'installation des dépendances et la génération des cartes. Les [fichiers de production](production/README.md) donnent accès aux exports, aux données et aux scripts.
 
 ## Licences
 

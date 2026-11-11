@@ -1,11 +1,13 @@
 # Production
 
-Placez ici les fichiers de la visualisation et, si nécessaire, son code source. Documentez leur utilisation dans le [README du projet](../README.md).
+Ce dossier contient les cartes, leurs données et leur code. Le [README du projet](../README.md) présente le contexte et les limites du travail.
 
-Le format du rendu dépend de la visualisation :
+Les formats de rendu sont précisés dans les [instructions de dépôt](../../../README.md).
 
-- Statique : PDF ou image à 300 dpi minimum.
-- Interactive : lien accessible en ligne et code source.
-- Physique : photos ou vidéo et description écrite.
+## Planches
 
-Ces formats sont précisés dans les [instructions de dépôt](../../../README.md).
+Les six planches, leurs données et leurs scripts sont décrits dans [docs/visualisation.md](docs/visualisation.md). La documentation présente les sources, les limites et les commandes de reproduction.
+
+Les [instructions d’exécution](docs/execution.md) détaillent les commandes, les dépendances et les étapes manquantes.
+
+Les [sources et leurs liens](docs/sources.md) décrivent les jeux utilisés et les données préparées communes.
