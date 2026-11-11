@@ -36,8 +36,8 @@ stations = [
     ("voiture", "pages/p3_voiture.py", "Comment ils vont travailler", f"{v[('Cadres', 'sans gare')]:.0f} %",
      "des cadres prennent la voiture quand leur lieu de travail n'a pas de gare", True),
     ("lune", "pages/p4_nuit.py", "Les trajets de nuit", f"{round(100 / u.part_nuit_pct())} fois moins",
-     "de bus et de trains la nuit qu'à l'heure de pointe", False),
-    ("velo", "pages/p5_solutions.py", "Les solutions", "2 cibles", "trajets courts pour le vélo, emplois sans gare pour les navettes", False),
+     "de bus et de trains la nuit qu'entre 7h et 10h", False),
+    ("velo", "pages/p5_solutions.py", "Les solutions", "2 solutions", "trajets courts pour le vélo, emplois sans gare pour les navettes", False),
 ]
 
 
@@ -71,21 +71,42 @@ st.markdown('<div class="carte"><div style="display:flex;justify-content:space-b
             unsafe_allow_html=True)
 
 # Les stations du dessin ne sont pas cliquables : le menu latéral sert de navigation, au clavier aussi.
+# Bloc du bas repris de la maquette validée (maquettes_validees/Conclusion.dc.html) : une icône de mode devant
+# chaque piste, une icône devant chaque titre, trois pastilles sous la méthode. Seul changement validé : 14 hypothèses.
+communes_navettes = u.lire("emplois_sans_gare_par_commune.csv").sort_values("emplois_sur_place", ascending=False)["nom"].head(4)
+pistes = [
+    ("velo", f"Faciliter le vélo pour les {u.fr(round(h16.loc['Ensemble', 'dont_moins_5km'], -3))} trajets en voiture "
+             f"de moins de 5 km entre communes de banlieue."),
+    ("navette", "Relier par navette ou covoiturage organisé les communes d'emploi sans gare : "
+                + ", ".join(communes_navettes) + "."),
+    ("lune", "Mesurer les temps de trajet de nuit en bus, pour ceux qui travaillent entre minuit et 5h (piste à tester)."),
+]
 g, d = st.columns(2)
 with g:
-    st.markdown(f'<div class="encadre" style="background:#FCEDE8"><div style="font-weight:700;color:#C0401A;margin-bottom:6px">'
-                f'Pistes que suggèrent les données</div>'
-                f'<p style="margin:0 0 6px">Vélo : {u.fr(round(h16.loc["Ensemble", "dont_moins_5km"], -3))} trajets en voiture '
-                f'de moins de 5 km entre communes de banlieue.</p>'
-                f'<p style="margin:0 0 6px">Navettes ou covoiturage organisé vers les zones d\'emploi sans gare.</p>'
-                f'<p style="margin:0">Mesurer les temps de trajet de nuit en bus (piste à tester).</p></div>',
-                unsafe_allow_html=True)
+    st.markdown(f'<section aria-labelledby="titre-pistes" class="encadre" style="background:#FCEDE8;border-radius:16px;'
+                f'padding:18px 22px;display:flex;flex-direction:column;gap:12px">'
+                f'<h2 id="titre-pistes" style="margin:0;display:flex;align-items:center;gap:8px;font-size:16px;'
+                f'font-weight:700;color:#C0401A">{u.icone("ampoule", 18, "#C0401A")}<span style="margin-left:8px">Pistes que suggèrent les données</span></h2>'
+                + "".join(f'<div class="piste" style="display:flex;gap:12px;align-items:flex-start;font-size:15px;'
+                          f'line-height:1.5">{u.badge_mode(ic)}<span>{texte}</span></div>' for ic, texte in pistes)
+                + '</section>', unsafe_allow_html=True)
 with d:
-    st.markdown('<div class="encadre" style="background:#FFFFFF;border:1px solid #E7EAE4"><div style="font-weight:700;'
-                'margin-bottom:6px">Notre méthode</div><p style="margin:0">14 hypothèses testées, dont 5 réfutées en tout '
-                'ou en partie, avec un critère écrit avant d\'ouvrir les données. Une erreur dans les données (gares sans '
-                'code commune) a été trouvée et corrigée. Données ouvertes, code open source, chaque chiffre vient d\'un '
-                'script.</p></div>', unsafe_allow_html=True)
+    pastille = ('padding:3px 12px;border-radius:999px;background:#E5EFF5;color:#1F6A8C;font-size:14px;font-weight:700')
+    st.markdown(f'<section aria-labelledby="titre-methode" class="encadre" style="background:#FFFFFF;border:1px solid '
+                f'#E7EAE4;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:12px">'
+                f'<h2 id="titre-methode" style="margin:0;display:flex;align-items:center;gap:8px;font-size:16px;'
+                f'font-weight:700"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" '
+                f'stroke="#1B1F2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/>'
+                f'<path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span style="margin-left:8px">Notre méthode</span></h2>'
+                f'<p style="margin:0;font-size:15px;line-height:1.55"><strong>14 hypothèses testées</strong>, dont '
+                f'<strong>5 réfutées en tout ou en partie</strong>, toutes publiées avec leurs critères, écrits avant '
+                f"d'ouvrir les données pour les tests principaux. Une erreur dans les données (gares sans code commune) "
+                f'a été trouvée et corrigée.</p>'
+                f'<div style="display:flex;flex-wrap:wrap;gap:6px"><span class="pastille" style="{pastille}">Données '
+                f'ouvertes</span><span class="pastille" style="{pastille}">Code open source</span><span class="pastille" '
+                f'style="{pastille}">Chaque chiffre vient d\'un script</span></div>'
+                f'<p style="margin:0;font-size:14px;color:#4E5466">Code, données et journal des choix : dépôt GitHub '
+                f'[lien à venir]</p></section>', unsafe_allow_html=True)
 
 u.navigation_bas(FICHIER)
 u.sources("INSEE (recensement 2023, enquête Emploi 2025) ; Île-de-France Mobilités (offre 2025, référentiel des arrêts) ; "

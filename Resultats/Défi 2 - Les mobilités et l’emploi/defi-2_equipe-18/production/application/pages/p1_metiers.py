@@ -90,7 +90,7 @@ u.menu(FICHIER)
 
 actifs = u.lire("parts_modales_par_gs.csv").set_index("GS")["effectif_pondere"]
 sur_place = actifs["Employé"] + actifs["Ouvrier"]
-# Formulations reprises des remarques de l'équipe (11/11)
+# Formulations reprises des recommandations de Pierre THAI (captures annotées des maquettes, 11/11)
 retenir = "Sans télétravail, chaque journée travaillée commence par un trajet."
 
 # « Surtout » et non « réservé » : 48 % des cadres ne télétravaillent pas ; titre affirmatif plutôt qu'une question
@@ -104,8 +104,14 @@ st.markdown('<div class="carte"><h2 class="sous-titre">Télétravail selon la ca
             'télétravaillent au moins un jour par semaine</h2><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">'
             + "".join(silhouette(m, p) for m, p in TELETRAVAIL_PCT.items())
             + '</div><p style="font-size:14px;color:#5E6475;margin:12px 0 0">Le niveau de remplissage indique la part de '
-              'télétravailleurs dans chaque catégorie (calculé sur la surface de la silhouette). Groupe « employés » de l\'INSEE : aides-soignants, agents d\'accueil, vendeurs, employés '
-              'administratifs, agents de sécurité…</p></div>', unsafe_allow_html=True)
+              'télétravailleurs dans chaque catégorie (calculé sur la surface de la silhouette).</p>'
+            # Noms officiels de l'INSEE, gardés tels quels (choix de Melvyn, 11/11 : « ce n'est pas à nous de créer des
+            # noms »). Définition des trois groupes, car « employé » prête à confusion : tous sont salariés.
+            '<p style="font-size:14px;color:#5E6475;margin:6px 0 0">Catégories officielles de l\'INSEE (PCS 2020) : '
+            '<strong>cadres</strong> (ingénieurs, cadres d\'entreprise, professeurs…), <strong>employés</strong> '
+            '(métiers de bureau, de commerce et de service : vendeurs, caissiers, aides-soignants, agents d\'accueil, '
+            'agents de sécurité…) et <strong>ouvriers</strong> (usine, chantier, entrepôt, conduite de véhicules…).</p>'
+            '</div>', unsafe_allow_html=True)
 u.tableau(pd.DataFrame({"Métier": list(TELETRAVAIL_PCT),
                         "Télétravail au moins 1 jour par semaine (%)": list(TELETRAVAIL_PCT.values()),
                         "Actifs résidant en Île-de-France": [u.fr(actifs[m.rstrip("s") if m != "Cadres" else m]) for m in TELETRAVAIL_PCT]}))
