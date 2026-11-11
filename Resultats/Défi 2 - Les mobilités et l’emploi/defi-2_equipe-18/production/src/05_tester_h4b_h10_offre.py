@@ -54,10 +54,23 @@ def charger_offre() -> pd.DataFrame:
     dtype=str pour le code commune : "01001" doit garder son zéro initial.
     Les lignes sans code commune sont comptées puis écartées, pour savoir
     quelle part de l'offre on perd.
+
+    Correction du 2026-11-10 : 90 % des arrêts de train et RER n'ont pas de
+    code commune dans ce fichier. On le complète avec le référentiel IDFM des
+    zones de correspondance (champ zdcpostalregion = code INSEE), sinon les
+    trains disparaissent de la comparaison entre communes. Les arrondissements
+    de Paris (751xx) sont regroupés sous le code de Paris, comme côté emplois.
     """
-    colonnes = ["code_commune", "tranche_horaire"] + JOURS_SEMAINE + [JOUR_DIMANCHE]
+    colonnes = ["code_commune", "id_zone_de_correspondance", "tranche_horaire"] + JOURS_SEMAINE + [JOUR_DIMANCHE]
     offre = pd.read_csv(BRUT / "idfm_offre_hebdo_2025" / "offre_hebdomadaire_moyenne_hors_vacances.csv",
                         sep=";", encoding="utf-8-sig", usecols=colonnes, dtype={"code_commune": str})
+    zones = pd.read_csv(BRUT / "idfm_referentiel_arrets" / "zones-de-correspondance.csv", sep=";",
+                        usecols=["zdcid", "zdcpostalregion"], dtype=str, encoding="utf-8-sig")
+    commune_par_zone = zones.set_index("zdcid")["zdcpostalregion"]
+    # L'identifiant est lu comme un nombre décimal ("463511.0") : on le remet en texte entier
+    id_zone = offre["id_zone_de_correspondance"].dropna().astype("int64").astype(str)
+    offre["code_commune"] = offre["code_commune"].fillna(id_zone.map(commune_par_zone))
+    offre.loc[offre["code_commune"].str.startswith("751", na=False), "code_commune"] = CODE_PARIS
     sans_commune = offre["code_commune"].isna()
     part_perdue = 100 * offre.loc[sans_commune, JOURS_SEMAINE].sum().sum() / offre[JOURS_SEMAINE].sum().sum()
     print(f"Offre IDFM : {len(offre):,} lignes, dont {sans_commune.sum():,} sans code commune "
