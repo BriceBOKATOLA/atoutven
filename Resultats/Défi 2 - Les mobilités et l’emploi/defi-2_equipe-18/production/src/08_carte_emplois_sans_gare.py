@@ -160,7 +160,9 @@ def main() -> None:
            + "".join(etiquettes) + "</svg>")
     (SORTIE / "carte_emplois_sans_gare.svg").write_text(svg, encoding="utf-8")
 
-    sans_gare[["nom", "emplois_sur_place"]].round(0).to_csv(SORTIE / "emplois_sans_gare_par_commune.csv",
+    # Arrondi à une décimale, pas à l'unité : arrondie à l'unité, une commune à 499,6 emplois passait à 500 dans le
+    # tableau alors que la carte (seuil de 500, calculé avant l'arrondi) ne la dessine pas : 155 lignes contre 154 cercles.
+    sans_gare[["nom", "emplois_sur_place"]].round(1).to_csv(SORTIE / "emplois_sans_gare_par_commune.csv",
                                                            encoding="utf-8-sig")
     print(f"Communes sans gare avec au moins {SEUIL_EMPLOIS_CERCLE} emplois sur place (cercles) : {len(cercles)}")
     print(f"Plus gros cercle : {sans_gare['nom'].iloc[0]} ({valeur_max:,.0f} emplois)".replace(",", " "))
