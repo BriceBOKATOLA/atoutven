@@ -15,6 +15,7 @@ Les fichiers sont rangés dans `data/brut/`, un dossier par source. Seuls les fi
 |---|---|---|---|---|
 | `insee_mobpro_2023/` | [INSEE, recensement 2023, mobilités professionnelles (fichier détail)](https://www.insee.fr/fr/statistiques/9004795) | Commune de résidence et de travail, moyen de transport et catégorie socioprofessionnelle de chaque actif | Millésime 2023, publié le 25/06/2026 (voir ci-dessous) | [Licence Ouverte 2.0](https://www.insee.fr/fr/information/2381863) |
 | `insee_mobpro_2022/` | [INSEE, recensement 2022, mobilités professionnelles](https://www.insee.fr/fr/statistiques/8589904) | Comparaison des millésimes (script 01) | Millésime 2022 | Licence Ouverte 2.0 |
+| `insee_filosofi_2023/` | [INSEE, revenus et pauvreté au niveau local en 2023 (Filosofi)](https://www.insee.fr/fr/statistiques/8984752) | Niveau de vie médian de chaque commune (script 09 : le revenu explique-t-il le choix de la voiture ?) | Millésime 2023, publié le 06/08/2026 (nouvelle méthode, non comparable aux millésimes avant 2021) | [Licence Ouverte 2.0](https://www.insee.fr/fr/information/2381863) |
 | `idfm_offre_hebdo_2025/` | [IDFM, offre hebdomadaire moyenne hors vacances](https://data.iledefrance-mobilites.fr/explore/dataset/offre_hebdomadaire_moyenne_hors_vacances/) | Nombre de passages prévus par arrêt, ligne, heure et jour ; communes avec gare | Semaine type 2025 hors vacances | Licence Ouverte 2.0 |
 | `idfm_validations_ferre/` | IDFM, validations sur le réseau ferré, nombre de validations par jour ([exemple : 2e trimestre](https://data.iledefrance-mobilites.fr/explore/dataset/validations-reseau-ferre-nombre-validations-par-jour-2eme-trimestre/)) | Fréquentation par gare et par jour (script 04) | 4 trimestres : juillet 2025 à juin 2026 | Licence Ouverte 2.0 |
 | `idfm_referentiel_arrets/` | [IDFM, zones de correspondance](https://data.iledefrance-mobilites.fr/explore/dataset/zones-de-correspondance/) | Code commune de chaque gare | Version du 25/10/2026 (mise à jour quotidienne par IDFM) | Licence Ouverte 2.0 |
@@ -23,7 +24,7 @@ Les fichiers sont rangés dans `data/brut/`, un dossier par source. Seuls les fi
 
 Les licences des jeux IDFM et du calendrier scolaire ont été vérifiées le 11/11/2026 dans les métadonnées de leurs portails.
 
-Données téléchargées les 24 et 25 octobre 2026. Les résultats du dossier `resultats/` correspondent à ces versions.
+Données téléchargées les 24 et 25 octobre 2026 (revenus Filosofi : le 11 novembre 2026). Les résultats du dossier `resultats/` correspondent à ces versions.
 
 ## Pourquoi le « recensement 2023 » est la donnée la plus récente
 

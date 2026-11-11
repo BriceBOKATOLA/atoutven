@@ -22,6 +22,7 @@ import sys
 import time
 import urllib.parse
 import urllib.request
+import zipfile
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parent.parent
@@ -29,6 +30,7 @@ BRUT = RACINE / "data" / "brut"
 
 INSEE_2023 = "https://www.insee.fr/fr/statistiques/fichier/9004795"   # recensement 2023, publié le 25/06/2026
 INSEE_2022 = "https://www.insee.fr/fr/statistiques/fichier/8589904"   # recensement 2022, pour comparaison (script 01)
+FILOSOFI = "https://www.insee.fr/fr/statistiques/fichier/8984752"     # revenus par commune 2023, publiés le 06/08/2026
 IDFM = "https://data.iledefrance-mobilites.fr/api/explore/v2.1/catalog/datasets"
 EDUCATION = "https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets"
 GEO = "https://geo.api.gouv.fr/communes"
@@ -55,6 +57,8 @@ SOURCES = [
      "Recensement 2022, pour comparer les millésimes (script 01)"),
     ("insee_mobpro_2022", "varmod_mobpro_2022.csv", f"{INSEE_2022}/varmod_mobpro_2022.csv",
      "Dictionnaire 2022"),
+    ("insee_filosofi_2023", "FILOSOFI_CC_csv.zip", f"{FILOSOFI}/FILOSOFI_CC_csv.zip",
+     "Revenus et pauvreté par commune en 2023 (niveau de vie médian, script 09) ; archive décompressée sur place"),
     ("idfm_offre_hebdo_2025", "offre_hebdomadaire_moyenne_hors_vacances.csv",
      url(f"{IDFM}/offre_hebdomadaire_moyenne_hors_vacances/exports/csv", delimiter=";"),
      "Passages prévus par arrêt, ligne, heure et jour, semaine type 2025 hors vacances (environ 300 Mo)"),
@@ -117,6 +121,9 @@ def main() -> None:
         debut = time.time()
         try:
             taille = telecharger(adresse, destination)
+            if fichier.endswith(".zip"):   # archive INSEE : on décompresse à côté, les scripts lisent le CSV
+                with zipfile.ZipFile(destination) as archive:
+                    archive.extractall(destination.parent)
             print(f"téléchargé    {dossier}/{fichier}  ({taille / 1e6:.1f} Mo, {time.time() - debut:.0f} s)  {description}")
         except OSError as erreur:   # réseau coupé, adresse changée, serveur indisponible
             echecs += 1
