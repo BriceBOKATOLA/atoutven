@@ -48,11 +48,25 @@ def communes_avec_gare() -> set:
     """Codes INSEE des communes ayant au moins un arrêt ferré avec un passage dans la semaine.
 
     On lit seulement les colonnes utiles : le fichier compte 1,3 million de lignes.
+
+    Correction découverte au premier lancement (2026-11-10) : 90 % des arrêts
+    de train et RER n'ont pas de code commune dans le fichier d'offre. On le
+    complète avec le référentiel IDFM des zones de correspondance, dont le
+    champ zdcpostalregion contient le code INSEE de la commune.
     """
-    colonnes = ["libelle_mode_ligne", "code_commune"] + [f"nb_courses_{j}" for j in JOURS]
+    colonnes = (["libelle_mode_ligne", "code_commune", "id_zone_de_correspondance"]
+                + [f"nb_courses_{j}" for j in JOURS])
     offre = pd.read_csv(BRUT / "idfm_offre_hebdo_2025" / "offre_hebdomadaire_moyenne_hors_vacances.csv",
                         sep=";", usecols=colonnes, dtype={"code_commune": str}, encoding="utf-8-sig")
-    ferre = offre[offre["libelle_mode_ligne"].isin(MODES_FERRES)]
+    ferre = offre[offre["libelle_mode_ligne"].isin(MODES_FERRES)].copy()
+
+    zones = pd.read_csv(BRUT / "idfm_referentiel_arrets" / "zones-de-correspondance.csv", sep=";",
+                        usecols=["zdcid", "zdcpostalregion"], dtype=str, encoding="utf-8-sig")
+    commune_par_zone = zones.set_index("zdcid")["zdcpostalregion"]
+    # L'identifiant est lu comme un nombre décimal ("463511.0") : on le remet en texte entier
+    id_zone = ferre["id_zone_de_correspondance"].dropna().astype("int64").astype(str)
+    ferre["code_commune"] = ferre["code_commune"].fillna(id_zone.map(commune_par_zone))
+    print(f"Arrêts ferrés encore sans commune après correction : {ferre['code_commune'].isna().mean():.1%}")
     # Un arrêt compte s'il a au moins un passage dans la semaine (somme des 7 jours)
     ferre = ferre[ferre[[f"nb_courses_{j}" for j in JOURS]].sum(axis=1) > 0]
     return set(ferre["code_commune"].dropna())
