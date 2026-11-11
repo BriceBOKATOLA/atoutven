@@ -1,0 +1,4 @@
+﻿code,libelle,nb_lignes,effectif_pondere,part_pct,prudence
+101,CDI (contrat à durée indéterminée) ou fonctionnaire,1309929,4406016.951219195,76.48222333767646,False
+102,"Autre contrat (CDD, intérim, stage, etc.)",221459,715602.2179472962,12.42184250762746,False
+ZZZ,Sans objet,184927,639218.7862969656,11.09593415469609,False

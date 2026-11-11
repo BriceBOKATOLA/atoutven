@@ -1,0 +1,7 @@
+﻿code,libelle,nb_lignes,effectif_pondere,part_pct,prudence
+6,Transports en commun,787480,2519315.166416737,43.731748504181965,False
+5,"Voiture, camion, fourgonnette",619382,2203234.1363646425,38.24502882041912,False
+2,"Marche à pied (ou rollers, patinette)",124972,414171.58240640425,7.189432954169675,False
+3,Vélo (y compris à assistance électrique),85978,284624.14885488496,4.940672712117401,False
+1,Pas de transport,57041,199448.6533812073,3.462146564842263,False
+4,Deux-roues motorisé,41462,140044.2680395809,2.430970444269586,False
