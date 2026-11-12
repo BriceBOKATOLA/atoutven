@@ -273,7 +273,9 @@ with droite:
     # d'écran et utilisables au clavier ; une ou plusieurs catégories allumées
     st.markdown('<div style="font-size:14px;font-weight:600;color:#4E5466;margin-bottom:-14px">Catégories affichées</div>',
                 unsafe_allow_html=True)
-    for colonne, (lettre, nom_cat, defaut) in zip(st.columns(3, gap="small"), CATEGORIES):
+    # Colonnes à la longueur des mots (« Cadres » plus court) : en ligne, « Employés » était coupé en « Emplo… »
+    # avec trois colonnes égales (12/11)
+    for colonne, (lettre, nom_cat, defaut) in zip(st.columns([0.85, 1.15, 1.05], gap="small"), CATEGORIES):
         with colonne:
             st.toggle(nom_cat, value=defaut, key=f"cat_{lettre}")
     # Annonce pour les lecteurs d'écran : quand on choisit une commune ou une catégorie, le résultat est lu tout seul

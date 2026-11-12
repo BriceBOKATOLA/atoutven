@@ -150,5 +150,8 @@ st.markdown(f'<section aria-labelledby="titre-changements" style="margin-top:8px
 
 # Pas de navigation_bas : les deux boutons ci-dessus la remplacent (« ← Chercher ma commune » aurait fait doublon)
 u.sources("INSEE (recensement 2023, enquête Emploi 2025) ; Île-de-France Mobilités (offre 2025, référentiel des arrêts) ; "
-          "France Travail (Besoins en main-d'œuvre 2026) ; geo.api.gouv.fr. Constat « une gare ne suffit pas » : "
-          "src/12_gare_ne_suffit_pas.py (exploratoire ; seuil « 2 sur 3 » choisi par l'équipe, au moins 200 trajets par commune).")
+          "France Travail (Besoins en main-d'œuvre 2026) ; geo.api.gouv.fr. Constat « une gare ne suffit pas » : analyse "
+          "exploratoire de l'équipe à partir du recensement 2023 (seuil de « 2 sur 3 » choisi par l'équipe, communes d'au "
+          "moins 200 trajets).")
+# (Le chemin du script, src/12_gare_ne_suffit_pas.py, était écrit ici par erreur jusqu'au 12/11 : du jargon de code dans
+# un texte destiné au lecteur. La méthode et le script sont décrits dans le README.)
