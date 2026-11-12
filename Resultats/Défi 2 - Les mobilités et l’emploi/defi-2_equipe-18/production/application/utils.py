@@ -357,12 +357,15 @@ def navigation_bas(fichier: str) -> None:
     i = next(k for k, p in enumerate(PAGES) if p[0] == fichier)
     st.write("")
     g, _, d = st.columns([1, 0.4, 1])
+    # Chemins absolus (DOSSIER / ...), comme dans app.py : un chemin relatif est lu depuis le fichier lancé par
+    # Streamlit ; lancée par le lanceur de déploiement (racine du dépôt), l'application plantait (« Could not find
+    # page », testé le 2026-11-12).
     if i > 0:
         with g:
-            st.page_link(PAGES[i - 1][0], label=f"← {PAGES[i - 1][1]}")
+            st.page_link(DOSSIER / PAGES[i - 1][0], label=f"← {PAGES[i - 1][1]}")
     if i < len(PAGES) - 1:
         with d:
-            st.page_link(PAGES[i + 1][0], label=f"Station suivante : {PAGES[i + 1][1]} →")
+            st.page_link(DOSSIER / PAGES[i + 1][0], label=f"Station suivante : {PAGES[i + 1][1]} →")
 
 
 def sources(texte: str) -> None:
