@@ -8,37 +8,11 @@ export const shell = `
 <main>
 <div class="primary">
 <section class="map-section" aria-label="Carte des demandeurs d’emploi">
-<div class="map-wrap"><div id="map" aria-label="Carte interactive de l’Île-de-France"></div><div class="compass" aria-hidden="true"><span>N</span><svg viewBox="0 0 80 80"><path d="M40 0 46 32 80 40 46 46 40 80 33 46 0 40 33 33Z"/></svg></div>
+<div id="map-wrap" class="map-wrap"><div id="map" aria-label="Carte interactive de l’Île-de-France"></div><div class="compass" aria-hidden="true"><span>N</span><svg viewBox="0 0 80 80"><path d="M40 0 46 32 80 40 46 46 40 80 33 46 0 40 33 33Z"/></svg></div>
 <div id="map-scale" class="map-scale" aria-label="Échelle approximative à la latitude de Paris" hidden><span></span><i></i></div>
 <div id="load-status" class="load-status" role="status">Chargement de la carte et des indicateurs…</div></div>
 <div id="map-tooltip" class="map-tooltip" role="tooltip" hidden></div>
-<section id="map-legend" class="map-legend" aria-labelledby="legend-title">
-  <h2 id="legend-title" class="visually-hidden">Légende de la carte</h2>
-  <div class="legend-group">
-    <h3>Demandeurs d’emploi</h3>
-    <p class="legend-note">Évolution par commune, entre les moyennes du 4e trimestre 2016 et 2024</p>
-    <ol class="legend-ramp" aria-label="Classes d’évolution">
-      <li><i style="--swatch:#2C7FB8"></i><span>Moins de −5 %</span></li>
-      <li><i style="--swatch:#A6CEE3"></i><span>−5 % à moins de 0 %</span></li>
-      <li><i style="--swatch:#FBE6CC"></i><span>0 % à moins de 5 %</span></li>
-      <li><i style="--swatch:#F5AE6B"></i><span>5 % à moins de 15 %</span></li>
-      <li><i style="--swatch:#D9531E"></i><span>15 % ou plus</span></li>
-    </ol>
-    <ul class="legend-keys"><li><i class="legend-swatch" style="--swatch:#F1EFEA"></i>Donnée indisponible</li></ul>
-  </div>
-  <div class="legend-group">
-    <h3>Réseau et territoires</h3>
-    <p class="legend-note">Lignes ferrées et zones d’emploi</p>
-    <ul class="legend-keys">
-      <li><i class="line"></i>Ligne ouverte entre 2015 et 2025</li>
-      <li><i class="old-line"></i>Réseau antérieur à 2015</li>
-      <li><i class="t4-line"></i>Encadré du Tram T4</li>
-      <li><i class="zone-line"></i>Contour de zone d’emploi</li>
-    </ul>
-    <p class="legend-note">Survolez une fleur pour lire ses indicateurs. Cliquez dessus pour sélectionner sa zone.</p>
-  </div>
-</section>
-<p id="commune-detail" role="status">Sélectionnez une commune sur la carte pour consulter ses données.</p>
+<p id="commune-detail" role="status"></p>
 </section>
 <section id="explorer" class="portrait" aria-labelledby="portrait-title">
 <h2 id="portrait-title">Portrait des zones d’emploi</h2>
@@ -60,13 +34,14 @@ export const shell = `
 </main>
 <footer class="chart-sources" aria-labelledby="sources-title">
 <h2 id="sources-title">Sources et notes</h2>
+<p><a href="/data/LICENCES.txt">Conditions de réutilisation des données</a></p>
 <div class="sources-grid">
 <div class="source-group">
-<p><strong><a href="https://www.data.gouv.fr/datasets/inscrits-a-france-travail-donnees-communales-trimestrielles-brutes">Dares / France Travail.</a></strong> « Inscrits à France Travail – données communales » : catégories A, B, C, données brutes arrondies au multiple de 5, moyennes du 4e trimestre 2016 et 2024. Les agrégats régionaux sont des sommes de valeurs communales arrondies.</p>
-<p><strong><a href="https://open.urssaf.fr/explore/dataset/etablissements-et-effectifs-salaries-au-niveau-commune-x-ape-last/">Urssaf.</a></strong> Salariés du secteur privé au 31 décembre 2016 et 2024, agrégés par zone dans le classeur de l’équipe. Les sommes ignorent les cellules sectorielles non renseignées ; celles-ci ne sont pas des zéros confirmés.</p>
-<p><strong>Insee.</strong> <a href="https://www.insee.fr/fr/statistiques/1893230">Taux de chômage par zone d’emploi</a> : moyenne annuelle 2024, zonage 2020. <a href="https://www.insee.fr/fr/statistiques/4171446">Recensement 2016, emploi et population active</a> : calcul des emplois dans la zone pour 100 actifs occupés résidents de 15 à 64 ans.</p>
-<p><strong>Île-de-France Mobilités.</strong> <a href="https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/">Tracés du réseau ferré</a> et <a href="https://data.iledefrance-mobilites.fr/explore/dataset/emplacement-des-gares-idf/">gares par ligne</a>.</p>
-<p><strong>Fonds de carte.</strong> La documentation de l’équipe cite la Région Île-de-France pour les <a href="https://data.iledefrance.fr/explore/dataset/base-des-zones-demploi-contours/">contours des zones d’emploi</a> et leur <a href="https://data.iledefrance.fr/explore/dataset/base-des-zones-demploi/">composition communale</a>. L’origine des contours communaux et les transformations initiales restent à confirmer.</p>
+<p><strong><a href="https://www.data.gouv.fr/datasets/inscrits-a-france-travail-donnees-communales-trimestrielles-brutes">Dares / France Travail.</a></strong> « Inscrits à France Travail – données communales » : catégories A, B, C, données brutes arrondies au multiple de 5, moyennes du 4e trimestre 2016 et 2024. Les agrégats régionaux sont des sommes de valeurs communales arrondies. Données sous <a href="https://github.com/etalab/licence-ouverte/blob/master/LO.md">Licence Ouverte 2.0</a>.</p>
+<p><strong><a href="https://open.urssaf.fr/explore/dataset/etablissements-et-effectifs-salaries-au-niveau-commune-x-ape-last/">Urssaf.</a></strong> Salariés du secteur privé au 31 décembre 2016 et 2024, agrégés par zone dans le classeur de l’équipe. Les sommes ignorent les cellules sectorielles non renseignées ; celles-ci ne sont pas des zéros confirmés. Données sous <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a> selon la <a href="https://www.data.gouv.fr/datasets/nombre-detablissements-employeurs-et-effectifs-salaries-du-secteur-prive-par-commune-x-ape-au-31-12-depuis-2006">fiche des effectifs</a>.</p>
+<p><strong>Insee.</strong> <a href="https://www.insee.fr/fr/statistiques/1893230">Taux de chômage par zone d’emploi</a> : moyenne annuelle 2024, zonage 2020. <a href="https://www.insee.fr/fr/statistiques/4171446">Recensement 2016, emploi et population active</a> : calcul des emplois dans la zone pour 100 actifs occupés résidents de 15 à 64 ans. Source : Insee. Réutilisation sous <a href="https://www.insee.fr/fr/information/2008466">Licence Ouverte 2.0, sauf mention contraire</a>.</p>
+<p><strong>Île-de-France Mobilités.</strong> <a href="https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/">Tracés du réseau ferré</a> et <a href="https://data.iledefrance-mobilites.fr/explore/dataset/emplacement-des-gares-idf/">gares par ligne</a>. Données sous <a href="https://github.com/etalab/licence-ouverte/blob/master/LO.md">Licence Ouverte 2.0</a>.</p>
+<p><strong>Fonds de carte.</strong> La documentation de l’équipe cite la Région Île-de-France pour les <a href="https://data.iledefrance.fr/explore/dataset/base-des-zones-demploi-contours/">contours des zones d’emploi</a> et leur <a href="https://data.iledefrance.fr/explore/dataset/base-des-zones-demploi/">composition communale</a>. L’origine des contours communaux et les transformations initiales restent à confirmer. La provenance et la licence des copies locales restent à confirmer.</p>
 </div>
 <div class="source-group">
 <p><strong>Notes de lecture.</strong> Paris regroupe ses 20 arrondissements.</p>

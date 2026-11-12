@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def export_paths(name):
-    pitch = Path(__file__).resolve().parent.parent / "pitch"
+    pitch = Path(__file__).resolve().parents[2] / "pitch"
     png_dir = pitch / "png"
     pdf_dir = pitch / "PDF"
     png_dir.mkdir(parents=True, exist_ok=True)

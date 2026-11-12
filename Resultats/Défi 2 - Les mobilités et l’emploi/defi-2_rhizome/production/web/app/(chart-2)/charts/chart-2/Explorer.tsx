@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { mountExplorer } from "./lib/explorer";
 import { shell } from "./lib/shell";
 import { chartMarkup } from "../../../../lib/chart-markup.mjs";
-import { loadVendors } from "./lib/vendors";
+import { loadVendors } from "../../../../lib/highmaps";
 import "./globals.css";
 
 const markup = chartMarkup(shell, "g2-");

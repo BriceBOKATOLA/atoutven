@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { initializeReference } from "./reference-engine.mjs";
 import { palette } from "./flowers.mjs";
+import { poleRadius, unitsPerPixel } from "./geometry.mjs";
 import { referenceMarkup } from "./reference-markup.mjs";
 // Minimal DOM fixture; real engine/data, no browser layout.
 class Node {
@@ -218,11 +219,13 @@ test("abbreviates all 32 departmental values and preserves exact accessible valu
     cleanup();
   }
 });
-test("labels density classes without overlapping bounds", () => {
-  assert.match(referenceMarkup, /<\/i>&lt; 100<\/li>/);
-  assert.match(referenceMarkup, /<\/i>100 à moins de 500<\/li>/);
-  assert.match(referenceMarkup, /<\/i>500 à moins de 2 000<\/li>/);
-  assert.match(referenceMarkup, /<\/i>≥ 2 000<\/li>/);
+test("reserves native legend hosts without duplicate HTML symbol keys", () => {
+  for (const id of ["density-legend", "pole-legend", "network-legend"])
+    assert.ok(referenceMarkup.includes(`id="${id}"`));
+  assert.doesNotMatch(
+    referenceMarkup,
+    /class="ramp"|class="keys"|key-pole|key-rail/,
+  );
 });
 test("keeps map content without obsolete data exports", () => {
   assert.doesNotMatch(referenceMarkup, /Méthode et limites|class="method"/);
@@ -246,6 +249,45 @@ test("keeps map content without obsolete data exports", () => {
       87,
     );
     assert.equal(nodes.get("size-legend").children.length, 1);
+  } finally {
+    cleanup();
+  }
+});
+test("size references keep calibrated circles on a shared baseline with readable values", () => {
+  const { nodes, cleanup } = mount();
+  try {
+    const map = nodes.get("map");
+    for (const key of [undefined, "+", "-", "0"]) {
+      if (key) map.listeners.keydown({ key, target: map });
+      const [x, y, width, height] = map.attributes.viewBox
+        .split(" ")
+        .map(Number);
+      const units = unitsPerPixel({ x, y, width, height }, 1000, 720);
+      const svg = nodes.get("size-legend").children[0];
+      const baselines = [];
+      for (const [index, value] of [10000, 50000, 150000].entries()) {
+        const [circle, guide, label] = svg.children.slice(
+          index * 3,
+          index * 3 + 3,
+        );
+        const radius = Number(circle.attributes.r);
+        assert.equal(radius, poleRadius(value, units) / units);
+        baselines.push(Number(circle.attributes.cy) + radius);
+        assert.equal(
+          label.textContent,
+          new Intl.NumberFormat("fr-FR").format(value),
+        );
+        assert.equal(circle.attributes.cx, label.attributes.x);
+        assert.equal(guide.attributes.x1, label.attributes.x);
+        assert.ok(Number(guide.attributes.y1) > baselines[index]);
+        assert.ok(Number(label.attributes.y) > Number(guide.attributes.y2));
+      }
+      assert.ok(baselines.every((baseline) => baseline === baselines[0]));
+    }
+    assert.match(
+      referenceMarkup,
+      /id="size-legend" role="img" aria-label="Taille des cercles : 10 000, 50 000 et 150 000 emplois/,
+    );
   } finally {
     cleanup();
   }
@@ -633,5 +675,170 @@ test("commune tooltip preserves missing employment and density", () => {
     );
   } finally {
     cleanup();
+  }
+});
+
+test("one-finger swipes preserve page scrolling and map view", () => {
+  const { nodes, cleanup } = mount();
+  const map = nodes.get("map");
+  const initial = map.attributes.viewBox;
+  let prevented = 0;
+  const preventDefault = () => prevented++;
+  try {
+    map.listeners.touchstart({
+      touches: [{ clientX: 300, clientY: 300 }],
+      preventDefault,
+    });
+    map.listeners.touchmove({
+      touches: [{ clientX: 360, clientY: 310 }],
+      preventDefault,
+    });
+    assert.equal(prevented, 0);
+    assert.equal(map.attributes.viewBox, initial);
+    assert.equal(
+      nodes.get("map-hint").textContent,
+      "Deux doigts pour déplacer la carte",
+    );
+  } finally {
+    cleanup();
+  }
+});
+
+test("plain wheel zooms at the pointer and keyboard reset restores the region", () => {
+  const { nodes, cleanup, url } = mount();
+  const map = nodes.get("map");
+  const initial = map.attributes.viewBox;
+  const selectedUrl = url();
+  let prevented = false;
+  try {
+    map.listeners.wheel({
+      wheelDelta: 120,
+      deltaY: -100,
+      clientX: 600,
+      clientY: 410,
+      preventDefault: () => {
+        prevented = true;
+      },
+    });
+    assert.equal(prevented, true);
+    assert.ok(
+      Number(map.attributes.viewBox.split(" ")[2]) <
+        Number(initial.split(" ")[2]),
+    );
+    const zoomed = map.attributes.viewBox;
+    map.listeners.keydown({
+      key: "ArrowRight",
+      target: map,
+      preventDefault() {},
+    });
+    assert.notEqual(map.attributes.viewBox, zoomed);
+    map.listeners.keydown({ key: "0", target: map });
+    assert.equal(map.attributes.viewBox, initial);
+    assert.equal(url(), selectedUrl);
+  } finally {
+    cleanup();
+  }
+});
+
+test("drag threshold preserves clicks but completed drags suppress selection until the next turn", async () => {
+  const { nodes, cleanup, url } = mount();
+  const map = nodes.get("map");
+  const initial = map.attributes.viewBox;
+  const selectedUrl = url();
+  const target = new Node();
+  target.setAttribute("data-department", "75");
+  const pointer = {
+    button: 0,
+    pointerType: "mouse",
+    pointerId: 1,
+    clientX: 600,
+    clientY: 410,
+  };
+  try {
+    map.listeners.pointerdown(pointer);
+    map.listeners.pointermove({ ...pointer, clientX: 603 });
+    assert.equal(map.attributes.viewBox, initial);
+    map.listeners.pointermove({ ...pointer, clientX: 680 });
+    assert.notEqual(map.attributes.viewBox, initial);
+    assert.equal(map.classList.contains("dragging"), true);
+    map.listeners.pointerup();
+    map.listeners.click({ target, clientX: 680, clientY: 410 });
+    assert.equal(url(), selectedUrl);
+    assert.equal(map.classList.contains("dragging"), false);
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    map.listeners.click({ target, clientX: 680, clientY: 410 });
+    assert.match(url(), /departement=75/);
+  } finally {
+    cleanup();
+  }
+});
+
+test("two-finger pinch zooms and blocks its synthetic selection click", () => {
+  const { nodes, cleanup, url } = mount();
+  const map = nodes.get("map");
+  const initial = map.attributes.viewBox;
+  const selectedUrl = url();
+  const target = new Node();
+  target.setAttribute("data-department", "75");
+  let prevented = 0;
+  const preventDefault = () => prevented++;
+  try {
+    map.listeners.touchstart({
+      touches: [
+        { clientX: 500, clientY: 400 },
+        { clientX: 700, clientY: 400 },
+      ],
+      preventDefault,
+    });
+    map.listeners.touchmove({
+      touches: [
+        { clientX: 400, clientY: 430 },
+        { clientX: 800, clientY: 430 },
+      ],
+      preventDefault,
+    });
+    assert.equal(prevented, 2);
+    assert.ok(
+      Number(map.attributes.viewBox.split(" ")[2]) <
+        Number(initial.split(" ")[2]),
+    );
+    map.listeners.touchend({ touches: [] });
+    map.listeners.click({ target, clientX: 600, clientY: 430 });
+    assert.equal(url(), selectedUrl);
+  } finally {
+    cleanup();
+  }
+});
+
+test("disposal clears a pending drag and prevents queued rendering", () => {
+  const previousFrame = globalThis.requestAnimationFrame;
+  const frames = [];
+  globalThis.requestAnimationFrame = (callback) => frames.push(callback);
+  const { nodes, cleanup } = mount();
+  const map = nodes.get("map");
+  try {
+    frames.shift()();
+    const initial = map.attributes.viewBox;
+    const pointer = {
+      button: 0,
+      pointerType: "mouse",
+      pointerId: 1,
+      clientX: 600,
+      clientY: 410,
+    };
+    map.listeners.pointerdown(pointer);
+    map.listeners.pointermove({ ...pointer, clientX: 680 });
+    map.listeners.pointerup();
+    cleanup();
+    assert.equal(map.classList.contains("dragging"), false);
+    assert.equal(map.listeners.pointermove, undefined);
+    assert.equal(map.listeners.touchmove, undefined);
+    assert.equal(map.listeners.wheel, undefined);
+    for (const callback of frames) callback();
+    assert.equal(map.attributes.viewBox, initial);
+  } finally {
+    cleanup();
+    if (previousFrame) globalThis.requestAnimationFrame = previousFrame;
+    else delete globalThis.requestAnimationFrame;
   }
 });

@@ -1,4 +1,16 @@
-import { geometryBounds, ringContains } from "./geometry.mjs";
+import { bindMapNavigation } from "../../../../../lib/map-navigation.mjs";
+import { evolutionDataClasses, missingEvolution } from "./evolution-scale.mjs";
+import {
+  communeLabels,
+  lineName,
+  lineTags,
+  tramT4Bounds,
+  zoneAt,
+  zoneBoundaries,
+  type Collection,
+  type Commune,
+  type Zone,
+} from "./map-model.mjs";
 
 // The npm Highmaps engine is supplied by the browser-only loader.
 // This local contract describes only the Highmaps API used by this application.
@@ -9,20 +21,36 @@ interface MapSVGElement {
   element: SVGElementTagNameMap["g"];
   attr(attributes: Record<string, unknown>): MapSVGElement;
   css(styles: Record<string, unknown>): MapSVGElement;
+  clip(clipRect?: MapSVGElement): MapSVGElement;
   add(parent?: MapSVGElement): MapSVGElement;
   destroy(): void;
 }
 interface MapPoint {
   select?(selected: boolean, accumulate?: boolean): void;
   options: MapPointOptionsObject;
+  value?: number | null;
+  visible?: boolean;
+  hiddenInDataClass?: boolean;
+  setVisible?(visible: boolean): void;
   graphic?: MapSVGElement;
   properties?: Record<string, unknown>;
 }
 interface MapSeries {
   points: MapPoint[];
+  setVisible(visible: boolean, redraw?: boolean): void;
+}
+interface MapLegendItem {
+  name: string;
+  visible: boolean;
+  isDataClass?: boolean;
+  options: { id?: string };
+  setVisible(visible?: boolean, redraw?: boolean): void;
+  a11yProxyElement?: { innerElement: HTMLElement };
 }
 interface MapChart {
   destroy(): void;
+  legend?: { legendHeight: number };
+  clipRect?: MapSVGElement;
   chartWidth: number;
   chartHeight: number;
   plotWidth: number;
@@ -75,25 +103,6 @@ type Highmaps = {
   geojson(data: MapGeoJSON, type: string): unknown;
 };
 
-type Feature<P> = {
-  type: "Feature";
-  properties: P;
-  geometry: { type: string; coordinates: unknown };
-};
-type Collection<P> = { type: "FeatureCollection"; features: Feature<P>[] };
-type Commune = {
-  code: string;
-  nom: string;
-  defm2016: number | null;
-  defm2024: number | null;
-  evolution: number | null;
-};
-type Zone = {
-  code: string;
-  nom: string;
-  indicators: Record<string, Record<string, number | null>>;
-  center: [number, number];
-};
 type Metric = { name: string; unit: string; source: string; scope: string };
 type Data = {
   communes: Collection<Commune>;
@@ -151,6 +160,81 @@ export function mountExplorer(
   const status = element<HTMLDivElement>("load-status");
   let data: Data;
   let chart: FlowerChart | undefined;
+  let legendHeight = 0;
+  let zoneOutlinesVisible = true;
+  let mapFlowersVisible = true;
+  const legendLayers: Record<string, string[]> = {
+    "legend-recent": [
+      "recent-lines-halo",
+      "recent-lines",
+      "recent-stations",
+      "recent-line-labels",
+    ],
+    "legend-old": ["old-lines"],
+    "legend-t4": ["tram-t4-box", "tram-t4-label"],
+  };
+  function syncCommuneVisibility(map: MapChart): void {
+    // Highmaps normally paints hidden non-null points with nullColor. This
+    // legend filters communes entirely, including their border and hit target.
+    for (const point of map.get("communes")?.points ?? []) {
+      point.graphic?.attr({
+        visibility: point.visible === false ? "hidden" : "inherit",
+      });
+    }
+  }
+  function toggleLegendItem(map: FlowerChart, item: MapLegendItem): false {
+    const visible = !item.visible;
+    // Native data-class toggling uses each point's unrounded dataClass. It also
+    // keeps Highcharts' hiddenInDataClass state and legend appearance in sync.
+    if (item.isDataClass) item.setVisible();
+    else {
+      const id = item.options.id ?? "";
+      if (id === "legend-missing") {
+        for (const point of map.get("communes")?.points ?? []) {
+          if (point.value === null) {
+            point.setVisible?.(visible);
+            // Map translation otherwise restores null points on zoom/reflow.
+            point.hiddenInDataClass = !visible;
+          }
+        }
+      } else if (id === "legend-flowers") {
+        mapFlowersVisible = visible;
+        syncFlowerVisibility(map);
+      } else if (id === "legend-zones") {
+        zoneOutlinesVisible = visible;
+        map.zoneLayer?.attr({ visibility: visible ? "visible" : "hidden" });
+      } else {
+        for (const layer of legendLayers[id] ?? []) {
+          map.get(layer)?.setVisible(visible, false);
+        }
+      }
+      // Hiding groups is immediate. Avoid a redraw that would replace the
+      // focused legend proxy or flower while the user operates the key.
+      item.setVisible(visible, false);
+    }
+    syncCommuneVisibility(map);
+    item.a11yProxyElement?.innerElement.setAttribute(
+      "aria-pressed",
+      String(visible),
+    );
+    item.a11yProxyElement?.innerElement.setAttribute(
+      "aria-label",
+      `${visible ? "Masquer" : "Afficher"} ${item.name}`,
+    );
+    return false;
+  }
+  function resetLegendHeight(): void {
+    legendHeight = 0;
+    element("map-wrap").style.setProperty("--map-legend-height", "0px");
+  }
+  function reserveLegendSpace(map: MapChart): void {
+    const height = Math.ceil(map.legend?.legendHeight ?? 0);
+    if (height === legendHeight) return;
+    // Width determines wrapping. Only write changed heights so the resulting
+    // Highcharts reflow settles instead of repeatedly resizing the container.
+    legendHeight = height;
+    element("map-wrap").style.setProperty("--map-legend-height", `${height}px`);
+  }
   let selectedCode = "";
   let selectedCommuneCode = "";
   let selectedCommuneZoneCode = "";
@@ -180,7 +264,7 @@ export function mountExplorer(
     tooltipClose = setTimeout(hideTooltip, 120);
   }
   function showTooltip(zone: Zone, anchor: SVGGElement): void {
-    if (disposed) return;
+    if (disposed || !mapFlowersVisible) return;
     cancelTooltipClose();
     const title = document.createElement("strong");
     title.textContent = zone.nom;
@@ -375,6 +459,20 @@ export function mountExplorer(
     });
     return svg;
   }
+  function flowerLegendSymbol(): string {
+    const path = petalPath(PETAL_MAX)
+      .map((segment) => segment.join(" "))
+      .join(" ");
+    const petals = indicators
+      .map(
+        (indicator, index) =>
+          `<path d="${path}" transform="rotate(${petalRotation(index)})" fill="${indicator.fill}" stroke="${indicator.stroke}" stroke-width="3"/>`,
+      )
+      .join("");
+    // Highcharts accepts an inline SVG image as a native marker symbol.
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="-46 -46 92 92">${petals}<circle r="3" fill="#fffefa" stroke="#06264d" stroke-width="2"/></svg>`;
+    return `url(data:image/svg+xml,${encodeURIComponent(svg)})`;
+  }
   function indicatorDot(indicator: Indicator): HTMLSpanElement {
     const dot = document.createElement("span");
     dot.className = "dot";
@@ -444,14 +542,6 @@ export function mountExplorer(
         })[character]!,
     );
   }
-  function colorFor(value: number | null): string {
-    if (value === null) return "#F1EFEA";
-    if (value < -5) return "#2C7FB8";
-    if (value < 0) return "#A6CEE3";
-    if (value < 5) return "#FBE6CC";
-    if (value < 15) return "#F5AE6B";
-    return "#D9531E";
-  }
   function communeText(commune: Commune): string {
     const count = (value: number | null) =>
       value === null ? "indisponible" : format.format(value);
@@ -475,8 +565,7 @@ export function mountExplorer(
   function clearCommune(): void {
     selectedCommuneCode = "";
     selectedCommuneZoneCode = "";
-    element("commune-detail").textContent =
-      "Sélectionnez une commune sur la carte pour consulter ses données.";
+    element("commune-detail").textContent = "";
     for (const point of chart?.get("communes")?.points ?? [])
       point.select?.(false, true);
   }
@@ -522,7 +611,13 @@ export function mountExplorer(
     // Keep zone boundaries below Highcharts' data-label layer (zIndex 6).
     map.zoneLayer = map.renderer
       .g("zone-outlines")
-      .attr({ zIndex: 4, translateX: map.plotLeft, translateY: map.plotTop })
+      .attr({
+        zIndex: 4,
+        translateX: map.plotLeft,
+        translateY: map.plotTop,
+        visibility: zoneOutlinesVisible ? "visible" : "hidden",
+      })
+      .clip(map.clipRect)
       .add();
     for (const feature of zoneBoundaries(data.zones).features) {
       const segments: MapSVGPathArray = [];
@@ -558,6 +653,19 @@ export function mountExplorer(
       outline.element.style.pointerEvents = "none";
     }
   }
+  function syncFlowerVisibility(map: FlowerChart): void {
+    map.flowerLayer?.attr({
+      visibility: mapFlowersVisible ? "visible" : "hidden",
+    });
+    map.flowerLayer?.element.setAttribute(
+      "aria-hidden",
+      String(!mapFlowersVisible),
+    );
+    for (const { marker } of markers.values()) {
+      marker.element.setAttribute("tabindex", mapFlowersVisible ? "0" : "-1");
+    }
+    if (!mapFlowersVisible) hideTooltip();
+  }
   function drawFlowers(map: FlowerChart): void {
     if (!map.mapView || !data) return;
     hideTooltip();
@@ -567,6 +675,7 @@ export function mountExplorer(
     map.flowerLayer = map.renderer
       .g("flowers")
       .attr({ zIndex: 7, translateX: map.plotLeft, translateY: map.plotTop })
+      .clip(map.clipRect)
       .add();
     // Only the centers follow the projection; petals keep a fixed size in pixels.
     const zones = [...data.zones.features].sort(
@@ -655,6 +764,7 @@ export function mountExplorer(
       label.element.style.pointerEvents = "none";
       markers.set(zone.code, { marker, target, center, label });
       marker.element.onmouseenter = () => {
+        if (!mapFlowersVisible) return;
         label.attr({ opacity: 1 });
         showTooltip(zone, marker.element);
       };
@@ -667,6 +777,7 @@ export function mountExplorer(
       const activate = (event: Event) => {
         event.preventDefault();
         event.stopPropagation();
+        if (!mapFlowersVisible) return;
         selectZone(zone.code);
         showTooltip(zone, marker.element);
       };
@@ -682,6 +793,7 @@ export function mountExplorer(
         }
       };
     }
+    syncFlowerVisibility(map);
   }
   function indicatorText(indicator: Indicator, zone: Zone): string {
     const value = indicator.value(zone);
@@ -728,25 +840,6 @@ export function mountExplorer(
     if (chart) drawZoneOutlines(chart);
     syncFlowerSelection();
   }
-  function zoneAt({
-    lon,
-    lat,
-  }: {
-    lon: number;
-    lat: number;
-  }): Zone | undefined {
-    return data.zones.features.find(({ geometry }) => {
-      const polygons =
-        geometry.type === "MultiPolygon"
-          ? (geometry.coordinates as number[][][][])
-          : [geometry.coordinates as number[][][]];
-      return polygons.some(
-        ([outer, ...holes]) =>
-          ringContains(outer, lon, lat) &&
-          !holes.some((hole) => ringContains(hole, lon, lat)),
-      );
-    })?.properties;
-  }
   function selectZoneAt(
     map: FlowerChart,
     event: { chartX: number; chartY: number },
@@ -756,178 +849,72 @@ export function mountExplorer(
     const y = event.chartY - map.plotTop;
     if (x < 0 || y < 0 || x > map.plotWidth || y > map.plotHeight) return;
     const position = map.mapView?.pixelsToLonLat({ x, y });
-    const zone = position && zoneAt(position);
+    const zone = position && zoneAt(data.zones, position);
     if (zone) {
       selectZone(zone.code);
       if (scroll) element("explorer").scrollIntoView({ block: "nearest" });
     }
   }
-  // geojson(..., 'mapline') expects line geometry, not polygon geometry.
-  function zoneBoundaries(zones: Collection<Zone>): Collection<Zone> {
-    return {
-      type: "FeatureCollection",
-      features: zones.features.map((feature) => ({
-        ...feature,
-        geometry: {
-          type: "MultiLineString",
-          coordinates:
-            feature.geometry.type === "MultiPolygon"
-              ? (feature.geometry.coordinates as number[][][][]).flat()
-              : feature.geometry.coordinates,
-        },
-      })),
-    };
-  }
-  // Labels use the commune's own evolution, never a rounded substitute in the dataset.
-  function communeLabels(): unknown[] {
-    const names = [
-      "Épinay-sur-Seine",
-      "Saint-Ouen-sur-Seine",
-      "Romainville",
-      "Rosny-sous-Bois",
-      "Clamart",
-      "Villejuif",
-      "Antony",
-      "Thiais",
-      "Massy",
-      "Ris-Orangis",
-      "Paris",
-    ];
-    return data.communes.features
-      .filter(
-        (feature) =>
-          names.includes(feature.properties.nom) &&
-          feature.properties.evolution !== null,
-      )
-      .map((feature) => {
-        const bounds = geometryBounds(feature.geometry);
-        const evolution = Math.round(feature.properties.evolution!);
-        return {
-          lon: (bounds.west + bounds.east) / 2,
-          lat: (bounds.south + bounds.north) / 2,
-          name: `${feature.properties.nom === "Paris" ? "PARIS" : feature.properties.nom} | ${evolution > 0 ? "+" : ""}${evolution} %`,
-          dataLabels:
-            feature.properties.nom === "Paris"
-              ? { backgroundColor: "#f6f4ef" }
-              : undefined,
-        };
-      });
-  }
-  function lineName(name: string): { tag: string; full: string } {
-    const [kind, number] = name.split(" ");
-    if (kind === "TRAM") return { tag: `T${number}`, full: `Tram T${number}` };
-    if (kind === "METRO") return { tag: `M${number}`, full: `Métro ${number}` };
-    if (kind === "CABLE")
-      return { tag: `C${number}`, full: `Câble C${number}` };
-    return { tag: name, full: name };
-  }
-  function lineTags(labels: { lon: number; lat: number }[]): unknown[] {
-    const scale = Math.cos((48.8 * Math.PI) / 180);
-    const span = (a: number[], b: number[]) =>
-      Math.hypot((a[0] - b[0]) * scale, a[1] - b[1]);
-    const lines = new Map<string, number[][][]>();
-    for (const feature of data.lines.features) {
-      const name = String(feature.properties.nom);
-      if (name !== "TRAM 4")
-        lines.set(name, [
-          ...(lines.get(name) ?? []),
-          feature.geometry.coordinates as number[][],
-        ]);
-    }
-    const taken = labels.map((label) => [label.lon, label.lat]);
-    const wideLabelClearance = (at: number[]) =>
-      Math.min(
-        ...taken.map((other) =>
-          Math.hypot((at[0] - other[0]) * scale * 0.4, at[1] - other[1]),
-        ),
-      );
-    return [...lines]
-      .map(([name, paths]) => ({
-        name,
-        paths,
-        length: paths.reduce(
-          (sum, path) =>
-            sum +
-            path
-              .slice(1)
-              .reduce(
-                (total, point, index) => total + span(point, path[index]),
-                0,
-              ),
-          0,
-        ),
-      }))
-      .sort((a, b) => b.length - a.length)
-      .map(({ name, paths, length }) => {
-        const ends = paths.flatMap((path) => [
-          {
-            at: path[0],
-            from: path[Math.max(1, Math.round((path.length - 1) / 3))],
-          },
-          {
-            at: path[path.length - 1],
-            from: path[
-              Math.min(path.length - 2, Math.round(((path.length - 1) * 2) / 3))
-            ],
-          },
-        ]);
-        const termini = ends.filter(
-          (end) =>
-            ends.filter((other) => span(other.at, end.at) < 0.002).length === 1,
-        );
-        const { at, from } = (termini.length ? termini : ends).reduce(
-          (best, end) =>
-            wideLabelClearance(end.at) > wideLabelClearance(best.at)
-              ? end
-              : best,
-        );
-        taken.push(at);
-        const tag = lineName(name).tag,
-          reach = span(at, from) || 1,
-          east = ((at[0] - from[0]) * scale) / reach,
-          north = (at[1] - from[1]) / reach;
-        const pastTerminus =
-          Math.abs(east) * (tag.length * 3.5 + 6) + Math.abs(north) * 10 + 5;
-        return {
-          lon: at[0],
-          lat: at[1],
-          name: tag,
-          dataLabels: {
-            x: east * pastTerminus,
-            y: -north * pastTerminus,
-            labelrank: length,
-          },
-        };
-      });
-  }
-  function tramT4Bounds(): {
-    west: number;
-    east: number;
-    south: number;
-    north: number;
-  } {
-    // Source: Amar, scripts/base/groupes_lignes.json, T4 (2019).
-    const codes = ["93014", "93046", "93047"];
-    const communes = data.communes.features
-      .filter((feature) => codes.includes(feature.properties.code))
-      .map((feature) => geometryBounds(feature.geometry));
-    return {
-      west: Math.min(...communes.map((bounds) => bounds.west)) - 0.012,
-      east: Math.max(...communes.map((bounds) => bounds.east)) + 0.012,
-      south: Math.min(...communes.map((bounds) => bounds.south)) - 0.008,
-      north: Math.max(...communes.map((bounds) => bounds.north)) + 0.008,
-    };
-  }
   function createChart(): void {
-    const t4 = tramT4Bounds();
+    resetLegendHeight();
+    const t4 = tramT4Bounds(data.communes);
     const compact = element("map").clientWidth < 520;
     const t4Label = { lon: t4.east, lat: t4.north + 0.012, name: "TRAM T4" };
-    const labels = communeLabels() as { lon: number; lat: number }[];
+    const labels = communeLabels(data.communes);
+    // Empty series supply native legend controls for composite map layers.
+    const networkLegend = [
+      {
+        id: "legend-recent",
+        name: "Ligne ouverte entre 2015 et 2025",
+        color: "#0e1b2c",
+        lineWidth: compact ? 1.6 : 2.2,
+        marker: {
+          enabled: true,
+          symbol: "circle",
+          radius: compact ? 2 : 2.6,
+          fillColor: "#fff",
+          lineColor: "#0e1b2c",
+          lineWidth: 1,
+        },
+      },
+      {
+        id: "legend-old",
+        name: "Réseau antérieur à 2015",
+        color: "#a3aab5",
+        lineWidth: 0.7,
+      },
+      {
+        id: "legend-t4",
+        name: "Encadré du Tram T4",
+        color: "#1e3442",
+        lineWidth: 1.5,
+        dashStyle: "Dash",
+      },
+      {
+        id: "legend-flowers",
+        type: "mappoint",
+        name: "Zones d’emploi",
+        color: "#7A9A3A",
+        lineWidth: 0,
+        marker: {
+          enabled: true,
+          symbol: flowerLegendSymbol(),
+        },
+      },
+      {
+        id: "legend-zones",
+        name: "Contour de zone d’emploi",
+        color: "#66727f",
+        lineWidth: 1,
+      },
+    ];
     const communes = data.communes.features.map((feature) => ({
       code: feature.properties.code,
       name: feature.properties.nom,
       value: feature.properties.evolution,
-      color: colorFor(feature.properties.evolution),
+      ...(feature.properties.evolution === null
+        ? { borderColor: MISSING_STROKE, borderWidth: 0.8 }
+        : {}),
     }));
     chart = Highcharts.mapChart(element("map"), {
       chart: {
@@ -936,6 +923,8 @@ export function mountExplorer(
         spacing: [0, 0, 0, 0],
         events: {
           render(this: FlowerChart) {
+            syncCommuneVisibility(this);
+            reserveLegendSpace(this);
             drawFlowers(this);
             updateScale(this);
           },
@@ -949,6 +938,11 @@ export function mountExplorer(
         zoomOut: "Réduire",
         resetZoom: "Vue initiale",
         accessibility: {
+          legend: {
+            legendLabel: "Légende interactive : {legendTitle}",
+            legendItem:
+              "{#if item.visible}Masquer{else}Afficher{/if} {itemName}",
+          },
           defaultChartTitle: "Carte de l’Île-de-France",
           chartContainerLabel: "{title}. Carte interactive.",
           svgContainerLabel: "Carte interactive",
@@ -988,7 +982,8 @@ export function mountExplorer(
       },
       accessibility: {
         description:
-          "Évolution communale des demandeurs d’emploi entre 2016 et 2024. Parcourez les communes avec les flèches et activez-les avec Entrée ou Espace pour consulter leurs données. Le choix de zone permet de lire les indicateurs des fleurs au clavier.",
+          `Classes d’évolution : ${evolutionDataClasses.map(({ name }) => name).join(" ; ")}. ${missingEvolution.label}. Repères : ligne ouverte entre 2015 et 2025, réseau antérieur à 2015, encadré du Tram T4, contour de zone d’emploi. ` +
+          "Activez les entrées de légende pour masquer ou afficher les communes d’une classe ou les repères correspondants. Évolution communale des demandeurs d’emploi entre 2016 et 2024. Parcourez les communes avec les flèches et activez-les avec Entrée ou Espace pour consulter leurs données. Le choix de zone permet de lire les indicateurs des fleurs au clavier.",
         series: { pointDescriptionEnabledThreshold: false },
         keyboardNavigation: {
           seriesNavigation: {
@@ -998,12 +993,43 @@ export function mountExplorer(
           },
         },
       },
-      legend: { enabled: false },
+      colorAxis: { dataClasses: evolutionDataClasses },
+      legend: {
+        enabled: true,
+        align: "left",
+        verticalAlign: "bottom",
+        layout: "horizontal",
+        padding: 12,
+        itemDistance: 16,
+        itemMarginBottom: 6,
+        symbolRadius: 0,
+        symbolWidth: 24,
+        navigation: { enabled: false },
+        title: {
+          text: "Évolution des demandeurs d’emploi, 2016–2024 et repères",
+        },
+        itemStyle: {
+          color: "#0e1b2c",
+          fontSize: "12px",
+          fontWeight: "normal",
+          cursor: "pointer",
+        },
+        events: {
+          itemClick(
+            this: { chart: FlowerChart },
+            event: { legendItem: MapLegendItem },
+          ) {
+            return toggleLegendItem(this.chart, event.legendItem);
+          },
+        },
+        accessibility: { enabled: true, keyboardNavigation: { enabled: true } },
+      },
       credits: { enabled: true, style: { fontSize: "12px", color: "#526071" } },
       mapNavigation: {
         enabled: true,
         enableButtons: false,
         enableMouseWheelZoom: true,
+        enableDoubleClickZoom: false,
         buttonOptions: {
           align: "left",
           verticalAlign: "bottom",
@@ -1033,6 +1059,8 @@ export function mountExplorer(
       },
       plotOptions: {
         series: {
+          colorAxis: false,
+          showInLegend: false,
           animation: false,
           states: { inactive: { enabled: false } },
           point: {
@@ -1047,14 +1075,37 @@ export function mountExplorer(
       series: [
         {
           type: "map",
+          id: "legend-missing",
+          name: missingEvolution.label,
+          color: missingEvolution.color,
+          data: [],
+          showInLegend: true,
+          legendIndex: 5,
+          enableMouseTracking: false,
+          accessibility: { enabled: false },
+        },
+        ...networkLegend.map((key, index) => ({
+          type: "mapline",
+          data: [],
+          legendSymbol: "lineMarker",
+          showInLegend: true,
+          legendIndex: 6 + index,
+          enableMouseTracking: false,
+          accessibility: { enabled: false },
+          marker: { enabled: false },
+          ...key,
+        })),
+        {
+          type: "map",
           id: "communes",
+          colorAxis: 0,
           name: "Demandeurs d’emploi",
           mapData: data.communes as unknown as MapGeoJSON,
           joinBy: ["code", "code"],
           data: communes,
           borderColor: "#fffefa",
           borderWidth: 0.3,
-          nullColor: "#F1EFEA",
+          nullColor: missingEvolution.color,
           states: {
             hover: { borderColor: "#273f31", borderWidth: 1, brightness: 0.08 },
           },
@@ -1093,6 +1144,7 @@ export function mountExplorer(
           ? [
               {
                 type: "mapline",
+                id: "old-lines",
                 name: "Réseau ferré antérieur à 2015",
                 className: "no-pointer",
                 mapData: Highcharts.geojson(
@@ -1109,6 +1161,7 @@ export function mountExplorer(
           : []),
         {
           type: "mapline",
+          id: "recent-lines-halo",
           name: "Lignes ouvertes entre 2015 et 2025",
           data: Highcharts.geojson(
             data.lines as unknown as MapGeoJSON,
@@ -1123,6 +1176,7 @@ export function mountExplorer(
         },
         {
           type: "mapline",
+          id: "recent-lines",
           name: "Tracé des lignes ouvertes entre 2015 et 2025",
           className: "no-pointer",
           mapData: Highcharts.geojson(
@@ -1139,6 +1193,7 @@ export function mountExplorer(
           ? [
               {
                 type: "mappoint",
+                id: "recent-stations",
                 name: "Gares ouvertes entre 2015 et 2025",
                 className: "no-pointer",
                 data: Highcharts.geojson(
@@ -1158,6 +1213,7 @@ export function mountExplorer(
           : []),
         {
           type: "mapline",
+          id: "tram-t4-box",
           name: "Communes du Tram T4",
           className: "no-pointer",
           data: [
@@ -1183,6 +1239,7 @@ export function mountExplorer(
         },
         {
           type: "mappoint",
+          id: "tram-t4-label",
           name: "Tram T4",
           className: "no-pointer",
           data: [t4Label],
@@ -1235,9 +1292,10 @@ export function mountExplorer(
           : [
               {
                 type: "mappoint",
+                id: "recent-line-labels",
                 name: "Noms des lignes",
                 className: "no-pointer",
-                data: lineTags([
+                data: lineTags(data.lines, [
                   ...labels,
                   t4Label,
                   ...data.zones.features.map(({ properties: zone }) => ({
@@ -1270,6 +1328,7 @@ export function mountExplorer(
       ],
     }) as FlowerChart;
   }
+  let disposeNavigation: (() => void) | undefined;
   async function load(): Promise<void> {
     try {
       const response = await fetch("/data/jobseekers-employment-zones.json", {
@@ -1303,9 +1362,16 @@ export function mountExplorer(
           (feature) => feature.properties.nom === "Paris",
         ) ?? data.zones.features[0]
       ).properties.code;
+      disposeNavigation?.();
+      disposeNavigation = undefined;
       chart?.destroy();
       chart = undefined;
       createChart();
+      if (chart)
+        disposeNavigation = bindMapNavigation(
+          element("map").parentElement!,
+          chart,
+        );
       if (chart && !markers.size) drawFlowers(chart);
       selectZone(selectedCode);
       status.hidden = true;
@@ -1313,6 +1379,8 @@ export function mountExplorer(
         `${format.format(data.communes.features.length)} communes dans le cadrage, ${data.zones.features.length} zones d’emploi et ${indicators.length} indicateurs. Les données absentes ne sont pas interpolées.`;
     } catch (error) {
       if (disposed) return;
+      disposeNavigation?.();
+      disposeNavigation = undefined;
       chart?.destroy();
       chart = undefined;
       console.error("La carte ne peut pas être chargée.", error);
@@ -1356,7 +1424,9 @@ export function mountExplorer(
     listeners.abort();
     hideTooltip();
     markers.clear();
+    disposeNavigation?.();
     chart?.destroy();
     chart = undefined;
+    resetLegendHeight();
   };
 }

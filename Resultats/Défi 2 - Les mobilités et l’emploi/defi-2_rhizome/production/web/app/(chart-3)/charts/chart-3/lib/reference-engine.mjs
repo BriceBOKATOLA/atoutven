@@ -1,28 +1,29 @@
 import {
   BASE_YEAR,
   densityColor,
+  densityKey,
+  poleKey,
   petalPath,
   geometryPath,
   metricMaxima,
   flowerPetals,
   flowerFrame,
-  viewFromBounds,
   unitsPerPixel,
-  constrainView,
-  zoomAt,
   poleRadius,
   scaleBar,
   layoutLabels,
   analyse,
 } from "./geometry.mjs";
+import { createMapNavigation } from "./map-navigation.mjs";
 import { palette } from "./flowers.mjs";
-import { mountHighmaps } from "./highmaps-adapter.mjs";
+import { mountHighmaps, mountMapLegends } from "./highmaps-adapter.mjs";
 
 // Keep the established interaction surface above the Highmaps geographical series.
 // Each mount owns its data and listeners; cleanup also handles React StrictMode.
 export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
   let highmaps;
   let mapEngine;
+  let legendEngine;
   let disposed = false;
   let tooltipDepartment;
   let flowerLayer;
@@ -54,7 +55,8 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     maximumFractionDigits: 2,
   });
   // The largest reference circle of the legend at the largest symbol scale.
-  const sizeLegendHeight = Math.ceil(poleRadius(150000, 1, 10, 10) * 2) + 20;
+  const sizeLegendBaseline = Math.ceil(poleRadius(150000, 1, 10, 10) * 2) + 2;
+  const sizeLegendHeight = sizeLegendBaseline + 32;
   const nextFrame =
     globalThis.requestAnimationFrame ??
     ((callback) => {
@@ -76,9 +78,30 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
   let insights;
   let maxima = [];
   let selected = "";
-  let homeView;
-  let regionView;
-  let view;
+  const hiddenKeys = new Set();
+  const poleVisible = (pole) => !hiddenKeys.has(poleKey(pole));
+  function applyLegendVisibility(key, visible) {
+    if (visible) hiddenKeys.delete(key);
+    else hiddenKeys.add(key);
+    mapEngine?.visibility(key, visible);
+    for (const node of map.querySelectorAll("[data-legend-key]")) {
+      const hidden = hiddenKeys.has(node.dataset.legendKey);
+      node.style.display = hidden ? "none" : "";
+    }
+    // Border filtering must not hide the selected territory or its hit area.
+    for (const shape of departmentLayer.children)
+      shape.style.stroke =
+        hiddenKeys.has("departments") && !shape.classList.contains("selected")
+          ? "none"
+          : "";
+    const visiblePoles = insights.poles.filter(poleVisible);
+    for (const pole of insights.poles)
+      poleNodes
+        .get(pole.code)
+        .setAttribute("tabindex", pole === visiblePoles[0] ? "0" : "-1");
+    drawLabels(currentUnits());
+    hideTooltip();
+  }
   let renderedUnits;
   let frameRequested = false;
   let departmentLayer;
@@ -88,13 +111,7 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
   let departmentButtons = [];
   let computedTakeaways = [];
   let hovered;
-  let dragging;
-  let pinch;
-  let swipe;
-  let suppressClickUntil = 0;
   let hintTimer;
-  let lastWheelHint = -Infinity;
-  let wheelHints = 0;
 
   function svgNode(name, attributes = {}) {
     const node = document.createElementNS(svgNamespace, name);
@@ -116,36 +133,28 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
   const lineYears = (line) => `${line.name} (${line.years.join(", ")})`;
   const metricValue = (metric, value) =>
     countFormat.format(Math.round(value * (metric.scale ?? 1)));
-  const mapSize = () => ({
-    width: frame.clientWidth || 1,
-    height: frame.clientHeight || 1,
+  const navigation = createMapNavigation({
+    map,
+    frame,
+    listen,
+    requestRender,
+    hideTooltip,
+    showHint,
+    onHover(event) {
+      if (event.target === hovered)
+        return showTooltip(undefined, event.clientX, event.clientY);
+      const lines = describe(event.target);
+      if (!lines) return hideTooltip();
+      hovered = event.target;
+      showTooltip(lines, event.clientX, event.clientY);
+    },
   });
-  const currentUnits = () =>
-    unitsPerPixel(view, mapSize().width, mapSize().height);
+  const { mapSize, currentUnits, setView } = navigation;
   const polePoint = (pole) => ({
     x: pole.geometry.coordinates[0],
     y: -pole.geometry.coordinates[1],
   });
-  function limits() {
-    const size = mapSize();
-    return {
-      minUnits: 6,
-      maxUnits: unitsPerPixel(regionView, size.width, size.height) * 1.1,
-      region: regionView,
-    };
-  }
-  function toMap(clientX, clientY) {
-    const box = map.getBoundingClientRect(),
-      units = currentUnits();
-    return {
-      x: view.x + view.width / 2 + (clientX - box.left - box.width / 2) * units,
-      y:
-        view.y + view.height / 2 + (clientY - box.top - box.height / 2) * units,
-    };
-  }
-
-  function setView(next) {
-    view = constrainView(next, limits(), mapSize());
+  function requestRender() {
     if (frameRequested) return;
     frameRequested = true;
     nextFrame(render);
@@ -155,9 +164,9 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     if (disposed) return;
     map.setAttribute(
       "viewBox",
-      `${view.x} ${view.y} ${view.width} ${view.height}`,
+      `${navigation.view.x} ${navigation.view.y} ${navigation.view.width} ${navigation.view.height}`,
     );
-    mapEngine?.render(view, mapSize());
+    mapEngine?.render(navigation.view, mapSize());
     const units = currentUnits();
     if (units !== renderedUnits) {
       renderedUnits = units;
@@ -174,27 +183,6 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     } else hideTooltip();
     renderMapFlowers();
   }
-  function zoomBy(factor) {
-    setView(
-      zoomAt(
-        view,
-        factor,
-        { x: view.x + view.width / 2, y: view.y + view.height / 2 },
-        limits(),
-        mapSize(),
-      ),
-    );
-  }
-  function pan(dx, dy) {
-    const size = mapSize(),
-      units = currentUnits();
-    setView({
-      ...view,
-      x: view.x + dx * size.width * units * 0.2,
-      y: view.y + dy * size.height * units * 0.2,
-    });
-  }
-
   // Symbols and labels keep a screen size, so they are redrawn when the scale changes.
   function drawSymbols(units) {
     for (const pole of insights.poles)
@@ -212,17 +200,27 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     ]);
     const height = sizeLegendHeight,
       svg = svgNode("svg", {
-        width: 138,
+        width: 216,
         height,
-        viewBox: `0 0 138 ${height}`,
+        viewBox: `0 0 216 ${height}`,
         "aria-hidden": "true",
       });
     radii.forEach(([value, radius], index) => {
-      const x = 23 + index * 46,
-        label = svgNode("text", { x, y: height - 7, "text-anchor": "middle" });
-      label.textContent = `${countFormat.format(value / 1e3)}\u00a0k`;
+      const x = 36 + index * 72,
+        label = svgNode("text", { x, y: height - 5, "text-anchor": "middle" });
+      label.textContent = countFormat.format(value);
       svg.append(
-        svgNode("circle", { cx: x, cy: height - 20 - radius, r: radius }),
+        svgNode("circle", {
+          cx: x,
+          cy: sizeLegendBaseline - radius,
+          r: radius,
+        }),
+        svgNode("line", {
+          x1: x,
+          x2: x,
+          y1: sizeLegendBaseline + 4,
+          y2: sizeLegendBaseline + 12,
+        }),
         label,
       );
     });
@@ -239,9 +237,12 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     labelLayer.replaceChildren();
     const size = mapSize(),
       compact = size.width < 520;
-    const zoom = unitsPerPixel(homeView, size.width, size.height) / units;
+    const zoom =
+      unitsPerPixel(navigation.homeView, size.width, size.height) / units;
     const radius = (pole) => poleRadius(pole.emploi_2025, units);
-    const byCode = new Map(insights.poles.map((pole) => [pole.code, pole]));
+    const byCode = new Map(
+      insights.poles.filter(poleVisible).map((pole) => [pole.code, pole]),
+    );
     const labels = [];
     const paris = byCode.get("75056");
     if (paris)
@@ -287,7 +288,7 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
         });
         if (members.length === 1) named.add(members[0].code);
       }
-      for (const pole of insights.newPoles) {
+      for (const pole of insights.newPoles.filter(poleVisible)) {
         labels.push({
           id: pole.code,
           ...polePoint(pole),
@@ -302,7 +303,7 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     }
     if (zoom > (compact ? 2.4 : 1.7))
       for (const pole of insights.poles)
-        if (!named.has(pole.code))
+        if (poleVisible(pole) && !named.has(pole.code))
           labels.push({
             id: pole.code,
             ...polePoint(pole),
@@ -313,7 +314,7 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
             reach: 0,
           });
     const obstacles = insights.poles
-      .filter((pole) => pole.code !== "75056")
+      .filter((pole) => poleVisible(pole) && pole.code !== "75056")
       .map((pole) => {
         const { x, y } = polePoint(pole),
           r = radius(pole);
@@ -492,6 +493,7 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
           "fill-rule": "evenodd",
           "data-department": commune.code.slice(0, 2),
           "data-commune": commune.code,
+          "data-legend-key": densityKey(commune.densite_2025),
         }),
       );
     departmentLayer = svgNode("g", { class: "department-shapes" });
@@ -506,12 +508,16 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
       );
     const earlier = svgNode("path", {
       class: "rail-earlier",
+      "data-legend-key": "rail-earlier",
       d: data.lines
         .filter((line) => line.an <= BASE_YEAR)
         .map((line) => geometryPath(line.geometry))
         .join(" "),
     });
-    const recent = svgNode("g", { class: "rail-recent" });
+    const recent = svgNode("g", {
+      class: "rail-recent",
+      "data-legend-key": "rail-recent",
+    });
     for (const line of insights.recentLines) {
       const d = line.segments
         .map((segment) => geometryPath(segment.geometry))
@@ -540,6 +546,7 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
         tabindex: pole.rank === 1 ? 0 : -1,
         "data-department": pole.department,
         "data-commune": pole.code,
+        "data-legend-key": poleKey(pole),
         class: `pole-symbol${pole.isNew ? " new-pole" : ""}${pole.change < 0 ? " declining" : ""}${pole.code === "75056" ? " paris-pole" : ""}`,
       });
       circle.setAttribute(
@@ -565,10 +572,8 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     mapEngine = highmaps
       ? mountHighmaps(highmaps, frame, map, data)
       : undefined;
-    regionView = viewFromBounds(data.bounds, 6500);
-    homeView = { ...regionView };
     renderedUnits = undefined;
-    setView({ ...homeView });
+    navigation.initialize(data.bounds);
   }
   function focusPole(circle) {
     const pole = insights.poles.find(
@@ -579,20 +584,7 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
       node.setAttribute("tabindex", node === circle ? "0" : "-1");
     // A pointer already shows the tooltip where it is; only keyboard focus moves the map.
     if (circle.matches && !circle.matches(":focus-visible")) return;
-    const { x, y } = polePoint(pole),
-      size = mapSize(),
-      units = currentUnits();
-    if (
-      Math.abs(x - view.x - view.width / 2) > size.width * units * 0.42 ||
-      Math.abs(y - view.y - view.height / 2) > size.height * units * 0.42
-    ) {
-      view = constrainView(
-        { ...view, x: x - view.width / 2, y: y - view.height / 2 },
-        limits(),
-        size,
-      );
-      render();
-    }
+    if (navigation.reveal(polePoint(pole))) render();
     const box = circle.getBoundingClientRect();
     tooltipDepartment = data.departments.find(
       (item) => item.code === pole.department,
@@ -606,6 +598,11 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     mapEngine?.select(selected);
     for (const shape of departmentLayer.children)
       shape.classList.toggle("selected", shape.dataset.department === selected);
+    for (const shape of departmentLayer.children)
+      shape.style.stroke =
+        hiddenKeys.has("departments") && !shape.classList.contains("selected")
+          ? "none"
+          : "";
     for (const button of departmentButtons)
       button.setAttribute(
         "aria-pressed",
@@ -874,6 +871,19 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
         if (disposed) return;
       }
       createMap();
+      if (highmaps) {
+        legendEngine?.destroy();
+        legendEngine = undefined;
+        legendEngine = mountMapLegends(
+          highmaps,
+          {
+            density: element("density-legend"),
+            poles: element("pole-legend"),
+            network: element("network-legend"),
+          },
+          applyLegendVisibility,
+        );
+      }
       renderDepartments();
       renderPanel();
       status.hidden = true;
@@ -905,8 +915,7 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     if (restoreFocus) map.focus();
   });
   listen(map, "click", (event) => {
-    if (!data || dragging?.moved || performance.now() < suppressClickUntil)
-      return;
+    if (!data || navigation.suppressClick) return;
     const lines = describe(event.target);
     if (lines) showTooltip(lines, event.clientX, event.clientY);
     const code =
@@ -918,180 +927,16 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
           : code,
       );
   });
-  listen(map, "pointerdown", (event) => {
-    if (!view || event.button !== 0 || event.pointerType === "touch") return;
-    dragging = {
-      x: event.clientX,
-      y: event.clientY,
-      view: { ...view },
-      moved: false,
-    };
-  });
-  listen(map, "pointermove", (event) => {
-    if (!view || event.pointerType === "touch") return;
-    if (!dragging) {
-      if (event.target === hovered)
-        return showTooltip(undefined, event.clientX, event.clientY);
-      const lines = describe(event.target);
-      if (!lines) return hideTooltip();
-      hovered = event.target;
-      return showTooltip(lines, event.clientX, event.clientY);
-    }
-    const dx = event.clientX - dragging.x,
-      dy = event.clientY - dragging.y;
-    if (Math.hypot(dx, dy) < 5 && !dragging.moved) return;
-    if (!dragging.moved) {
-      map.setPointerCapture(event.pointerId);
-      hideTooltip();
-    }
-    dragging.moved = true;
-    map.classList.add("dragging");
-    const units = unitsPerPixel(
-      dragging.view,
-      mapSize().width,
-      mapSize().height,
-    );
-    setView({
-      ...dragging.view,
-      x: dragging.view.x - dx * units,
-      y: dragging.view.y - dy * units,
-    });
-  });
-  function endDrag() {
-    map.classList.remove("dragging");
-    // The click follows pointerup; retain its movement guard until after that event.
-    setTimeout(() => {
-      dragging = undefined;
-    }, 0);
-  }
-  listen(map, "pointerup", endDrag);
-  listen(map, "pointercancel", endDrag);
-  listen(map, "pointerleave", () => {
-    if (!dragging) hideTooltip();
-  });
-
-  // One finger scrolls the page; two fingers move and zoom the map.
-  function touchCentre(touches) {
-    const [a, b] = touches;
-    return {
-      x: (a.clientX + b.clientX) / 2,
-      y: (a.clientY + b.clientY) / 2,
-      distance: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1,
-    };
-  }
-  listen(
-    map,
-    "touchstart",
-    (event) => {
-      if (!view) return;
-      if (event.touches.length === 2) {
-        event.preventDefault();
-        const start = touchCentre(event.touches);
-        pinch = {
-          distance: start.distance,
-          units: currentUnits(),
-          anchor: toMap(start.x, start.y),
-        };
-        swipe = undefined;
-        hideTooltip();
-      } else if (event.touches.length === 1)
-        swipe = { x: event.touches[0].clientX, y: event.touches[0].clientY };
-    },
-    { passive: false },
-  );
-  listen(
-    map,
-    "touchmove",
-    (event) => {
-      if (pinch && event.touches.length === 2) {
-        event.preventDefault();
-        const now = touchCentre(event.touches),
-          bounds = limits(),
-          box = map.getBoundingClientRect();
-        const units = Math.min(
-          bounds.maxUnits,
-          Math.max(
-            bounds.minUnits,
-            (pinch.units * pinch.distance) / now.distance,
-          ),
-        );
-        const factor = units / currentUnits(),
-          width = view.width * factor,
-          height = view.height * factor;
-        setView({
-          x:
-            pinch.anchor.x -
-            (now.x - box.left - box.width / 2) * units -
-            width / 2,
-          y:
-            pinch.anchor.y -
-            (now.y - box.top - box.height / 2) * units -
-            height / 2,
-          width,
-          height,
-        });
-        suppressClickUntil = performance.now() + 350;
-      } else if (swipe && event.touches.length === 1) {
-        const dx = event.touches[0].clientX - swipe.x,
-          dy = event.touches[0].clientY - swipe.y;
-        if (Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-          showHint("Deux doigts pour déplacer la carte");
-          swipe = undefined;
-        }
-      }
-    },
-    { passive: false },
-  );
-  for (const name of ["touchend", "touchcancel"])
-    listen(map, name, (event) => {
-      if (event.touches.length < 2) pinch = undefined;
-      if (!event.touches.length) swipe = undefined;
-    });
-  listen(
-    map,
-    "wheel",
-    (event) => {
-      if (!view) return;
-      if (!event.ctrlKey && !event.metaKey) {
-        // Plain scrolling belongs to the page; the hint is shown twice at most.
-        if (wheelHints < 2 && performance.now() - lastWheelHint > 6000) {
-          wheelHints++;
-          lastWheelHint = performance.now();
-          showHint(
-            /Mac|iPhone|iPad/.test(globalThis.navigator?.platform ?? "")
-              ? "Maintenez ⌘ pour zoomer avec le défilement"
-              : "Maintenez Ctrl pour zoomer avec la molette",
-          );
-        }
-        return;
-      }
-      event.preventDefault();
-      setView(
-        zoomAt(
-          view,
-          Math.exp(Math.max(-0.35, Math.min(0.35, event.deltaY * 0.01))),
-          toMap(event.clientX, event.clientY),
-          limits(),
-          mapSize(),
-        ),
-      );
-    },
-    { passive: false },
-  );
   listen(map, "keydown", (event) => {
-    if (!view || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (!navigation.view || event.altKey || event.ctrlKey || event.metaKey)
+      return;
     const circle = event.target.closest?.(".pole-symbol");
-    const arrows = {
-      ArrowLeft: [-1, 0],
-      ArrowRight: [1, 0],
-      ArrowUp: [0, -1],
-      ArrowDown: [0, 1],
-    };
     if (circle) {
-      const index = insights.poles.findIndex(
+      const visiblePoles = insights.poles.filter(poleVisible);
+      const index = visiblePoles.findIndex(
           (pole) => pole.code === circle.dataset.commune,
         ),
-        last = insights.poles.length - 1;
+        last = visiblePoles.length - 1;
       const next = {
         ArrowRight: index + 1,
         ArrowDown: index + 1,
@@ -1103,34 +948,26 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
       if (next !== undefined) {
         event.preventDefault();
         return poleNodes
-          .get(insights.poles[Math.max(0, Math.min(last, next))].code)
+          .get(visiblePoles[Math.max(0, Math.min(last, next))].code)
           .focus();
       }
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        return selectDepartment(insights.poles[index].department);
+        return selectDepartment(visiblePoles[index].department);
       }
       if (event.key === "Escape") {
         hideTooltip();
         return map.focus();
       }
-    } else if (arrows[event.key]) {
-      event.preventDefault();
-      return pan(...arrows[event.key]);
     }
-    if (event.key === "+" || event.key === "=") zoomBy(0.75);
-    else if (event.key === "-" || event.key === "−") zoomBy(1 / 0.75);
-    else if (event.key === "0") setView({ ...homeView });
-    else if (event.key === "Escape") hideTooltip();
+    navigation.handleKeyDown(event);
+    if (event.key === "Escape") hideTooltip();
   });
   listen(map, "focus", () => {
-    if (view && map.matches?.(":focus-visible"))
+    if (navigation.view && map.matches?.(":focus-visible"))
       showHint(
         "Flèches pour déplacer, + et − pour zoomer, Tab pour parcourir les pôles",
       );
-  });
-  listen(window, "resize", () => {
-    if (view) setView(view);
   });
   // The tooltip is fixed to the window: it leaves with a tap elsewhere or a page scroll.
   listen(window, "scroll", hideTooltip, { passive: true });
@@ -1138,9 +975,9 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     if (!map.contains(event.target)) hideTooltip();
   });
   document.fonts?.ready.then(() => {
-    if (!disposed && view) {
+    if (!disposed && navigation.view) {
       renderedUnits = undefined;
-      setView(view);
+      setView(navigation.view);
     }
   });
   void load();
@@ -1165,11 +1002,12 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
     return flower;
   }
   function renderMapFlowers() {
-    if (!data || !view) return;
+    if (!data || !navigation.view) return;
     // Preserve focused SVG nodes while zooming or resizing.
     if (!flowerLayer) {
       flowerLayer = svgNode("g", {
         class: "prototype-flowers",
+        "data-legend-key": "flowers",
         tabindex: -1,
         "aria-label": "Indicateurs des huit départements",
       });
@@ -1225,6 +1063,7 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
       });
     }
     const offsets = { 75: [0, -20], 92: [-39, 8], 93: [28, -32], 94: [37, 18] };
+    flowerLayer.style.display = hiddenKeys.has("flowers") ? "none" : "";
     for (const group of flowerLayer.children) {
       const department = data.departments.find(
         (item) => item.code === group.dataset.department,
@@ -1275,7 +1114,9 @@ export function initializeReference(root, sourceData, { loadHighmaps } = {}) {
   return () => {
     disposed = true;
     mapEngine?.destroy();
+    legendEngine?.destroy();
     lifecycle.abort();
+    navigation.destroy();
     clearTimeout(hintTimer);
     hideTooltip();
   };

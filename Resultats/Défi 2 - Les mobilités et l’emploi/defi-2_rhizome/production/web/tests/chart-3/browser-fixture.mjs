@@ -9,33 +9,44 @@ const base = new URL("../../app/(chart-3)/charts/chart-3/", import.meta.url);
 export async function browserFixture() {
   const read = (name) => readFile(new URL(name, base), "utf8");
   const modules = await Promise.all(
-    ["geometry", "flowers", "highmaps-adapter", "reference-engine"].map(
-      async (name) => {
-        let source = await read(`lib/${name}.mjs`);
-        const parsed = ts.createSourceFile(
-          `${name}.mjs`,
-          source,
-          ts.ScriptTarget.Latest,
-        );
-        const removals = parsed.statements.flatMap((statement) => {
-          if (ts.isImportDeclaration(statement)) {
-            return [statement];
-          }
-          return (ts.getModifiers(statement) ?? []).filter(
-            (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
-          );
-        });
-        // Remove from the end so every parsed position stays valid.
-        for (const node of removals.reverse()) {
-          source =
-            source.slice(0, node.getStart(parsed)) + source.slice(node.end);
+    [
+      "geometry",
+      "flowers",
+      "highmaps-adapter",
+      "map-navigation",
+      "reference-engine",
+    ].map(async (name) => {
+      let source = await read(`lib/${name}.mjs`);
+      const parsed = ts.createSourceFile(
+        `${name}.mjs`,
+        source,
+        ts.ScriptTarget.Latest,
+      );
+      const removals = parsed.statements.flatMap((statement) => {
+        if (ts.isImportDeclaration(statement)) {
+          return [statement];
         }
-        return source;
-      },
-    ),
+        return (ts.getModifiers(statement) ?? []).filter(
+          (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+        );
+      });
+      // Remove from the end so every parsed position stays valid.
+      for (const node of removals.reverse()) {
+        source =
+          source.slice(0, node.getStart(parsed)) + source.slice(node.end);
+      }
+      return source;
+    }),
   );
   const highmaps = await readFile(
     new URL("../../node_modules/highcharts/highmaps.js", import.meta.url),
+    "utf8",
+  );
+  const accessibility = await readFile(
+    new URL(
+      "../../node_modules/highcharts/modules/accessibility.js",
+      import.meta.url,
+    ),
     "utf8",
   );
   const sharedStyles = await readFile(
@@ -46,7 +57,7 @@ export async function browserFixture() {
     /^@import\s+["'][^"']*sources\.css["'];\s*/,
     "",
   );
-  return `<!doctype html><meta charset="utf-8"><style>${sharedStyles}\n${styles}</style><div class="chart-frame"><div class="chart-three" id="root" data-chart-prefix="g3-">${chartMarkup(referenceMarkup, "g3-")}</div></div><script>${highmaps}</script><script>${modules.join("\n")}\nwindow.cleanup=initializeReference(document.querySelector('#root'),${await readFile(new URL("../../public/data/employment-centers-departments.json", import.meta.url), "utf8")},{loadHighmaps:async()=>Highcharts});</script>`;
+  return `<!doctype html><meta charset="utf-8"><style>${sharedStyles}\n${styles}</style><div class="chart-frame"><div class="chart-three" id="root" data-chart-prefix="g3-">${chartMarkup(referenceMarkup, "g3-")}</div></div><script>${highmaps}</script><script>${accessibility}</script><script>${modules.join("\n")}\nwindow.cleanup=initializeReference(document.querySelector('#root'),${await readFile(new URL("../../public/data/employment-centers-departments.json", import.meta.url), "utf8")},{loadHighmaps:async()=>Highcharts});</script>`;
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const destination = new URL(

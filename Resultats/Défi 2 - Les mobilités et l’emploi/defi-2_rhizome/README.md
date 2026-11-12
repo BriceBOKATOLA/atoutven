@@ -1,51 +1,48 @@
-# Eclowork
+# EcloWork
 
 **Équipe :** Rhizome (équipe 16).  
 **Membres :** Aurélie Auzas, Amar Tamourt, Michel Huang, Elodie Thiébault et Loane Cotellon.
 
 **Défi :** 2, les mobilités et l’emploi.  
-**Contact :** Aurélie Auzas — adresse e-mail à compléter plus tard.
+**Contact :** Aurélie Auzas
 
 **Site :** [EcloWork — site interactif](https://dataviz-rhizome-liard.vercel.app/).
 
-**En local :** [http://localhost:3000](http://localhost:3000), après compilation et démarrage du serveur selon les [instructions du site](production/web/README.md#vérification-et-export-statique).
-
-## Par où commencer
-
-1. Consultez le [cadrage du projet](projet.md).
-2. Retrouvez les sources et leurs conditions d'utilisation dans [donnees.md](donnees.md).
-3. Explorez les cartes et leur documentation dans [production/](production/README.md).
-
-Ce dossier est placé dans le répertoire du défi 2. Il contient ce README et `production/`, comme demandé dans les [instructions de dépôt](../../README.md).
+**En local :** [http://localhost:3000](http://localhost:3000), après démarrage selon les [instructions du site](production/web/README.md#démarrer-le-site).
 
 ## Notre question
 
-Comment l'évolution des transports franciliens se situe-t-elle par rapport à celle de l'emploi entre 2015 et 2025 ? La présentation propose aussi d'examiner les zones qui gagnent en accessibilité et celles qui restent à l'écart. Les données présentées ne mesurent pas directement l'accessibilité et ne permettent pas d'attribuer une évolution de l'emploi au développement des transports.
+Quel a été l’impact du développement du réseau de transport sur l’emploi ces dix dernières années ? La présentation propose aussi d'examiner les zones qui gagnent en accessibilité et celles qui restent à l'écart. Les données présentées ne mesurent pas directement l'accessibilité et ne permettent pas d'attribuer une évolution de l'emploi au développement des transports.
 
 ## Notre visualisation
 
-Les livrables sont les trois graphiques du [site web](production/web/README.md) : le réseau ferré, les demandeurs d'emploi par zone d'emploi et les pôles d'emploi par département. Le graphique 1 dispose aussi d'un export statique PNG et PDF, généré par un [script Python](production/docs/execution.md#générer-la-version-statique-du-graphique-1). Les visualisations décrivent des évolutions sans établir de relation causale.
+Le [site interactif](https://dataviz-rhizome-liard.vercel.app/) présente trois cartes : le réseau ferré, les demandeurs d'emploi par zone d'emploi et les pôles d'emploi par département. La carte du réseau existe aussi en [PNG](pitch/png/01_reseau_transport_extens.png) et en [PDF](pitch/PDF/01_reseau_transport_extens.pdf). Le [support de présentation](pitch/EcloWork.pdf) accompagne le projet.
+
+Le récit s'adresse au public du Hackaviz et aux personnes intéressées par les mobilités et l'emploi en Île-de-France. Selon les données disponibles, les comparaisons portent sur 2015–2025 pour le réseau et l'emploi privé, 2016–2024 pour les demandeurs d'emploi, et 2017–2023 pour l'emploi total.
 
 ## Les données utilisées
 
-Les [sources et leurs conditions d’utilisation](donnees.md) sont répertoriées avec leurs fichiers locaux. Le [catalogue des fichiers](production/docs/catalogue_fichiers.md) décrit leurs champs et leurs limites.
+Les [données utilisées](donnees.md) présentent les sources, les périodes, les limites et les conditions de réutilisation.
 
 ## Les outils employés
 
-Les cartes utilisent Python, GeoPandas, pandas, NumPy, Matplotlib, SciPy et adjustText. Des projets cartographiques sont également fournis pour QGIS. Le script de création des projets utilise PyQGIS.
+- **Site web :** JavaScript, TypeScript, React, Next.js et CSS. Highcharts Maps affiche les cartes interactives.
+- **Développement et qualité :** Node.js et npm pour le site, `node:test` et `unittest` pour les tests, TypeScript pour la vérification des types, ESLint et Prettier pour le code.
+- **Données et planches :** Python, GeoPandas, pandas, NumPy, SciPy et openpyxl pour préparer les données ; Matplotlib et adjustText pour produire les figures.
+- **Cartographie :** QGIS pour consulter les projets cartographiques et PyQGIS pour les reconstruire.
 
 ## Difficultés et suite du projet
 
-L'emploi Urssaf concerne les salariés du secteur privé. Les autres indicateurs couvrent des populations et des périodes différentes. La présence d'une gare dans une commune ne mesure pas l'accès réel à l'emploi. Certaines étapes de préparation des données ne sont pas disponibles. Les [limites des sources](production/docs/visualisation.md#méthode-et-limites) et les [étapes manquantes pour la reproduction](production/docs/execution.md#ce-qui-manque-pour-une-reproduction-complète) précisent ces points.
+La mise en route a pris du temps. Il a fallu trouver des moments d'échange communs et une approche qui convienne au groupe. La coordination à distance était également difficile, car les membres de l'équipe ne se connaissaient pas. L'équipe a commencé à cinq et terminé le projet à quatre.
+
+La recherche de données cohérentes et lissées pour l'angle choisi a aussi été difficile. Les années, les trimestres et les zones disponibles ne coïncidaient pas toujours entre les sources.
+
+Pour prolonger le projet, des données de déplacements domicile-travail et de temps de trajet pourraient aider à mesurer l'accès aux pôles d'emploi. Des indicateurs plus complets permettraient aussi d'affiner les comparaisons entre territoires. Ces pistes ne suffiraient pas, à elles seules, à établir une relation causale.
 
 ## Installation et utilisation
 
-Les [instructions d'exécution](production/docs/execution.md) décrivent l'installation des dépendances et la génération des cartes. Les [fichiers de production](production/README.md) donnent accès aux exports, aux données et aux scripts.
+Les [instructions d'installation et d'exécution](production/web/README.md) décrivent le lancement du site, la préparation des données et la génération de la carte statique.
 
 ## Licences
 
-Le code et la documentation du projet utilisent la [licence MIT](LICENSE), reprise du dépôt Hackaviz 2026. Les licences des données et des éléments réutilisés restent à vérifier et à documenter avant publication.
-
-## Site interactif
-
-Le [site web](production/web/README.md) présente le récit et trois cartes interactives. Ses [spécifications](production/web/docs/specifications.md) et son [catalogue de données](production/web/docs/donnees.md) précisent les indicateurs, leurs sources et les limites de reproduction.
+Le code et la documentation du projet utilisent la [licence MIT](LICENSE), reprise du dépôt Hackaviz 2026. Les [conditions des données et des dépendances](donnees.md#conditions-de-réutilisation) sont distinctes de cette licence.

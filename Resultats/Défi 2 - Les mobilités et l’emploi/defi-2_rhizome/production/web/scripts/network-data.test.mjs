@@ -88,8 +88,16 @@ async function renderMap() {
     module: { type: "commonjs" },
   });
   const exports = {};
+  const require = createRequire(filename);
   runInThisContext(`(function(require, exports) { ${code} })`)(
-    createRequire(filename),
+    (specifier) =>
+      specifier === "../lib/highmaps"
+        ? {
+            loadVendors: () => {
+              throw new Error("Highmaps must not load during SSR");
+            },
+          }
+        : require(specifier),
     exports,
   );
   return renderToStaticMarkup(createElement(exports.NetworkMap));

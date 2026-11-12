@@ -155,7 +155,7 @@ test("migrated maps contain no public vendor copies or script references", async
   }
   for (const file of [
     "../app/(chart-2)/charts/chart-2/Explorer.tsx",
-    "../app/(chart-2)/charts/chart-2/lib/vendors.ts",
+    "../lib/highmaps.ts",
     "../app/(chart-3)/charts/chart-3/explorer.js",
   ]) {
     const source = await readFile(new URL(file, import.meta.url), "utf8");

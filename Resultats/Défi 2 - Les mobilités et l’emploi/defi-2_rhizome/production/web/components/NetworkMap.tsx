@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type Highcharts from "highcharts/highmaps";
+import { loadVendors } from "../lib/highmaps";
+import { bindMapNavigation } from "../lib/map-navigation.mjs";
 
 type MapPath = { name: string; path: string };
 type MapPoint = {
@@ -122,7 +124,41 @@ function createOptions(data: NetworkData): Highcharts.Options {
     },
     title: { text: undefined },
     credits: { enabled: true, style: { fontSize: "12px", color: "#526071" } },
-    legend: { enabled: false },
+    legend: {
+      enabled: true,
+      align: "center",
+      verticalAlign: "bottom",
+      layout: "vertical",
+      width: "90%",
+      padding: 12,
+      margin: 24,
+      symbolWidth: 36,
+      symbolPadding: 12,
+      itemMarginTop: 6,
+      itemMarginBottom: 6,
+      events: {
+        itemClick(event) {
+          const series = event.legendItem;
+          if ("linkedParent" in series && series.linkedParent) {
+            // A station legend item controls its whole opening period too.
+            event.preventDefault();
+            series.linkedParent.setVisible();
+          }
+        },
+      },
+      title: {
+        text: "Périodes et repères",
+        style: { color: "#0E1B2C", fontSize: "14px", fontWeight: "bold" },
+      },
+      itemStyle: {
+        color: "#344052",
+        fontSize: "14px",
+        fontWeight: "normal",
+        textOverflow: undefined,
+      },
+      itemHoverStyle: { color: "#0E1B2C" },
+      itemHiddenStyle: { color: "#526071", textDecoration: "line-through" },
+    },
     mapView: { padding: 0 },
     mapNavigation: {
       enabled: true,
@@ -152,26 +188,52 @@ function createOptions(data: NetworkData): Highcharts.Options {
     series: [
       mapLayer("Communes", data.communes, "#E3E4DF", "#FFFFFF", 0.35),
       mapLayer("Paris", data.paris, "#D4D9D4", "#FFFFFF", 0.35),
-      lineLayer("Limites départementales", data.departments, "#D9739F", 0.8),
-      lineLayer("Réseau existant avant 2015", data.existing, "#8B929B", 1),
-      ...data.periods.flatMap((period, index) => [
-        lineLayer(`Contour ${period.name}`, period.tracks, "#FFFFFF", 5),
-        lineLayer(
-          `Ouvertures ${period.name}`,
-          period.tracks,
-          period.color,
-          2.6,
-          true,
-          periodDashes[index],
-        ),
-      ]),
+      {
+        ...lineLayer("Limite départementale", data.departments, "#D9739F", 0.8),
+        showInLegend: true,
+        legendIndex: 7,
+      },
+      {
+        ...lineLayer("Réseau existant avant 2015", data.existing, "#8B929B", 1),
+        showInLegend: true,
+        legendIndex: 6,
+      },
+      ...data.periods.flatMap((period, index) => {
+        const openings: Highcharts.SeriesMaplineOptions = {
+          ...lineLayer(
+            `${period.name} : ${period.openings
+              .map((opening) => `${opening.line} (${opening.year})`)
+              .join(", ")}`,
+            period.tracks,
+            period.color,
+            2.6,
+            true,
+            periodDashes[index],
+          ),
+          id: `network-period-${index}`,
+          showInLegend: true,
+          legendIndex: index * 2,
+        };
+        return [
+          {
+            ...lineLayer(`Contour ${period.name}`, period.tracks, "#FFFFFF", 5),
+            linkedTo: openings.id,
+          },
+          openings,
+        ];
+      }),
       ...data.periods.map(
-        (period, index): Highcharts.SeriesMappointOptions => ({
+        (
+          period,
+          index,
+        ): Highcharts.SeriesMappointOptions & { linkedTo: string } => ({
           type: "mappoint",
           name: `Gares ouvertes en ${period.name}`,
+          linkedTo: `network-period-${index}`,
           data: period.stations,
           color: period.color,
-          showInLegend: false,
+          showInLegend: true,
+          legendIndex: index * 2 + 1,
           marker: {
             radius: 2.8,
             lineWidth: 1.4,
@@ -253,6 +315,7 @@ export function NetworkMap() {
   useEffect(() => {
     let disposed = false;
     const controller = new AbortController();
+    let disposeNavigation: (() => void) | undefined;
     async function initialize() {
       try {
         const [network, highchartsModule] = await Promise.all([
@@ -264,13 +327,16 @@ export function NetworkMap() {
               return network;
             },
           ),
-          import("highcharts/highmaps"),
+          loadVendors(),
         ]);
-        await import("highcharts/modules/accessibility");
         if (disposed || !container.current) return;
-        chart.current = highchartsModule.default.mapChart(
+        chart.current = highchartsModule.mapChart(
           container.current,
           createOptions(network),
+        );
+        disposeNavigation = bindMapNavigation(
+          container.current.parentElement!,
+          chart.current,
         );
         setState("ready");
       } catch {
@@ -281,6 +347,7 @@ export function NetworkMap() {
     return () => {
       disposed = true;
       controller.abort();
+      disposeNavigation?.();
       chart.current?.destroy();
       chart.current = null;
     };
@@ -367,52 +434,6 @@ export function NetworkMap() {
                 où se concentrent les emplois.
               </p>
             </aside>
-            <section
-              className="network-map-legend"
-              aria-label="Légende de la carte"
-            >
-              <div>
-                <h4>Ouvertures par période</h4>
-                <ul className="network-periods">
-                  {data.periods.map((period, index) => (
-                    <li key={period.name}>
-                      <span
-                        className={`network-period-symbol network-period-symbol-${index}`}
-                        style={{ borderColor: period.color }}
-                        aria-hidden="true"
-                      />
-                      <div>
-                        <strong>{period.name}</strong>
-                        <p>
-                          {period.openings
-                            .map(
-                              (opening) => `${opening.line} (${opening.year})`,
-                            )
-                            .join(", ")}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4>Lecture</h4>
-                <ul className="network-symbols">
-                  <li>
-                    <span className="key-existing" aria-hidden="true" />
-                    Réseau existant avant 2015
-                  </li>
-                  <li>
-                    <span className="key-station" aria-hidden="true" />
-                    Gare ouverte : forme et couleur selon la période
-                  </li>
-                  <li>
-                    <span className="key-department" aria-hidden="true" />
-                    Limite départementale
-                  </li>
-                </ul>
-              </div>
-            </section>
           </>
         )}
       </div>
@@ -422,6 +443,11 @@ export function NetworkMap() {
         aria-labelledby="network-sources-title"
       >
         <h4 id="network-sources-title">Sources et notes</h4>
+        <p>
+          <a href="/data/LICENCES.txt">
+            Conditions de réutilisation des données
+          </a>
+        </p>
         <div className="sources-grid">
           <div className="source-group">
             <p>
@@ -433,7 +459,11 @@ export function NetworkMap() {
               <a href="https://data.iledefrance-mobilites.fr/explore/dataset/emplacement-des-gares-idf/">
                 gares par ligne
               </a>
-              , consultés le 08/11/2026.
+              . Données sous{" "}
+              <a href="https://github.com/etalab/licence-ouverte/blob/master/LO.md">
+                Licence Ouverte 2.0
+              </a>
+              .
             </p>
             <p>
               <strong>Fonds de carte.</strong> La documentation de l’équipe cite{" "}
@@ -442,7 +472,8 @@ export function NetworkMap() {
               </a>{" "}
               (tracés IGN Admin Express COG et codes Insee, édition 2018).
               L’extraction et les transformations initiales des copies locales
-              ne sont pas documentées.
+              ne sont pas documentées. La provenance et la licence des copies
+              locales restent à confirmer.
             </p>
           </div>
           <div className="source-group">

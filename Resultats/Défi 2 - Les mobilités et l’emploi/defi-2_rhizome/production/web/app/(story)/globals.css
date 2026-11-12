@@ -597,7 +597,7 @@ html {
   }
   .network-map-canvas {
     width: 100%;
-    height: clamp(420px, 64vh, 720px);
+    height: clamp(720px, 90vh, 900px);
     border: 0.5px solid var(--network-line);
     background: var(--network-map-ground);
   }
@@ -646,88 +646,6 @@ html {
     color: var(--network-text);
     font-size: 14px;
     line-height: 1.5;
-  }
-  .network-map-legend {
-    grid-column: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-    gap: 24px;
-    padding: 14px 0 24px;
-    border-bottom: 0.5px solid var(--network-line);
-  }
-  .network-map-legend h4 {
-    color: var(--network-ink);
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 600;
-    margin: 0 0 10px;
-  }
-  .network-periods {
-    display: grid;
-    gap: 14px;
-  }
-  .network-periods,
-  .network-symbols {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .network-periods li {
-    display: grid;
-    grid-template-columns: 22px minmax(0, 1fr);
-    gap: 8px;
-  }
-  .network-period-symbol {
-    display: block;
-    width: 10px;
-    height: 10px;
-    margin: 5px auto 0;
-    border: 2px solid;
-    background: var(--network-surface);
-  }
-  .network-period-symbol-0 {
-    border-radius: 50%;
-  }
-  .network-period-symbol-2 {
-    transform: rotate(45deg);
-  }
-  .network-periods strong {
-    font-size: 14px;
-    font-weight: 600;
-  }
-  .network-periods p {
-    font-size: 14px;
-    line-height: 1.5;
-    color: var(--network-muted);
-    margin-top: 2px;
-  }
-  .network-symbols {
-    display: grid;
-    gap: 8px;
-  }
-  .network-symbols li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  .network-symbols li > span {
-    flex: 0 0 22px;
-  }
-  .key-existing {
-    border-top: 1px solid #8b929b;
-  }
-  .key-department {
-    border-top: 1px solid #d9739f;
-  }
-  .network-symbols .key-station {
-    flex-basis: 8px;
-    width: 8px;
-    height: 8px;
-    border: 1.5px solid var(--network-ink);
-    border-radius: 50%;
-    margin-inline: 7px;
   }
   .network-key-note {
     font-size: 14px;
@@ -807,9 +725,6 @@ html {
       grid-template-columns: 1fr;
       gap: 8px;
     }
-    .network-map-legend {
-      grid-template-columns: 1fr;
-    }
   }
   @media (max-width: 800px) {
     .network-atlas {
@@ -821,9 +736,6 @@ html {
     }
     .network-map-stats {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    .network-map-legend {
-      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
     }
   }
   @media (max-width: 600px) {
@@ -838,7 +750,7 @@ html {
       font-size: 28px;
     }
     .network-map-canvas {
-      height: clamp(320px, 100vw, 460px);
+      height: 820px;
     }
     .network-map-area:has(.network-map-pending) {
       min-height: 320px;
@@ -846,10 +758,6 @@ html {
     }
     .network-map-key {
       padding: 16px;
-    }
-    .network-map-legend {
-      grid-template-columns: 1fr;
-      gap: 24px;
     }
     .network-map-stats {
       grid-template-columns: 1fr;
@@ -866,4 +774,9 @@ html {
     visibility: hidden;
     pointer-events: none;
   }
+}
+
+.network-map-area:focus-visible {
+  outline: 3px solid var(--network-ink, #0e1b2c);
+  outline-offset: -3px;
 }

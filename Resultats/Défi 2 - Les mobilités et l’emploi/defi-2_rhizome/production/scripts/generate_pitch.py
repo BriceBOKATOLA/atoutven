@@ -22,7 +22,7 @@ def main():
         if result.returncode:
             print(f"Échec de {script} (code {result.returncode}).", file=sys.stderr)
             return result.returncode
-    print("Les cinq planches sont disponibles dans production/pitch/.")
+    print("Les cinq planches sont disponibles dans pitch/.")
     return 0
 
 

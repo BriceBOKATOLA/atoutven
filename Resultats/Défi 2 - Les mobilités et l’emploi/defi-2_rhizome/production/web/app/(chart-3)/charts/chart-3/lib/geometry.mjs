@@ -3,12 +3,33 @@ export const POLE_THRESHOLD = 10000;
 export const BASE_YEAR = 2015;
 export const OUTER_RING = ["77", "78", "91", "95"];
 
+export const DENSITY_CLASSES = [
+  { from: 0, name: "< 100", color: "#F1EFEA" },
+  { from: 100, name: "100 à moins de 500", color: "#DCE3EC" },
+  { from: 500, name: "500 à moins de 2 000", color: "#B3C3D9" },
+  { from: 2000, name: "≥ 2 000", color: "#7F9BC2" },
+];
+export const MISSING_DENSITY_COLOR = "#ffffff";
+export function densityKey(value) {
+  if (value === null || !Number.isFinite(value)) return "density-missing";
+  for (let index = DENSITY_CLASSES.length - 1; index > 0; index--)
+    if (value >= DENSITY_CLASSES[index].from) return `density-${index}`;
+  return "density-0";
+}
+export function poleKey(pole) {
+  return pole.isNew
+    ? "poles-new"
+    : pole.change < 0
+      ? "poles-declining"
+      : "poles-growing";
+}
 export function densityColor(value) {
-  if (value === null || !Number.isFinite(value)) return "#ffffff";
-  if (value < 100) return "#F1EFEA";
-  if (value < 500) return "#DCE3EC";
-  if (value < 2000) return "#B3C3D9";
-  return "#7F9BC2";
+  if (value === null || !Number.isFinite(value)) return MISSING_DENSITY_COLOR;
+  for (let index = DENSITY_CLASSES.length - 1; index > 0; index--) {
+    if (value >= DENSITY_CLASSES[index].from)
+      return DENSITY_CLASSES[index].color;
+  }
+  return DENSITY_CLASSES[0].color;
 }
 // The petal shape grows in both directions, so its area is proportional to the value.
 export function petalLength(value, maximum, size = 40) {

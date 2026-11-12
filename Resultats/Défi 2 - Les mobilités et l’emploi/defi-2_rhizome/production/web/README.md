@@ -1,74 +1,82 @@
-# EcloWork — interface du récit
+# EcloWork : installation et utilisation
 
-Application de storytelling en français pour le projet de l’équipe Rhizome. Les livrables sont les trois graphiques intégrés au récit. Le graphique 1 possède aussi une [version statique générée par Python](../docs/execution.md#générer-la-version-statique-du-graphique-1). Next.js, TypeScript et CSS natif. Aucun backend et aucun service externe ne sont nécessaires.
+EcloWork est un site statique Next.js. Il utilise trois fichiers JSON locaux pour afficher les cartes. Consultez le [README du projet](../../README.md) pour les livrables et la [notice des données](../../donnees.md) pour les sources et leurs conditions.
 
-## Démarrage
+## Démarrer le site
 
-Prérequis pour le développement, les tests et l’export : Node.js 22.18 ou plus récent dans la branche 22, ou Node.js 24 ou plus récent, et npm. Le contrat `engines.node` est `^22.18.0 || >=24.0.0`. Depuis la racine du projet :
+Installez Node.js 22.18 ou une version ultérieure de la branche 22, ou Node.js 24 ou une version ultérieure. Depuis `defi-2_rhizome` :
 
 ```sh
 cd production/web
-npm install
+npm ci
 npm run dev
 ```
 
-Ouvrir http://localhost:3000.
+Ouvrez [http://localhost:3000](http://localhost:3000). Le récit et les liens restent lisibles sans JavaScript ; les cartes nécessitent JavaScript.
 
-## Vérification et export statique
+## Vérifier et exporter le site
 
-Installez les dépendances verrouillées depuis `production/web` :
-
-```sh
-npm ci
-```
-
-Lancez les vérifications :
+Depuis `production/web` :
 
 ```sh
 npm run lint
 npm run format:check
-```
-
-ESLint recherche les problèmes de code avec les règles Next.js, React et TypeScript. Prettier vérifie le format des fichiers.
-
-Pour appliquer les corrections automatiques, utiliser `npm run lint:fix`. Pour reformater les fichiers, utiliser `npm run format`. Ces commandes modifient les fichiers. Vérifier les différences avant de les conserver. Pour limiter le formatage à un fichier, utiliser par exemple `npm exec -- prettier --write components/Brand.tsx`.
-
-Les configurations suivent les [instructions ESLint de Next.js](https://nextjs.org/docs/app/api-reference/config/eslint) et les [instructions d'installation de Prettier](https://prettier.io/docs/install). Elles excluent uniquement les fichiers générés. Aucun formatage global n'a été appliqué lors de leur ajout.
-
-```sh
 npm run typecheck
+node --test "tests/*.test.mjs" "tests/chart-2/*.test.mjs" "tests/chart-3/*.test.mjs" "scripts/*.test.mjs" "app/(chart-3)/charts/chart-3/lib/*.test.mjs"
 npm run build
 ```
 
-Lancer les tests Node.js :
-
-```sh
-node --test "tests/*.test.mjs" "tests/chart-2/*.test.mjs" "tests/chart-3/*.test.mjs" "scripts/*.test.mjs" "app/(chart-3)/charts/chart-3/lib/*.test.mjs"
-```
-
-L’export statique est produit dans `out/`. Pour le consulter localement :
+L'export statique est créé dans `out/`. Pour le consulter, lancez un serveur depuis `production/web` :
 
 ```sh
 python3 -m http.server 3000 --directory out
 ```
 
-Ouvrir [http://localhost:3000](http://localhost:3000) pour consulter la version compilée. Le serveur doit rester en cours d’exécution pendant la consultation.
+Ouvrez ensuite [http://localhost:3000](http://localhost:3000). L'export doit être servi à la racine d'un site : les fichiers de données utilisent le chemin `/data/`.
 
-`next start` ne sert pas l’export statique ; utiliser le serveur de fichiers ci-dessus ou un hébergement statique.
+## Préparer les données et la carte statique
 
-## Structure
+Les scripts Python utilisent les fichiers préparés de `production/datasets/`. Depuis `defi-2_rhizome`, installez les dépendances :
 
-- `app/(story)/page.tsx` : récit et textes de contexte, fondés sur `../docs/visualisation.md`.
-- `app/(story)/globals.css` : palette, typographie système, styles responsives, focus et mouvement réduit.
-- `components/NetworkMap.tsx` et `public/data/rail-network.json` : carte interactive du réseau et données utilisées pour sa légende et ses chiffres clés.
-- `app/(chart-2)` et `app/(chart-3)` : sources des deux visualisations, intégrées directement au récit. Les données des graphiques 2 et 3 sont respectivement dans `public/data/jobseekers-employment-zones.json` et `public/data/employment-centers-departments.json`. Les graphiques utilisent les polices système et la dépendance npm Highcharts. Leurs styles utilisent `@scope` et les requêtes de conteneur CSS ; un navigateur moderne compatible est nécessaire.
-- `components/StoryNavigation.tsx` : ancres natives et indication du chapitre en cours. Le récit et la navigation restent lisibles sans JavaScript.
-- `components/Brand.tsx` : mot-symbole typographique et éléments de marque.
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r production/requirements.txt
+```
 
-Les [spécifications du site](docs/specifications.md) décrivent les vues et leurs limites. Le [catalogue des données web](docs/donnees.md) distingue les instantanés utilisés des sources nécessaires à leur reproduction.
+Sur Windows, utilisez `.venv\Scripts\python.exe`. Les dépendances Python ne sont pas figées.
 
-Les contenus restent descriptifs. La desserte d’une commune ne mesure pas un trajet réel et ne prouve pas l’effet d’une ouverture sur l’emploi. Les champs, périodes et précautions de chaque indicateur doivent rester visibles lors de l’intégration.
+Pour régénérer les données du site, exécutez les trois scripts suivants. **Ils remplacent les fichiers JSON existants** dans `production/web/public/data/` :
 
-## Direction visuelle
+```sh
+.venv/bin/python production/scripts/export-network.py
+.venv/bin/python production/scripts/export-jobseekers.py
+.venv/bin/python production/scripts/export-employment-centers.py
+```
 
-Palette du support : bleu sourd, rose pâle, fond blanc cassé, prune et vert clair. Le motif de lignes et de stations évoque les transports sans représenter de données géographiques. Les polices système évitent tout chargement distant.
+Chaque script accepte `--output` pour écrire ailleurs. La préparation initiale de certaines entrées n'est pas disponible ; le [catalogue des données](../../docs/catalogue_fichiers.md) décrit les entrées utilisées et les limites.
+
+Pour générer la carte statique du réseau :
+
+```sh
+.venv/bin/python production/scripts/01_transport_extensions.py
+```
+
+Le script lit `rail-network.json` et remplace les fichiers de `pitch/png/` et `pitch/PDF/`. Pour conserver les livrables existants, ajoutez par exemple `--output-dir /tmp/eclowork-reseau`. Le rendu utilise Arial, Liberation Sans ou DejaVu Sans selon les polices disponibles ; le titre privilégie Arial Narrow.
+
+Les tests Python s'exécutent depuis la racine du projet :
+
+```sh
+.venv/bin/python -m unittest discover -s production/tests -v
+```
+
+Les scripts `build_line_groups.py`, `build_territories.py`, `rebuild_workbook_indicators.py`, `build_defm.py` et `build_defm_series.py` reconstruisent une partie des données préparées. Utilisez leur option `--help` pour les entrées et les destinations disponibles. Le script `generate_pitch.py` régénère les cinq planches, y compris les travaux antérieurs, et remplace les fichiers de même nom dans `pitch/`.
+
+Les projets QGIS sont dans `production/datasets/clean/`. Leur reconstruction par `build_qgis_projects.py` nécessite PyQGIS et remplace les projets existants.
+
+## Fichiers du site
+
+- `app/(story)/` contient le récit. `components/NetworkMap.tsx` affiche la carte du réseau.
+- `app/(chart-2)/` et `app/(chart-3)/` contiennent les cartes des demandeurs et des pôles d'emploi.
+- `public/data/` contient les trois instantanés et leur notice de licence.
+
+Les cartes permettent de masquer des couches, de zoomer et de se déplacer à la souris ou au clavier. Sur écran tactile, deux doigts déplacent ou agrandissent la carte. Les logos du pied de page proviennent des dépôts [Île-de-France Mobilités](https://github.com/IleDeFranceMobilites/hackathon_ia_mobilites_2024/blob/4d96130f4f085dbb07e2f0655d3d58d2418f6580/resultats/repositories/equipe_07_tranquiliscore/tranquili-score-main/Documents/t-app-js/ressources/IdFMobilit%C3%A9s.svg.png) et [Datactivist](https://github.com/datactivist/slides_datactivist/blob/master/inst/rmarkdown/templates/xaringan/resources/img/logo.png).

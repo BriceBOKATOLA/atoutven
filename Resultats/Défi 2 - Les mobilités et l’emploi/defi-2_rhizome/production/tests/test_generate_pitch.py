@@ -17,19 +17,17 @@ OUTPUTS = {
 
 class GeneratePitchTest(unittest.TestCase):
     def test_generates_all_exports_and_stops_on_failure(self):
-        with tempfile.TemporaryDirectory() as temp:
+        with tempfile.TemporaryDirectory(dir="/tmp") as temp:
             root = Path(temp)
-            scripts = root / "scripts"
-            scripts.mkdir()
+            scripts = root / "production" / "scripts"
+            scripts.mkdir(parents=True)
             (scripts / "generate_pitch.py").write_text((SCRIPTS / "generate_pitch.py").read_text(encoding="utf-8"), encoding="utf-8")
+            (scripts / "export_paths.py").write_text((SCRIPTS / "export_paths.py").read_text(encoding="utf-8"), encoding="utf-8")
             for name, (_, target) in OUTPUTS.items():
                 (scripts / name).write_text(
-                    "from pathlib import Path\n"
-                    "root = Path(__file__).resolve().parent.parent / 'pitch'\n"
-                    "for ext, folder in (('png', 'png'), ('pdf', 'PDF')):\n"
-                    "    dest = root / folder\n"
-                    "    dest.mkdir(parents=True, exist_ok=True)\n"
-                    f"    (dest / '{target}.{{}}'.format(ext)).write_text('{name}', encoding='utf-8')\n",
+                    "from export_paths import export_paths\n"
+                    f"for dest in export_paths('{target}'):\n"
+                    f"    dest.write_text('{name}', encoding='utf-8')\n",
                     encoding="utf-8",
                 )
             runner = scripts / "generate_pitch.py"
@@ -38,10 +36,15 @@ class GeneratePitchTest(unittest.TestCase):
             for name, (_, target) in OUTPUTS.items():
                 for ext in ("png", "pdf"):
                     self.assertEqual((root / "pitch" / ("PDF" if ext == "pdf" else "png") / f"{target}.{ext}").read_text(encoding="utf-8"), name)
-            self.assertFalse((root / "out").exists())
+            self.assertFalse((root / "production" / "pitch").exists())
+            self.assertIn("disponibles dans pitch/", result.stdout)
+            for output in (root / "pitch").glob("*/*"):
+                output.unlink()
             (scripts / "04_jobseekers.py").write_text("raise SystemExit(7)\n", encoding="utf-8")
             result = subprocess.run([sys.executable, str(runner)], capture_output=True, text=True)
-            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(result.returncode, 7)
+            self.assertFalse((root / "pitch/png/05_tous_reseaux_2015_2025.png").exists())
+            self.assertFalse((root / "pitch/png/06_poles_emploi_2015_2025.png").exists())
             self.assertIn("04_jobseekers.py", result.stderr)
 
 

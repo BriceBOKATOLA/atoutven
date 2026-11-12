@@ -94,10 +94,7 @@ test("the installed Highcharts Enter and Space handlers activate commune data an
     app.select(paris.code);
     assert.match(app.control("commune-detail").textContent, /^Paris/);
     app.select(cergy.code);
-    assert.equal(
-      app.control("commune-detail").textContent,
-      "Sélectionnez une commune sur la carte pour consulter ses données.",
-    );
+    assert.equal(app.control("commune-detail").textContent, "");
     assert.equal(selected.selected, false);
   }
 });

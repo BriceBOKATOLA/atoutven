@@ -1,6 +1,8 @@
 """Exercise the real snapshot and renderer, with exports isolated in /tmp."""
 
 import runpy
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -28,6 +30,24 @@ class TransportExtensionsTest(unittest.TestCase):
             cls.result = runpy.run_path(str(SCRIPTS / args[0]), run_name="__main__")
         cls.fig = cls.result["fig"]
         cls.addClassCleanup(plt.close, cls.fig)
+
+    def test_default_exports_reach_project_pitch_from_another_working_directory(self):
+        with tempfile.TemporaryDirectory(dir="/tmp") as temp:
+            root = Path(temp)
+            scripts = root / "production/scripts"
+            scripts.mkdir(parents=True)
+            for name in ("01_transport_extensions.py", "export_paths.py"):
+                shutil.copyfile(SCRIPTS / name, scripts / name)
+            result = subprocess.run(
+                [sys.executable, str(scripts / "01_transport_extensions.py"),
+                 "--network-data", str(SCRIPTS.parent / "web/public/data/rail-network.json")],
+                cwd="/tmp", capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse((root / "production/pitch").exists())
+            with Image.open(root / "pitch/png/01_reseau_transport_extens.png") as image:
+                self.assertEqual(image.size, (5400, 3450))
+            self.assertTrue((root / "pitch/PDF/01_reseau_transport_extens.pdf").read_bytes().startswith(b"%PDF-"))
 
     def test_real_plate_shows_web_totals(self):
         texts = {text.get_text() for text in self.fig.texts}

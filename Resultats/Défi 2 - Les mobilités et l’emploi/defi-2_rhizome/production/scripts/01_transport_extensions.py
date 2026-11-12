@@ -205,7 +205,7 @@ def create_figure(data):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--network-data", type=Path, default=SNAPSHOT)
-    parser.add_argument("--output-dir", type=Path, help="Review directory instead of production/pitch")
+    parser.add_argument("--output-dir", type=Path, help="Review directory instead of pitch/")
     args = parser.parse_args()
     data = load_network(args.network_data)
     fig = create_figure(data)

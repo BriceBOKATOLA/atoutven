@@ -125,6 +125,7 @@ export async function mountedExplorer(
     if (!nodes.has(id)) nodes.set(id, new Element());
     return nodes.get(id);
   };
+  control("map").parentElement = control("map-frame");
   control("zone-options").append(new Element("legend"));
   control("map-scale").append(new Element("span"), new Element("i"));
   globalThis.document = Object.assign(new Element("document"), {
@@ -155,6 +156,10 @@ export async function mountedExplorer(
         return this;
       },
       css() {
+        return this;
+      },
+      clip(clipRect) {
+        this.clipRect = clipRect;
         return this;
       },
       add(parent) {

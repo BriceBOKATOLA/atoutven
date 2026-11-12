@@ -30,8 +30,8 @@ export default function Home() {
         </div>
         <div className="hero-bottom">
           <p>
-            Comment le réseau de transport et l’emploi ont-ils évolué en
-            Île-de-France&nbsp;?
+            Quel a été l’impact du développement du réseau de transport sur
+            l’emploi ces dix dernières années ?
           </p>
           <a href="#recit" className="discover">
             Explorer les cartes <span aria-hidden="true">↓</span>
@@ -143,19 +143,19 @@ export default function Home() {
           <div className="footer-logos">
             <a href="https://www.iledefrance-mobilites.fr/">
               <Image
-                src="/images/ile-de-france-mobilites.png"
+                src="/images/ile-de-france-mobilites-transparent.png"
                 alt="Île-de-France Mobilités"
-                width={208}
-                height={50}
+                width={2560}
+                height={597}
                 unoptimized
               />
             </a>
             <a href="https://datactivist.coop/fr/">
               <Image
-                src="/images/datactivist.png"
+                src="/images/datactivist-transparent.png"
                 alt="Datactivist"
-                width={579}
-                height={78}
+                width={1053}
+                height={136}
                 unoptimized
               />
             </a>

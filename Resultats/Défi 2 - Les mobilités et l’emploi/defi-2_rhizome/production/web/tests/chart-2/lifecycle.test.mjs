@@ -9,6 +9,7 @@ test("unmount aborts requests and controls; a late response cannot render", asyn
   let rendered = 0;
   let handledChanges = 0;
   const control = new (class extends EventTarget {
+    style = { setProperty() {} };
     addEventListener(type, handler, options) {
       assert.ok(["change", "mouseenter", "mouseleave"].includes(type));
       signals.push(options.signal);

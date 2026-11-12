@@ -12,13 +12,9 @@ test("the explorer retains map selections and portraits without search, tables, 
     /type="search"|<table\b|commune-results|commune-search|tables-title|method-title/,
   );
   assert.doesNotMatch(shell, /\bdownload(?:\s|=|>)|Exporter|Télécharger/i);
-  assert.match(
-    shell,
-    /id="commune-detail" role="status">Sélectionnez une commune sur la carte pour consulter ses données\.<\/p>/,
-  );
+  assert.match(shell, /id="commune-detail" role="status"><\/p>/);
   for (const id of [
     "map",
-    "map-legend",
     "zone-options",
     "legend-flower",
     "flower-preview",
@@ -28,21 +24,9 @@ test("the explorer retains map selections and portraits without search, tables, 
   }
 });
 
-test("evolution legend labels match the half-open color thresholds", () => {
-  const legend = shell.match(
-    /<ol class="legend-ramp"[^>]*>([\s\S]*?)<\/ol>/,
-  )?.[1];
-  assert.ok(legend);
-
-  const labels = [
-    ...legend.matchAll(/<li><i [^>]*><\/i><span>(.*?)<\/span><\/li>/g),
-  ].map(([, label]) => label);
-
-  assert.deepEqual(labels, [
-    "Moins de −5 %",
-    "−5 % à moins de 0 %",
-    "0 % à moins de 5 %",
-    "5 % à moins de 15 %",
-    "15 % ou plus",
-  ]);
+test("native legend replaces custom keys", () => {
+  assert.doesNotMatch(
+    shell,
+    /map-legend|legend-ramp|legend-keys|legend-swatch/,
+  );
 });

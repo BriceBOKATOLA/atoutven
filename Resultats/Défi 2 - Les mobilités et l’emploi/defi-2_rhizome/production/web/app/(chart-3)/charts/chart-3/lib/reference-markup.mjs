@@ -27,31 +27,19 @@ export const referenceMarkup = `
 <div class="legend-group">
 <h3>Densité d’emploi</h3>
 <p class="legend-note">Emplois salariés privés par km², fin 2025</p>
-<ol class="ramp">
-<li><i style="--swatch:#F1EFEA"></i>&lt; 100</li>
-<li><i style="--swatch:#DCE3EC"></i>100 à moins de 500</li>
-<li><i style="--swatch:#B3C3D9"></i>500 à moins de 2 000</li>
-<li><i style="--swatch:#7F9BC2"></i>≥ 2 000</li>
-</ol>
+<div id="density-legend" class="native-map-legend"></div>
 </div>
 <div class="legend-group legend-poles">
 <h3>Pôles d’emploi</h3>
 <p class="legend-note">Communes d’au moins 10&nbsp;k emplois ; taille selon l’effectif fin 2025.</p>
-<div class="sizes" id="size-legend"></div>
-<ul class="keys">
-<li><svg viewBox="0 0 22 16" aria-hidden="true"><circle class="key-pole" cx="11" cy="8" r="6"/></svg>Plus d’emplois qu’en 2015</li>
-<li><svg viewBox="0 0 22 16" aria-hidden="true"><circle class="key-pole key-declining" cx="11" cy="8" r="6"/></svg>Moins d’emplois qu’en 2015</li>
-<li><svg viewBox="0 0 22 16" aria-hidden="true"><circle class="key-pole key-new" cx="11" cy="8" r="5.5"/></svg>Nouveau pôle depuis 2015</li>
-</ul>
+<p class="size-legend-title">Taille des cercles · emplois</p>
+<div class="sizes" id="size-legend" role="img" aria-label="Taille des cercles : 10 000, 50 000 et 150 000 emplois salariés privés fin 2025."></div>
+<div id="pole-legend" class="native-map-legend"></div>
 </div>
 <div class="legend-group">
 <h3>Réseau ferré</h3>
 <p class="legend-note">Train, RER, métro, tramway et câble</p>
-<ul class="keys">
-<li><svg viewBox="0 0 22 16" aria-hidden="true"><path class="key-rail-new" d="M1 8h20"/></svg>Ligne ouverte depuis 2015</li>
-<li><svg viewBox="0 0 22 16" aria-hidden="true"><path class="key-rail-earlier" d="M1 8h20"/></svg>Ligne déjà en service</li>
-<li><svg viewBox="0 0 22 16" aria-hidden="true"><path class="key-boundary" d="M1 8h20"/></svg>Limite de département</li>
-</ul>
+<div id="network-legend" class="native-map-legend"></div>
 </div>
 </section>
 <section class="flower-legend" aria-labelledby="flower-legend-title">
@@ -94,17 +82,24 @@ export const referenceMarkup = `
 </main>
 <footer class="chart-sources" aria-labelledby="sources-title">
 <h2 id="sources-title">Sources et notes</h2>
+<p><a href="/data/LICENCES.txt">Conditions de réutilisation des données</a></p>
 <div class="sources-grid">
 <div class="source-group">
-<p><strong><a href="https://open.urssaf.fr/explore/dataset/etablissements-et-effectifs-salaries-au-niveau-commune-x-ape-last/">Urssaf.</a></strong> Effectifs salariés du secteur privé par commune au 31 décembre 2015 et 2025, et <a href="https://open.urssaf.fr/explore/dataset/auto-entrepreneurs-par-departement/">auto-entrepreneurs par département</a> au 4e trimestre 2015 et 2025 (administrativement et économiquement actifs).</p>
-<p><strong><a href="https://catalogue-donnees.insee.fr/fr/catalogue/recherche/DS_RP_EMPLOI_LT_PRINC">Insee.</a></strong> Recensement de la population, emploi au lieu de travail 2017 et 2023.</p>
-<p><strong><a href="https://www.data.gouv.fr/datasets/inscrits-a-france-travail-donnees-communales-trimestrielles-brutes">France Travail et Dares.</a></strong> Demandeurs d’emploi de catégories A, B et C, moyennes du 4e trimestre 2016 et 2024, données brutes arrondies au multiple de cinq.</p>
-<p><strong><a href="https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/">Île-de-France Mobilités.</a></strong> Tracés du réseau ferré.</p>
-<p><strong>Fonds de carte.</strong> La documentation de l’équipe cite <a href="https://github.com/gregoiredavid/france-geojson">France GeoJSON</a> : tracés IGN Admin Express COG et codes Insee, édition 2018. L’extraction et les transformations initiales des copies locales ne sont pas documentées.</p>
+<p><strong><a href="https://open.urssaf.fr/explore/dataset/etablissements-et-effectifs-salaries-au-niveau-commune-x-ape-last/">Urssaf.</a></strong> Effectifs salariés du secteur privé par commune au 31 décembre 2015 et 2025, et <a href="https://open.urssaf.fr/explore/dataset/auto-entrepreneurs-par-departement/">auto-entrepreneurs par département</a> au 4e trimestre 2015 et 2025 (administrativement et économiquement actifs). Données sous <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a> selon la <a href="https://www.data.gouv.fr/datasets/nombre-detablissements-employeurs-et-effectifs-salaries-du-secteur-prive-par-commune-x-ape-au-31-12-depuis-2006">fiche des effectifs</a> et la <a href="https://www.data.gouv.fr/datasets/auto-entrepreneurs-par-departement">fiche des auto-entrepreneurs</a>.</p>
+<p><strong><a href="https://catalogue-donnees.insee.fr/fr/catalogue/recherche/DS_RP_EMPLOI_LT_PRINC">Insee.</a></strong> Recensement de la population, emploi au lieu de travail 2017 et 2023. Source : Insee. Réutilisation sous <a href="https://www.insee.fr/fr/information/2008466">Licence Ouverte 2.0, sauf mention contraire</a>.</p>
+<p><strong><a href="https://www.data.gouv.fr/datasets/inscrits-a-france-travail-donnees-communales-trimestrielles-brutes">France Travail et Dares.</a></strong> Demandeurs d’emploi de catégories A, B et C, moyennes du 4e trimestre 2016 et 2024, données brutes arrondies au multiple de cinq. Données sous <a href="https://github.com/etalab/licence-ouverte/blob/master/LO.md">Licence Ouverte 2.0</a>.</p>
+<p><strong><a href="https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/">Île-de-France Mobilités.</a></strong> Tracés du réseau ferré. Données sous <a href="https://github.com/etalab/licence-ouverte/blob/master/LO.md">Licence Ouverte 2.0</a>.</p>
+<p><strong>Fonds de carte.</strong> La documentation de l’équipe cite <a href="https://github.com/gregoiredavid/france-geojson">France GeoJSON</a> : tracés IGN Admin Express COG et codes Insee, édition 2018. L’extraction et les transformations initiales des copies locales ne sont pas documentées. La provenance et la licence des copies locales restent à confirmer.</p>
 </div>
 <div class="source-group">
-<p><strong>Créations d’entreprises.</strong> Tableau de l’équipe, à partir des fiches mensuelles Île-de-France de Bpifrance Création : <a href="https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202507.pdf">juillet</a>, <a href="https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202508.pdf">août</a> et <a href="https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202509.pdf">septembre 2025</a> ; données Insee (Sirene), brutes et non corrigées des variations saisonnières. Les trois chiffres mensuels sont ceux de leur première publication, provisoire ; les révisions ultérieures peuvent modifier les totaux.</p>
-<p><strong><a href="https://www.insee.fr/fr/statistiques/2109644">Insee — tableau de bord de la conjoncture.</a></strong> Emploi salarié total (public et privé) et intérim au 2e trimestre 2025 : estimations Urssaf, Dares et Insee, en fin de trimestre, corrigées des variations saisonnières ; mise à jour du 18 septembre 2026. Défaillances : Banque de France, Fiben, cumul de septembre 2025 à août 2026 en date de jugement ; mise à jour du 28 octobre 2026. Les valeurs correspondent aux figures 3, 7 et 22 consultées le 12 novembre 2026.</p>
+<p><strong>Créations d’entreprises.</strong> Tableau de l’équipe, à partir de l’Observatoire de la création d’entreprise, Bpifrance Création :</p>
+<ul>
+<li><a href="https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202507.pdf">La création d’entreprise en Île-de-France — chiffres de juillet 2025</a> (publication : août 2025).</li>
+<li><a href="https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202508.pdf">La création d’entreprise en Île-de-France — chiffres d’août 2025</a> (publication : septembre 2025).</li>
+<li><a href="https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202509.pdf">La création d’entreprise en Île-de-France — chiffres de septembre 2025</a> (publication : octobre 2025).</li>
+</ul>
+<p>Reproduction collective autorisée avec mention des sources selon la page 10 de chaque publication. Source : Insee (Sirene) ; traitements : Observatoire de la création d’entreprise. Données brutes et non corrigées des variations saisonnières. Les trois chiffres mensuels sont ceux de leur première publication, provisoire ; les révisions ultérieures peuvent modifier les totaux.</p>
+<p><strong><a href="https://www.insee.fr/fr/statistiques/2109644">Insee — tableau de bord de la conjoncture.</a></strong> Emploi salarié total (public et privé) et intérim au 2e trimestre 2025 : estimations Urssaf, Dares et Insee, en fin de trimestre, corrigées des variations saisonnières ; mise à jour du 18 septembre 2026. Défaillances : Banque de France, Fiben, cumul de septembre 2025 à août 2026 en date de jugement ; mise à jour du 28 octobre 2026. Les valeurs correspondent aux figures 3, 7 et 22. Source : Insee. Réutilisation sous <a href="https://www.insee.fr/fr/information/2008466">Licence Ouverte 2.0, sauf mention contraire</a>.</p>
 <p><strong>Notes de lecture.</strong> Les variations sur trois mois reconstituées dans le fichier à partir de variations annuelles arrondies peuvent différer d’environ 0,1 point d’un calcul sur les chiffres exacts. Elles ne sont pas affichées ici. Les défaillances couvrent les douze mois jusqu’en août 2026 ; les autres indicateurs datent de 2025.</p>
 <p id="coverage"></p>
 </div>

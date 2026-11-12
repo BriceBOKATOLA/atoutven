@@ -7,7 +7,11 @@ test("the offline fixture compiles its real modules as classic browser scripts",
   const html = await browserFixture();
   const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
 
-  assert.equal(scripts.length, 2, "Highmaps and the explorer are embedded");
+  assert.equal(
+    scripts.length,
+    3,
+    "Highmaps, accessibility and the explorer are embedded",
+  );
   for (const [index, [, source]] of scripts.entries()) {
     assert.doesNotThrow(
       () => new Script(source),

@@ -89,6 +89,93 @@ assert.ok(
   "Paris remains available",
 );
 
+test("native legend displays five evolution classes and enables accessible filtering", async (t) => {
+  const app = await mountedExplorer(t, dataset);
+  assert.equal(app.options.legend.enabled, true);
+  assert.equal(app.options.legend.accessibility.enabled, true);
+  assert.match(
+    app.options.accessibility.description,
+    /Classes d’évolution : Moins de −5 %/,
+  );
+  assert.match(
+    app.options.accessibility.description,
+    /15 % ou plus. Donnée indisponible/,
+  );
+  assert.deepEqual(
+    app.options.colorAxis.dataClasses.map(({ name, color }) => [name, color]),
+    [
+      ["Moins de −5 %", "#2C7FB8"],
+      ["−5 % à moins de 0 %", "#A6CEE3"],
+      ["0 % à moins de 5 %", "#FBE6CC"],
+      ["5 % à moins de 15 %", "#F5AE6B"],
+      ["15 % ou plus", "#D9531E"],
+    ],
+  );
+  const missing = app.options.series.find(
+    (series) => series.name === "Donnée indisponible",
+  );
+  assert.equal(missing.color, "#F1EFEA");
+  assert.equal(missing.showInLegend, true);
+  assert.deepEqual(missing.data, []);
+  assert.equal(app.options.plotOptions.series.colorAxis, false);
+  assert.equal(app.options.plotOptions.series.showInLegend, false);
+  assert.equal(
+    app.options.series.find((series) => series.id === "communes").colorAxis,
+    0,
+  );
+});
+
+test("native network and territory keys reproduce the mapped lines and station symbol", async (t) => {
+  const app = await mountedExplorer(t, dataset);
+  const keys = app.options.series.filter(
+    (series) => series.showInLegend && series.type === "mapline",
+  );
+  assert.deepEqual(
+    keys.map(({ name, color, lineWidth, dashStyle }) => [
+      name,
+      color,
+      lineWidth,
+      dashStyle,
+    ]),
+    [
+      ["Ligne ouverte entre 2015 et 2025", "#0e1b2c", 2.2, undefined],
+      ["Réseau antérieur à 2015", "#a3aab5", 0.7, undefined],
+      ["Encadré du Tram T4", "#1e3442", 1.5, "Dash"],
+      ["Contour de zone d’emploi", "#66727f", 1, undefined],
+    ],
+  );
+  assert.ok(
+    keys.every(
+      (key) => key.data.length === 0 && key.legendSymbol === "lineMarker",
+    ),
+  );
+  assert.deepEqual(keys[0].marker, {
+    enabled: true,
+    symbol: "circle",
+    radius: 2.6,
+    fillColor: "#fff",
+    lineColor: "#0e1b2c",
+    lineWidth: 1,
+  });
+  assert.equal(app.options.legend.navigation.enabled, false);
+});
+
+test("native legend reserves only its current height and clears it on disposal", async (t) => {
+  const app = await mountedExplorer(t, dataset);
+  const style = app.control("map-wrap").style;
+  const writes = [];
+  style.setProperty = (name, value) => writes.push([name, value]);
+  app.map.legend = { legendHeight: 180.4 };
+  app.redraw();
+  app.redraw();
+  assert.deepEqual(writes, [["--map-legend-height", "181px"]]);
+  app.map.legend.legendHeight = 80;
+  app.redraw();
+  assert.deepEqual(writes[1], ["--map-legend-height", "80px"]);
+  app.dispose();
+  assert.deepEqual(writes[2], ["--map-legend-height", "0px"]);
+});
+
 test("commune map classes include every boundary and escape tooltip content", async (t) => {
   const fixture = structuredClone(dataset);
   const cases = [
@@ -101,6 +188,7 @@ test("commune map classes include every boundary and escape tooltip content", as
     [5, "#F5AE6B"],
     [14.999, "#F5AE6B"],
     [15, "#D9531E"],
+    [150, "#D9531E"],
   ];
   fixture.communes.features = fixture.communes.features.slice(0, cases.length);
   fixture.communes.features.forEach((feature, index) => {
@@ -111,10 +199,34 @@ test("commune map classes include every boundary and escape tooltip content", as
   const communes = app.options.series.find(
     (series) => series.id === "communes",
   );
+  const context = vm.createContext({
+    module: { exports: {} },
+    exports: {},
+    console,
+  });
+  vm.runInContext(
+    await readFile(
+      new URL("../../node_modules/highcharts/highmaps.js", import.meta.url),
+      "utf8",
+    ),
+    context,
+  );
+  const ColorAxis = context.module.exports.ColorAxis;
+  const axis = { dataClasses: app.options.colorAxis.dataClasses };
   assert.deepEqual(
-    communes.data.map((point) => point.color),
+    communes.data.map((point) => point.value),
+    cases.map(([value]) => value),
+  );
+  assert.ok(communes.data.every((point) => !("color" in point)));
+  assert.deepEqual(
+    communes.data.map((point) =>
+      point.value === null
+        ? communes.nullColor
+        : ColorAxis.prototype.toColor.call(axis, point.value, {}),
+    ),
     cases.map(([, color]) => color),
   );
+  assert.equal(communes.nullColor, "#F1EFEA");
   const tooltip = app.options.tooltip.formatter.call({
     options: communes.data[0],
   });
@@ -398,4 +510,30 @@ test("the delivered Highmaps engine converts the transport layers consumed by th
       converted.every((point) => point.geometry.coordinates.length > 0),
     );
   }
+});
+
+test("unavailable communes keep their fill scale and gain a distinct border", async (t) => {
+  const app = await mountedExplorer(t, dataset);
+  const series = app.options.series.find(({ id }) => id === "communes");
+  const missing = series.data.filter(({ value }) => value === null);
+  const available = series.data.filter(({ value }) => value !== null);
+  assert.ok(missing.length > 0);
+  assert.ok(
+    missing.every(
+      ({ borderColor, borderWidth }) =>
+        borderColor === "#7f8894" && borderWidth === 0.8,
+    ),
+  );
+  assert.ok(
+    available.every(
+      (point) =>
+        point.borderColor === undefined && point.borderWidth === undefined,
+    ),
+  );
+  assert.equal(series.nullColor, "#F1EFEA");
+  assert.deepEqual(series.states.hover, {
+    borderColor: "#273f31",
+    borderWidth: 1,
+    brightness: 0.08,
+  });
 });

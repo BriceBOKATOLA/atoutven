@@ -290,3 +290,16 @@ test("tooltip permits pointer use inside its card and dismisses on outside input
     assert.equal(tooltip.hidden, true);
   }
 });
+
+test("custom map layers use the native plot clip after zoom and redraw", async (t) => {
+  const clipRect = {};
+  const app = await mountedExplorer(t, await deliveredData(), {
+    map: { clipRect },
+  });
+  assert.equal(app.map.zoneLayer.clipRect, clipRect);
+  assert.equal(app.map.flowerLayer.clipRect, clipRect);
+  app.setZoom(2);
+  app.redraw();
+  assert.equal(app.map.zoneLayer.clipRect, clipRect);
+  assert.equal(app.map.flowerLayer.clipRect, clipRect);
+});

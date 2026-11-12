@@ -1,10 +1,7 @@
 import { test } from "node:test";
 import { execFileSync } from "node:child_process";
 
-const loader = new URL(
-  "../../app/(chart-2)/charts/chart-2/lib/vendors.ts",
-  import.meta.url,
-).href;
+const loader = new URL("../../lib/highmaps.ts", import.meta.url).href;
 
 function isolated(source) {
   execFileSync(process.execPath, ["--input-type=module", "-e", source], {

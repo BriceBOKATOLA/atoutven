@@ -123,3 +123,32 @@ test("French map labels stay local to the explorer instead of changing the share
     "Fin de la carte interactive.",
   );
 });
+
+test("map-level keyboard controls preserve point and legend navigation and detach on disposal", async (t) => {
+  const zooms = [];
+  const app = await mountedExplorer(t, await deliveredData());
+  app.map.mapView.zoomBy = (...args) => zooms.push(args);
+  const host = app.control("map-frame");
+  assert.equal(app.control("map").getAttribute("tabindex"), null);
+  assert.equal(app.options.mapNavigation.enableDoubleClickZoom, false);
+  assert.equal(host.getAttribute("tabindex"), "0");
+  host.dispatch("keydown", { key: "+", preventDefault() {} });
+  const child = { tagName: "path" };
+  host.dispatch("keydown", {
+    target: child,
+    key: "-",
+    preventDefault() {
+      assert.fail("Point or legend key was intercepted");
+    },
+  });
+  assert.deepEqual(zooms, [[1]]);
+  app.dispose();
+  host.dispatch("keydown", {
+    key: "+",
+    preventDefault() {
+      assert.fail("Disposed map handled a key");
+    },
+  });
+  assert.deepEqual(zooms, [[1]]);
+  assert.equal(host.getAttribute("tabindex"), null);
+});

@@ -1,0 +1,41 @@
+EcloWork — données de production et conditions de réutilisation
+
+La licence MIT du code ne s'applique pas automatiquement aux données. Les conditions suivantes concernent les sources et les droits identifiés ; elles ne garantissent pas les droits d'éléments dont l'origine est inconnue.
+
+Urssaf — ODbL 1.0
+Les jeux d'effectifs salariés privés par commune, d'auto-entrepreneurs par département et de déclarations préalables à l'embauche sont sous ODbL 1.0 :
+https://www.data.gouv.fr/datasets/nombre-detablissements-employeurs-et-effectifs-salaries-du-secteur-prive-par-commune-x-ape-au-31-12-depuis-2006
+https://www.data.gouv.fr/datasets/auto-entrepreneurs-par-departement
+https://www.data.gouv.fr/datasets/declarations-prealables-a-lembauche-par-departement-x-grand-secteur
+
+Les copies et bases dérivées Urssaf comprennent notamment :
+- src/mobility-employment/idf-raw-sources/urssaf_effectifs_communes_idf.csv et dpae-par-departement-x-grand-secteur.xlsx ;
+- src/jobseekers/communes.geojson et territoires.json, qui contiennent des indicateurs Urssaf ;
+- clean/shared/hackathon_emploi.gpkg et series_emploi_urssaf.json ;
+- les couches d'emploi de clean/01_network/01_reseau.gpkg ;
+- les tables d'emploi de clean/02_employment_growth/ ;
+- les données d'emploi et d'auto-entrepreneurs de clean/06_employment_centers_2015_2025/.
+
+Pour les bases dérivées Urssaf utilisées publiquement, citer Urssaf et l'ODbL ; respecter les obligations de partage à l'identique et de mise à disposition de la base dérivée ou des modifications lisibles par machine. Les fichiers de ce répertoire et les scripts de production fournissent les copies et transformations conservées.
+https://opendatacommons.org/licenses/odbl/1-0/
+
+Autres sources identifiées
+- Tracés et gares : Île-de-France Mobilités, Licence Ouverte 2.0.
+  https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/
+  https://data.iledefrance-mobilites.fr/explore/dataset/emplacement-des-gares-idf/
+- Demandeurs d'emploi communaux : Dares / France Travail, Licence Ouverte 2.0.
+  https://www.data.gouv.fr/datasets/inscrits-a-france-travail-donnees-communales-trimestrielles-brutes
+- Données Insee identifiées : Licence Ouverte 2.0 sauf indication contraire. Mentionner « Source : Insee » et la dernière mise à jour lorsqu'elle est connue.
+  https://www.insee.fr/fr/information/2008466
+- Noms officiels dans src/noms_officiels.json : découpage administratif Etalab / Insee, Licence Ouverte 2.0 pour les données.
+  https://github.com/etalab/decoupage-administratif
+- Contours communaux du GeoPackage partagé et huit départements : géométries correspondant à France GeoJSON, IGN Admin Express COG et codes Insee 2018. Cette correspondance ne prouve pas l'origine historique des copies.
+  https://github.com/gregoiredavid/france-geojson
+- Créations d'entreprises : publications Bpifrance Création, avec les mentions indiquées dans l'avis des données du site, ../web/public/data/LICENCES.txt.
+
+Points non établis
+Les droits des contributions propres aux deux classeurs, l'origine de certains contours du graphique 2 et les droits de src/rivieres_idf.geojson ne sont pas établis. La fiche exacte des offres Dares brutes trimestrielles n'indique pas de licence :
+https://www.data.gouv.fr/datasets/offres-collectees-et-satisfaites-par-france-travail-brutes-trimestrielles
+Les bases combinées peuvent être soumises à plusieurs conditions ; la mention ODbL des données Urssaf ne règle pas les droits des autres éléments.
+
+Licence Ouverte 2.0 : https://github.com/etalab/licence-ouverte/blob/master/LO.md
