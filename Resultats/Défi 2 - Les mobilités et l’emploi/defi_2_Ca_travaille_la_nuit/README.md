@@ -16,7 +16,9 @@ Quelles disparités territoriales pour l’accès à l’emploi ?
 
 ## Notre visualisation
 
-Fichier HTLM (avec dossier des visuels attachés au fichier HTML et codes) dans dossier *production*
+Fichier HTLM (avec dossier des visuels attachés au fichier HTML et codes) dans dossier *production*.
+
+*Le fichier "DataViz_Voyager la nuit, travailler la nuit.html" doit être au même niveau que le dossier "Image_pr_HTML" pour avoir tous les visuels présent sur le html*
 
 ## Les données utilisées
 
