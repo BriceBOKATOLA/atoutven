@@ -164,6 +164,15 @@ python3 -m unittest discover -s production/tests -p 'test_build_defm.py' -v
 
 L'option `--output` est obligatoire et remplace le fichier indiqué s'il existe. L'option `--source` permet de choisir une autre copie du CSV. Avec la copie locale actuelle, le résultat est identique au fichier de 362 communes conservé. Cette correspondance n'établit pas la méthode initiale ni la provenance du CSV.
 
+Pour reconstruire les séries annuelles par groupe à partir du même CSV et de `clean/shared/groupes_lignes.json` :
+
+```sh
+python3 production/scripts/build_defm_series.py --output /tmp/rhizome-series-defm.json
+python3 -m unittest discover -s production/tests -p 'test_build_defm_series.py' -v
+```
+
+Le test compare les données produites au JSON conservé. Les agrégats ne suivent pas le seuil de 300. Pour reproduire les séries historiques, le script exclut deux codes absents de toutes les années du CSV : 93059 dans le groupe T11 et 91182 dans le groupe T12. Ces séries sont donc incomplètes ; le script signale ces exclusions et refuse les autres observations manquantes détectées. La note descriptive est recopiée du fichier conservé. Les groupes restent des données préparées dont la construction initiale manque.
+
 ## Site web
 
 Le [README du site](../web/README.md) décrit son installation et son export statique. Les commandes suivantes partent du dossier `defi-2_rhizome` et remplacent les trois instantanés dans `production/web/public/data/` :
