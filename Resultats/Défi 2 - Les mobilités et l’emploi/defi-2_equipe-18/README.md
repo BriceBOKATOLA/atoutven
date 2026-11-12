@@ -42,8 +42,9 @@ Une sixième page permet à chacun de chercher sa commune.
 - La nuit, l'offre de transport est **13 fois moins** importante qu'entre 7h et 10h, sur l'ensemble de l'Île-de-France, et 6 communes sur 10 n'en ont plus aucune ; or les ouvriers travaillent deux fois plus souvent la nuit que les cadres.
 - Chaque territoire a sa solution :
   - **le vélo en petite couronne** : 22 % des trajets en voiture d'une commune de banlieue à une autre font moins de 5 km (339 000 sur 1,54 million), et 31 % en petite couronne ;
-  - **des navettes en grande couronne** : hors de Paris, 20 % des postes d'employés et d'ouvriers sont dans une commune sans gare (322 000 sur 1,59 million), et 32 % en grande couronne. Les plus grands pôles sont Gonesse, Guyancourt, Bonneuil-sur-Marne et Les Ulis.
-- Les employeurs de grande couronne jugent 41 % de leurs recrutements difficiles, contre 29 % à Paris (France Travail, 2026). C'est une coïncidence géographique : l'enquête ne dit pas que le transport en est la cause.
+  - **des navettes en grande couronne** : hors de Paris, 20 % des postes d'employés et d'ouvriers sont dans une commune sans gare (322 000 sur 1,59 million), et 32 % en grande couronne. Les communes qui en comptent le plus sont Gonesse, Guyancourt, Bonneuil-sur-Marne et Les Ulis.
+- Les employeurs de grande couronne jugent difficiles 41 % de leurs projets de recrutement, contre 29 % à Paris (France Travail, 2026). C'est une coïncidence géographique : l'enquête ne dit pas que le transport en est la cause.
+- **Une gare dans la commune ne suffit pas** (constat exploratoire, script `12_gare_ne_suffit_pas.py`) : dans 151 des 290 communes d'emploi qui ont une gare, au moins 2 actifs sur 3 viennent encore en voiture (seuil choisi par l'équipe ; communes d'au moins 200 trajets). Le constat vaut pour les cadres comme pour les employés et les ouvriers ; la donnée ne dit pas pourquoi (distance, horaires, directions).
 
 ## Notre visualisation
 
@@ -119,11 +120,12 @@ streamlit run app.py                          # lance l'application
 
 - **La ponctualité de tout le réseau** : notre analyse couvre les 13 lignes de RER et Transilien publiées par la SNCF ; le métro, le tram et le bus, publiés à part, compléteraient le tableau.
 - **Des temps de trajet réels**, porte à porte, pour remplacer la présence d'une gare dans la commune.
+- **La distance réelle entre les emplois et la gare** (base Sirene géolocalisée de l'INSEE et arrêts IDFM, données ouvertes) : elle dirait pourquoi une gare dans la commune ne suffit pas toujours.
 - **Une analyse plus fine que la commune**, au niveau du quartier.
 
 ## Qui a fait quoi
 
-- **Melvyn MOTHO** : hypothèses et protocoles de test, analyses des données (scripts 00 à 11), maquettes et application.
+- **Melvyn MOTHO** : hypothèses et protocoles de test, analyses des données (scripts 00 à 12), maquettes et application.
 - **Pierre THAI** : relecture critique des maquettes, à partir de captures annotées. Ses recommandations ont donné le titre de l'Accueil (« Quand le lieu de travail impose la voiture »), la formulation « 13 fois moins » à la place d'un pourcentage mal compris, le titre, le sous-titre et le « À retenir » de la page sur le télétravail, et une description plus exacte de la page « Loin des gares » (« presque deux fois plus souvent »). Il a aussi proposé l'hypothèse sur le revenu (« la voiture comme luxe ? », script 09), qui est devenue le contrôle du résultat principal : à revenu égal, l'absence de gare fait toujours monter la voiture.
 - **Maroua Zoubir** : idée et premier travail sur la ponctualité des lignes de RER et de train, repris dans le script 11 et la page « Loin des gares ».
 

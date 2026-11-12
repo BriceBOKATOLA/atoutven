@@ -1,11 +1,16 @@
 """
 conclusion.py : terminus du récit.
 
-Message : le réseau mène à Paris, pas aux emplois de banlieue. Ce n'est pas le métier qui éloigne du réseau,
-c'est le lieu de travail.
+Message : ce n'est pas le métier, c'est le lieu de travail qui décide. Le réseau mène à Paris, pas aux emplois de
+banlieue.
 
-Visuel : plan de ligne. Les stations 2 et 3 sont des « correspondances » (double rond, chiffre plus grand) :
-elles portent le résultat central. Chaque station est un lien vers sa page.
+Version validée par Melvyn le 2026-11-12 (canevas « Proposition conclusion : schéma compact et chiffré ») : la
+conclusion CONCLUT au lieu de résumer les pages (l'ancien plan de ligne répétait tous leurs chiffres, « trop de
+saturation »). Elle contient :
+  - un schéma en aiguillage : les trois métiers arrivent au même aiguillage, le lieu de travail ; les chiffres sont sur
+    les branches (avec gare / sans gare, tous métiers confondus) et la nuance du script 12 (une gare ne suffit pas) ;
+  - « Ce que ça change pour IDFM » : 3 actions courtes, chacune avec une perspective « Et ensuite » ;
+  - deux boutons (ma commune, retour à l'accueil) et la méthode en une ligne.
 """
 
 import streamlit as st
@@ -13,105 +18,124 @@ import streamlit as st
 import utils as u
 
 FICHIER = "pages/conclusion.py"
+ORANGE, BLEU_TC, GRIS = "#C0401A", "#1F6A8C", "#5E6475"
 
 u.appliquer_style()
 u.menu(FICHIER)
 
-actifs = u.lire("parts_modales_par_gs.csv").set_index("GS")["effectif_pondere"]
-h21 = u.lire("h21_emplois_sans_gare.csv").set_index("groupe")
-v = u.lire("voiture_selon_gare_destination.csv").set_index(["groupe", "commune_de_travail"])["part_voiture_pct"]
-h16 = u.lire("h16_trajets_courts_voiture.csv").set_index("groupe")
+# --- Chiffres, tous calculés à partir des fichiers (aucun tapé à la main)
+# Part de la voiture de banlieue à banlieue, tous métiers confondus (synthèse de la page 3, pondérée par les trajets)
+v = u.lire("voiture_selon_gare_destination.csv")
+part = {cas: (d["trajets"] * d["part_voiture_pct"]).sum() / d["trajets"].sum() for cas, d in v.groupby("commune_de_travail")}
+# Constat exploratoire du script 12 : communes avec gare où au moins 2 actifs sur 3 viennent encore en voiture
+g = u.lire("gare_ne_suffit_pas.csv")
+gare = g[(g["groupe"] == "Ensemble") & (g["seuil_voiture_pct"] == 66.7)].iloc[0]
 
-description = ("Les emplois des employés et ouvriers sont plus souvent dans des communes sans gare. Là, près de 3 trajets sur 4 se "
-               "font en voiture, cadres compris. Ce n'est donc pas le métier qui éloigne du réseau, c'est le lieu "
-               "de travail.")
-u.entete(FICHIER, 'Le réseau mène à Paris, <span style="color:#C0401A">pas aux emplois de banlieue</span>', description)
 
-# (icône, page, nom, chiffre, texte, correspondance)
-stations = [
-    ("personnes", "pages/p1_metiers.py", "Ceux qui ne télétravaillent pas",
-     f"{(actifs['Employé'] + actifs['Ouvrier']) / 1e6:.0f} millions", "d'actifs ne peuvent presque pas télétravailler", False),
-    ("repere", "pages/p2_gares.py", "Loin des gares", f"{h21.loc['Ouvriers', 'part_sans_gare_pct']:.0f} %",
-     f"des emplois d'ouvriers hors Paris sont sans gare (cadres : {h21.loc['Cadres', 'part_sans_gare_pct']:.0f} %)", True),
-    ("voiture", "pages/p3_voiture.py", "Comment ils vont travailler", f"{v[('Cadres', 'sans gare')]:.0f} %",
-     "des cadres prennent la voiture quand leur lieu de travail n'a pas de gare", True),
-    ("lune", "pages/p4_nuit.py", "Les trajets de nuit", f"{round(100 / u.part_nuit_pct())} fois moins",
-     "de bus et de trains la nuit qu'entre 7h et 10h", False),
-    ("velo", "pages/p5_solutions.py", "Les solutions", "2 solutions", "trajets courts pour le vélo, emplois sans gare pour les navettes", False),
+def en_mots(pct: float) -> str:
+    """Part exprimée en fraction parlante, choisie d'après la valeur calculée (tolérance de 2 points)."""
+    for fraction, mots in ((0.5, "1 trajet sur 2"), (0.75, "près de 3 trajets sur 4"), (2 / 3, "2 trajets sur 3")):
+        if abs(pct / 100 - fraction) <= 0.02:
+            return mots
+    return f"{u.fr(pct)} %"
+
+
+AVEC, SANS = en_mots(part["avec gare"]), en_mots(part["sans gare"])
+
+u.entete(FICHIER, f'Ce n\'est pas le métier, c\'est le <span style="background:{ORANGE};color:#FFFFFF;border-radius:10px;'
+                  f'padding:0 10px">lieu de travail</span> qui décide',
+         "Le réseau mène à Paris, pas aux emplois de banlieue.")
+
+
+# --- Schéma en aiguillage (SVG 800 x 252, mêmes silhouettes et couleurs que le reste de l'application)
+def texte(x, y, contenu, taille=14, poids=700, couleur=u.ENCRE, ancre="start"):
+    """Texte du schéma (14 px minimum, règle du projet)."""
+    return (f'<text x="{x}" y="{y}" font-family="Plus Jakarta Sans, sans-serif" font-size="{taille}" font-weight="{poids}" '
+            f'fill="{couleur}" text-anchor="{ancre}">{contenu}</text>')
+
+
+def rond_icone(x, y, r, fond, nom_icone):
+    """Pastille ronde avec une icône de l'application (u.ICONES, dessinée en 24 x 24), trait blanc."""
+    t = r * 1.1
+    return (f'<circle cx="{x}" cy="{y}" r="{r}" fill="{fond}" stroke="#FFFFFF" stroke-width="4"/>'
+            f'<g transform="translate({x - t / 2},{y - t / 2}) scale({t / 24})" fill="none" stroke="#FFFFFF" stroke-width="2" '
+            f'stroke-linecap="round" stroke-linejoin="round">{u.ICONES[nom_icone]}</g>')
+
+
+def pastille_metier(metier, x, y, r):
+    """Rond de la couleur du métier + silhouette blanche (même dessin que u.libelle_metier)."""
+    rond = u.libelle_metier(metier)
+    interieur = rond[rond.find(">", rond.find("<svg")) + 1:rond.find("</svg>")]
+    t = r * 1.3
+    return (f'<circle cx="{x}" cy="{y}" r="{r}" fill="{u.METIERS[metier]["donnee"]}" stroke="#FFFFFF" stroke-width="4"/>'
+            f'<g transform="translate({x - t / 2},{y - t / 2}) scale({t / 24})">{interieur}</g>')
+
+
+ys = {"Cadres": 40, "Employés": 92, "Ouvriers": 144}
+dessin = ""
+for m, y in ys.items():   # les voies des trois métiers se rejoignent avant l'aiguillage
+    dessin += f'<path d="M95,{y} C150,{y} 160,92 200,92" fill="none" stroke="{u.METIERS[m]["donnee"]}" stroke-width="6" stroke-linecap="round"/>'
+dessin += (f'<path d="M318,92 C350,92 360,40 400,40 L410,40" fill="none" stroke="{BLEU_TC}" stroke-width="6" stroke-linecap="round"/>'
+           f'<path d="M318,92 C350,92 360,144 400,144 L410,144" fill="none" stroke="{ORANGE}" stroke-width="8" stroke-linecap="round"/>')
+for m, y in ys.items():   # nom à gauche de la pastille : la voie ne le traverse pas
+    dessin += pastille_metier(m, 95, y, 17) + texte(70, y + 5, m, 14, 800, u.METIERS[m]["texte"], "end")
+dessin += (f'<rect x="200" y="70" width="118" height="44" rx="22" fill="{u.ENCRE}"/>'
+           + texte(259, 89, "Lieu de", 14, 800, "#FFFFFF", "middle") + texte(259, 106, "travail", 14, 800, "#FFFFFF", "middle")
+           # Branche « avec gare » : part de la voiture + nuance du script 12
+           + rond_icone(430, 40, 20, BLEU_TC, "train")
+           + f'<text x="460" y="36" font-family="Plus Jakarta Sans, sans-serif" font-size="15" fill="{u.ENCRE}">'
+             f'<tspan font-weight="800" fill="{BLEU_TC}">Avec gare :</tspan> <tspan font-weight="800">{AVEC}</tspan> en voiture</text>'
+           + f'<text x="460" y="57" font-family="Plus Jakarta Sans, sans-serif" font-size="14" fill="{GRIS}">mais dans '
+             f'<tspan font-weight="800" fill="{u.ENCRE}">{int(gare.communes_au_dessus)} des {int(gare.communes_avec_gare)}</tspan> '
+             f'communes avec gare,</text>'
+           + f'<text x="460" y="75" font-family="Plus Jakarta Sans, sans-serif" font-size="14" fill="{GRIS}">'
+             f'<tspan font-weight="800" fill="{u.ENCRE}">2 sur 3</tspan> ou plus viennent encore en voiture</text>'
+           # Branche « sans gare » : part de la voiture + solutions reliées par une fourche en pointillé
+           + rond_icone(430, 144, 20, ORANGE, "voiture")
+           + f'<text x="460" y="140" font-family="Plus Jakarta Sans, sans-serif" font-size="15" fill="{u.ENCRE}">'
+             f'<tspan font-weight="800" fill="{ORANGE}">Sans gare :</tspan> <tspan font-weight="800">{SANS}</tspan> en voiture</text>'
+           + texte(460, 161, "quel que soit le métier", 14, 400, GRIS)
+           + f'<path d="M430,166 L430,232 M430,196 L458,196 M430,232 L458,232" fill="none" stroke="{ORANGE}" stroke-width="2.5" '
+             f'stroke-dasharray="4 4"/>'
+           + rond_icone(474, 196, 14, u.ENCRE, "velo") + texte(496, 201, "vélo si c'est court", 14, 700)
+           + rond_icone(474, 232, 14, u.ENCRE, "navette") + texte(496, 237, "navette sinon", 14, 700))
+description_schema = (f"Schéma : cadres, employés et ouvriers arrivent au même aiguillage, le lieu de travail. Avec gare : "
+                      f"{AVEC} en voiture, mais dans {int(gare.communes_au_dessus)} des {int(gare.communes_avec_gare)} communes "
+                      f"avec gare, 2 sur 3 ou plus viennent encore en voiture. Sans gare : {SANS} en voiture, quel que soit le "
+                      f"métier ; vélo si le trajet est court, navette sinon.")
+# defile-mobile : sur téléphone, le schéma garde 800 px (textes à 14 px) et défile de côté dans son cadre
+st.markdown(f'<div class="carte defile-mobile" style="--largeur-mobile:800px;padding:18px 0 10px">'
+            f'<svg viewBox="0 0 800 252" role="img" aria-label="{description_schema}" style="width:100%;height:auto;display:block">'
+            f'{dessin}</svg></div>', unsafe_allow_html=True)
+
+# --- Ce que ça change pour IDFM : 3 actions courtes, chacune avec sa perspective « Et ensuite » (sans chiffre :
+# les chiffres sont sur les pages 4 et 5 et sur le schéma)
+ACTIONS = [  # (icône, couleur de la page d'origine, action, et ensuite)
+    ("velo", "#E4572E", "Le vélo, en petite couronne", "mesurer les trajets réels à vélo, pas à vol d'oiseau"),
+    ("navette", "#B23A86", "Des navettes vers les emplois sans gare", "les tester avec les employeurs qui peinent à recruter"),
+    ("lune", "#CF5CA6", "Penser aux horaires de nuit", "mesurer les temps de trajet en bus de nuit"),
 ]
+actions = "".join(
+    f'<div class="piste" style="display:flex;gap:16px;align-items:center;padding:12px 0;border-top:1px solid #E1E4DE">'
+    f'<span aria-hidden="true" style="flex-shrink:0;width:42px;height:42px;border-radius:50%;background:{c};display:flex;'
+    f'align-items:center;justify-content:center">{u.icone(ic, 20, "#FFFFFF")}</span><div><div style="font-size:17px;'
+    f'font-weight:800">{action}</div><div style="font-size:15px;color:#4E5466;margin-top:2px"><b style="color:{ORANGE}">'
+    f'Et ensuite :</b> {ensuite}</div></div></div>' for ic, c, action, ensuite in ACTIONS)
+bouton = 'display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;font-size:16px;font-weight:800;text-decoration:none'
+st.markdown(f'<section aria-labelledby="titre-changements" style="margin-top:8px">'
+            f'<h2 id="titre-changements" style="margin:0 0 2px;font-size:20px;font-weight:800">Ce que ça change pour '
+            f'Île-de-France Mobilités</h2>{actions}</section>'
+            # Liens relatifs (comme le menu) : ils fonctionnent dans le cadre de Streamlit Cloud
+            f'<div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap">'
+            f'<a href="p6_commune" target="_self" style="{bouton};background:{u.ENCRE};color:#FFFFFF">Et votre commune ? →</a>'
+            f'<a href="./" target="_self" style="{bouton};border:2px solid {u.ENCRE};color:{u.ENCRE}">Revenir à l\'accueil ↺</a></div>'
+            f'<p style="margin:22px 0 0;font-size:14px;color:{GRIS}"><b style="color:#4E5466">15 hypothèses</b> testées, dont '
+            f'<b style="color:#4E5466">5 réfutées</b>, critères écrits avant d\'ouvrir les données · '
+            # Nouvel onglet : GitHub refuse de s'afficher dans le cadre de Streamlit Cloud (annoncé : RGAA, critère 13.2)
+            f'<a style="color:#4E5466" href="https://github.com/Melvy-hub/hackaviz_2026-equipe-18" target="_blank" '
+            f'rel="noopener noreferrer">code et données sur GitHub (nouvel onglet)</a></p>', unsafe_allow_html=True)
 
-
-def station_html(numero: int, icone: str, nom: str, chiffre: str, texte: str, coeur: bool) -> str:
-    """Une station du plan de ligne : icône de la page, rond (double si correspondance), nom, chiffre, phrase."""
-    rond = ("width:38px;height:38px;border:4px solid #1B1F2A;box-shadow:0 0 0 4px #fff,0 0 0 8px #1B1F2A"
-            if coeur else "width:32px;height:32px;border:4px solid #1B1F2A")
-    taille, couleur = ("30px", "#C0401A") if coeur else ("21px", u.ENCRE)   # 80 % (variante B, 12/11)
-    return (f'<li style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">'
-            f'{u.badge_mode(icone)}<span aria-hidden="true" style="height:44px;display:flex;align-items:center">'
-            f'<span style="{rond};border-radius:50%;background:#fff;box-sizing:border-box;display:flex;align-items:center;'
-            f'justify-content:center;font-weight:800;font-size:14px">{numero}</span></span>'
-            f'<span style="font-size:15px;font-weight:700;color:#4E5466">{nom}</span>'
-            f'<span style="font-family:Poppins,sans-serif;font-weight:800;font-size:{taille};color:{couleur};line-height:1.1">'
-            f'{chiffre}</span><span style="font-size:14px;line-height:1.4">{texte}</span></li>')
-
-
-st.markdown('<div class="carte"><div style="display:flex;justify-content:space-between;align-items:center">'
-            '<h2 class="sous-titre">Le voyage en cinq stations</h2><span style="display:inline-flex;align-items:center;'
-            f'gap:6px;font-size:14px;font-weight:700;color:#3F4555">{u.icone("drapeau", 16, u.ENCRE)}Terminus : vous êtes ici'
-            '</span></div><div style="position:relative"><div class="trait-ligne" aria-hidden="true" style="position:absolute;left:10%;right:14px;'
-            'top:59px;height:6px;background:#1B1F2A;border-radius:3px"></div><div class="trait-ligne" aria-hidden="true" style="position:absolute;'
-            'left:30%;width:20%;top:55px;height:14px;background:#1B1F2A;border-radius:7px"></div><div class="trait-ligne" aria-hidden="true" '
-            'style="position:absolute;right:0;top:52px;border-left:18px solid #1B1F2A;border-top:10px solid transparent;'
-            'border-bottom:10px solid transparent"></div><ol style="list-style:none;margin:0;padding:0;position:relative;'
-            'display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px">'
-            + "".join(station_html(i + 1, ic, nom, ch, tx, cc) for i, (ic, _, nom, ch, tx, cc) in enumerate(stations))
-            + '</ol><div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-top:12px"><div '
-              'style="grid-column:2 / span 2;border-top:3px solid #C0401A;padding-top:6px;text-align:center;font-size:14px;'
-              'font-weight:700;color:#C0401A">Le cœur du résultat : c\'est le lieu de travail qui décide</div></div></div></div>',
-            unsafe_allow_html=True)
-
-# Les stations du dessin ne sont pas cliquables : le menu latéral sert de navigation, au clavier aussi.
-# Bloc du bas repris de la maquette validée (maquettes_validees/Conclusion.dc.html) : une icône de mode devant
-# chaque piste, une icône devant chaque titre, trois pastilles sous la méthode. Seul changement validé : 14 hypothèses.
-communes_navettes = u.lire("emplois_sans_gare_par_commune.csv").sort_values("emplois_sur_place", ascending=False)["nom"].head(4)
-pistes = [
-    ("velo", f"Faciliter le vélo pour les {u.fr(round(h16.loc['Ensemble', 'dont_moins_5km'], -3))} trajets en voiture "
-             f"de moins de 5 km entre communes de banlieue."),
-    ("navette", "Relier par navette ou covoiturage organisé les communes d'emploi sans gare : "
-                + ", ".join(communes_navettes) + "."),
-    ("lune", "Mesurer les temps de trajet de nuit en bus, pour ceux qui travaillent entre minuit et 5h (piste à tester)."),
-]
-g, d = st.columns(2)
-with g:
-    st.markdown(f'<section aria-labelledby="titre-pistes" class="encadre" style="background:#FCEDE8;border-radius:16px;'
-                f'padding:18px 22px;display:flex;flex-direction:column;gap:12px">'
-                f'<h2 id="titre-pistes" style="margin:0;display:flex;align-items:center;gap:8px;font-size:16px;'
-                f'font-weight:700;color:#C0401A">{u.icone("ampoule", 18, "#C0401A")}<span style="margin-left:8px">Pistes que suggèrent les données</span></h2>'
-                + "".join(f'<div class="piste" style="display:flex;gap:12px;align-items:flex-start;font-size:15px;'
-                          f'line-height:1.5">{u.badge_mode(ic)}<span>{texte}</span></div>' for ic, texte in pistes)
-                + '</section>', unsafe_allow_html=True)
-with d:
-    pastille = ('padding:3px 12px;border-radius:999px;background:#E5EFF5;color:#1F6A8C;font-size:14px;font-weight:700')
-    st.markdown(f'<section aria-labelledby="titre-methode" class="encadre" style="background:#FFFFFF;border:1px solid '
-                f'#E7EAE4;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:12px">'
-                f'<h2 id="titre-methode" style="margin:0;display:flex;align-items:center;gap:8px;font-size:16px;'
-                f'font-weight:700"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" '
-                f'stroke="#1B1F2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/>'
-                f'<path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span style="margin-left:8px">Notre méthode</span></h2>'
-                f'<p style="margin:0;font-size:15px;line-height:1.55"><strong>15 hypothèses testées</strong>, dont '
-                f'<strong>5 réfutées en tout ou en partie</strong>, toutes publiées avec leurs critères, écrits avant '
-                f"d'ouvrir les données pour les tests principaux. Une erreur dans les données (gares sans code commune) "
-                f'a été trouvée et corrigée.</p>'
-                f'<div style="display:flex;flex-wrap:wrap;gap:6px"><span class="pastille" style="{pastille}">Données '
-                f'ouvertes</span><span class="pastille" style="{pastille}">Code open source</span><span class="pastille" '
-                f'style="{pastille}">Chaque chiffre vient d\'un script</span></div>'
-                f'<p style="margin:0;font-size:14px;color:#4E5466">Code et données : <a style="color:#1B1F2A" '
-                # Nouvel onglet : GitHub refuse de s'afficher dans le cadre de Streamlit Cloud ; l'ouverture est
-                # annoncée dans le texte du lien (RGAA, critère 13.2)
-                f'href="https://github.com/Melvy-hub/hackaviz_2026-equipe-18" target="_blank" rel="noopener noreferrer">'
-                f'dépôt GitHub de l\'équipe (nouvel onglet)</a></p>'
-                f'</section>', unsafe_allow_html=True)
-
-u.navigation_bas(FICHIER)
+# Pas de navigation_bas : les deux boutons ci-dessus la remplacent (« ← Chercher ma commune » aurait fait doublon)
 u.sources("INSEE (recensement 2023, enquête Emploi 2025) ; Île-de-France Mobilités (offre 2025, référentiel des arrêts) ; "
-          "geo.api.gouv.fr.")
+          "France Travail (Besoins en main-d'œuvre 2026) ; geo.api.gouv.fr. Constat « une gare ne suffit pas » : "
+          "src/12_gare_ne_suffit_pas.py (exploratoire ; seuil « 2 sur 3 » choisi par l'équipe, au moins 200 trajets par commune).")

@@ -96,13 +96,16 @@ ATTENDU = {
         ("interrupteur carte entière (changement validé le 2026-11-11)", "Voir toute l"),   # libellé de widget : accents codés dans le rendu, on cherche le début
     ],
     "pages/conclusion.py": [
+        # Conclusion validée le 2026-11-12 (canevas « schéma compact et chiffré ») : elle conclut au lieu de résumer
         ("bande de couleur à gauche de la page", 'class="bande-page"'),
-        ("titre", "pas aux emplois de banlieue"),
-        ("plan de ligne", "Le voyage en cinq stations"),
-        ("pistes", "Pistes que suggèrent les données"),
-        ("icône devant chaque piste (vélo, navette, lune)", 'class="piste"'),
-        ("méthode", "Notre méthode"),
-        ("trois pastilles sous la méthode", "Chaque chiffre vient d'un script"),
+        ("titre-message", "qui décide"),
+        ("schéma en aiguillage", "Lieu de"),
+        ("nuance du script 12 sur la branche « avec gare »", "communes avec gare"),
+        ("actions pour IDFM", "Ce que ça change pour"),
+        ("perspective sous chaque action", "Et ensuite :"),
+        ("bouton vers la page commune", "Et votre commune ?"),
+        ("bouton retour à l'accueil (maquette validée)", "Revenir à l"),
+        ("méthode en une ligne", "15 hypothèses"),
     ],
 }
 
