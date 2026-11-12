@@ -110,9 +110,13 @@ def legende(elements: list) -> str:
             + "".join(u.pastille_legende(libelle, style) for libelle, style in elements) + '</div>')
 
 
-def bloc_solution(pictos, couleur_barre, couleur_texte, titre, territoire, chiffre, phrase, contexte, titre_carte,
-                  carte, alt, elements_legende, titre_classement, lignes, maximum, unite, lecture) -> str:
-    """Une solution : tuile (HAP Express), puis carte zoomable et classement côte à côte, puis la phrase « Lecture »."""
+def bloc_solution(pictos, couleur_barre, couleur_texte, titre, territoire, chiffre, phrase, contexte, origine,
+                  titre_carte, carte, alt, elements_legende, titre_classement, lignes, maximum, unite, lecture) -> str:
+    """Une solution : tuile (HAP Express), puis carte zoomable et classement côte à côte, puis la phrase « Lecture ».
+
+    origine : ligne « D'où vient ce chiffre ? » (validée par Melvyn le 2026-11-12) ; des lecteurs ne comprenaient pas
+    d'où venaient les grands chiffres de la page (source, ce qui est compté, lien avec le chiffre du titre).
+    """
     nom_carte = f"{carte}{'' if entiere else '_cadree'}.svg"
     return (
         f'<div style="position:relative;padding-left:12px">'
@@ -126,6 +130,8 @@ def bloc_solution(pictos, couleur_barre, couleur_texte, titre, territoire, chiff
         f'<span style="font-family:Poppins,sans-serif;font-weight:800;font-size:32px;line-height:1;color:{couleur_texte}">'
         f'{chiffre}</span><span style="font-size:16px;line-height:1.4">{phrase}</span></div>'
         f'<div style="font-size:14px;color:#4E5466;margin-top:4px">{contexte}</div>'
+        f'<p style="font-size:14px;line-height:1.5;color:#4E5466;margin:8px 0 0"><strong style="color:{u.ENCRE}">'
+        f"D'où vient ce chiffre ?</strong> {origine}</p>"
         f'<div style="font-family:Poppins,sans-serif;font-size:17px;font-weight:800;line-height:1.5;margin:16px 0 10px">'
         f'{titre_carte}</div>'
         f'<div class="pile-mobile" style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:22px;'
@@ -146,6 +152,11 @@ with st.container(border=True, key="carte_velo"):
         f"des trajets en voiture font moins de 5 km en petite couronne (grande couronne : {pct(gc['voiture_moins_5km_pct'])})",
         f"Toute la banlieue : {pct(courts['part_moins_5km_pct'])} des trajets en voiture d'une commune de banlieue à une "
         f"autre, soit {u.fr(round(courts['dont_moins_5km'], -3))} sur {u.fr(round(courts['trajets_voiture'], -3))}",
+        # Définitions vérifiées dans les scripts 06 et 10 (couronne de la commune de RÉSIDENCE)
+        f"Recensement 2023 (INSEE) : trajets domicile-travail faits en voiture entre deux communes de banlieue, classés "
+        f"selon la commune de résidence. Un trajet compte comme « moins de 5 km » quand les centres des deux communes "
+        f"sont à moins de 5 km à vol d'oiseau. Le {pct(courts['part_moins_5km_pct'])} du titre est la même mesure pour "
+        f"toute la banlieue.",
         f'{pastille(str(compte["communes_velo_au_moins_un_tiers"]) + " communes", ORANGE_TEXTE)} où au moins 1 trajet en '
         f'voiture sur 3 fait moins de 5 km',
         "carte_velo_lisible",
@@ -173,6 +184,12 @@ with st.container(border=True, key="carte_navette"):
         f"Hors de Paris : {pct(sans_gare['part_sans_gare_pct'])}, soit {u.fr(round(sans_gare['emplois_sans_gare'], -3))} "
         f"emplois sur {u.fr(round(sans_gare['emplois'], -3))}. Les employeurs de grande couronne jugent "
         f"{pct(gc['part_A_pct'])} de leurs projets de recrutement difficiles (Paris : {pct(paris['part_A_pct'])}).",
+        # Définitions vérifiées dans les scripts 07 et 10 (couronne de la commune de TRAVAIL)
+        f"Recensement 2023 (INSEE) : postes d'employés et d'ouvriers classés selon la commune de travail ; une commune "
+        f"« sans gare » n'a aucun arrêt de métro, de RER, de train ou de tram (offre IDFM 2025). Le "
+        f"{pct(sans_gare['part_sans_gare_pct'])} du titre est la même mesure pour toute la banlieue, comme à la station 2. "
+        f"Recrutements difficiles : enquête Besoins en main-d'œuvre 2026 de France Travail, part des projets que les "
+        f"employeurs jugent difficiles.",
         f'{pastille(str(compte["communes_sans_gare_500_emplois"]) + " communes", ROSE)} sans gare comptent au moins 500 '
         f'postes d\'employés et d\'ouvriers',
         "carte_navettes_lisible",
