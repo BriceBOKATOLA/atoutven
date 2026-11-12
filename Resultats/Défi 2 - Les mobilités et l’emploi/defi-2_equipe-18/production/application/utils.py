@@ -413,12 +413,25 @@ def lire(nom: str) -> pd.DataFrame:
     return pd.read_csv(DONNEES / nom, encoding="utf-8-sig")
 
 
-@st.cache_data
 def svg_base64(nom: str) -> str:
     """Contenu d'une image SVG du dossier donnees/, encodé pour une balise <img>.
 
     On passe par <img> plutôt que st.image : st.image ne permet pas d'écrire un texte alternatif (attribut alt),
     indispensable pour les lecteurs d'écran.
+    La date de modification et la taille du fichier font partie de la clé du cache : quand une carte est mise à jour,
+    l'ancienne version n'est plus servie (le 2026-11-12, Streamlit Cloud servait encore les cartes d'avant leur
+    allègement, car le cache ne dépendait que du nom).
+    """
+    infos = (DONNEES / nom).stat()
+    return _svg_base64_en_cache(nom, infos.st_mtime_ns, infos.st_size)
+
+
+@st.cache_data
+def _svg_base64_en_cache(nom: str, date_modification: int, taille: int) -> str:
+    """Lecture et encodage réels, mis en cache selon (nom, date de modification, taille).
+
+    Les deux derniers paramètres ne servent qu'à la clé du cache ; ils ne commencent pas par « _ », sinon Streamlit
+    les ignorerait dans la clé.
     """
     import base64
     return base64.b64encode((DONNEES / nom).read_bytes()).decode("ascii")

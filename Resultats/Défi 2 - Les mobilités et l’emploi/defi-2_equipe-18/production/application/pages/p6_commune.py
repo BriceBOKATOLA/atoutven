@@ -23,6 +23,7 @@ import pandas as pd
 import streamlit as st
 
 import utils as u
+from svg_leger import relatif
 
 FICHIER = "pages/p6_commune.py"
 CODE_DEFAUT = "91228"           # Évry-Courcouronnes : la commune de la maquette validée
@@ -51,6 +52,17 @@ def contours() -> dict:
     return json.loads((u.DONNEES / "contours_communes.json").read_text(encoding="utf-8"))
 
 
+@st.cache_data
+def chemins_legers() -> dict:
+    """Contours écrits en écarts relatifs (svg_leger.relatif), calculés une seule fois pour toutes les recherches.
+
+    Même dessin, carte environ 40 % plus légère : elle est renvoyée au navigateur à chaque changement de commune, ce
+    qui créait de la latence en ligne (2026-11-12). Les tracés absolus de contours() restent utilisés pour le cadrage
+    (boite), qui lit les coordonnées absolues.
+    """
+    return {code: relatif(chemin) for code, chemin in contours()["chemins"].items()}
+
+
 def couleur_classe(part: float) -> str:
     """Couleur de la classe d'une part (%), ou gris très clair sous 0,25 %."""
     return next((c for seuil, _, c in CLASSES if part >= seuil), SANS_COULEUR)
@@ -75,10 +87,13 @@ def carte_svg(code: str, entiere: bool) -> str:
     geo = contours()
     d = destinations[destinations["code_residence"] == code].sort_values("part_pct", ascending=False)
     parts = d.set_index("code_travail")["part_pct"]
-    chemins = "".join(f'<path d="{ch}" fill="{couleur_classe(parts.get(c, 0))}" stroke="#FFFFFF" stroke-width="0.5"/>'
-                      for c, ch in geo["chemins"].items())
+    legers = chemins_legers()
+    # Trait blanc commun à toutes les communes, écrit une seule fois sur le groupe (même rendu, carte plus légère)
+    chemins = ('<g stroke="#FFFFFF" stroke-width="0.5">'
+               + "".join(f'<path d="{legers[c]}" fill="{couleur_classe(parts.get(c, 0))}"/>' for c in geo["chemins"])
+               + "</g>")
     # Commune de résidence encadrée en dernier, pour passer au-dessus des voisines
-    cadre = f'<path d="{geo["chemins"][code]}" fill="none" stroke="#1B1F2A" stroke-width="2.4"/>' if code in geo["chemins"] else ""
+    cadre = f'<path d="{legers[code]}" fill="none" stroke="#1B1F2A" stroke-width="2.4"/>' if code in legers else ""
     zone = [c for c in d.loc[d["part_pct"] >= SEUIL_ZOOM_PCT, "code_travail"] if c in geo["chemins"]] or [code]
     if entiere:
         x0, y0, largeur, hauteur = 0, 0, geo["largeur"], geo["hauteur"]
