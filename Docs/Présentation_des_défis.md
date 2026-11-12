@@ -1,8 +1,8 @@
-![Logo du Hackathon Mobilités](Images/logo_rectangle.png)
+![Logo du Hackathon Mobilités](../Images/logo_rectangle.png)
 
 # Présentation des défis du Hackaviz Mobilités 2026
 
-Cette page décrit les 4 défis du Hackaviz Mobilités 2026. Lien vers [le guide du participant](README.md).
+Cette page décrit les 4 défis du Hackaviz Mobilités 2026. Lien vers [le guide du participant](../README.md).
 
 ## Défi 1 - Comprendre comment la chaleur influence la mobilité et donner des clés de lecture pour aider à adapter les mobilités aux changements climatiques
 
