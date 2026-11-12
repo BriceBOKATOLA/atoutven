@@ -575,10 +575,11 @@ def navigation_bas(fichier: str) -> None:
 
 # Mention courte d'accessibilité en pied de page (seule mention autorisée : l'accessibilité est intégrée à chaque
 # page, jamais une page à part ; décision de Melvyn du 2026-11-10). Elle dit ce qui est fait ET ce qui reste imparfait.
-MENTION_ACCESSIBILITE = ("Accessibilité numérique : commentaire à écouter et description de chaque graphique, tableaux de données, "
-                         "navigation au clavier, information jamais portée par la couleur seule. Reste imparfait : "
-                         "certains éléments de Streamlit (menu, listes) ne sont pas entièrement maîtrisés, et "
-                         "l'application n'a pas encore été testée par une personne non voyante.")
+# Rédigée pour le visiteur (demande de Melvyn, 12/11) : pas de détail technique sur l'outil (« éléments de Streamlit »),
+# qui ne lui apprend rien ; seulement ce qui est fait et ce qui reste vraiment à faire.
+MENTION_ACCESSIBILITE = ("Accessibilité numérique : commentaire à écouter et description de chaque graphique, graphiques "
+                         "à écouter en sons, tableaux de données, navigation au clavier, information jamais portée par la "
+                         "couleur seule. Reste à faire : un test par des personnes non voyantes, avec leur lecteur d'écran.")
 
 
 # Liens des sources (demande de Melvyn, 12/11) : le texte des sources reste le même, un lien est posé derrière chaque

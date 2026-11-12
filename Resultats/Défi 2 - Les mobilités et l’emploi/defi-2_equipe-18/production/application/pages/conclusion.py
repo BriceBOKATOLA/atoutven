@@ -144,9 +144,12 @@ st.markdown(f'<section aria-labelledby="titre-changements" style="margin-top:8px
             f'<a href="./" target="_self" style="{bouton};border:2px solid {u.ENCRE};color:{u.ENCRE}">Revenir à l\'accueil ↺</a></div>'
             f'<p style="margin:22px 0 0;font-size:14px;color:{GRIS}"><b style="color:#4E5466">15 hypothèses</b> testées, dont '
             f'<b style="color:#4E5466">5 réfutées</b>, critères écrits avant d\'ouvrir les données · '
-            # Nouvel onglet : GitHub refuse de s'afficher dans le cadre de Streamlit Cloud (annoncé : RGAA, critère 13.2)
+            # Nouvel onglet : GitHub refuse de s'afficher dans le cadre de Streamlit Cloud. « (nouvel onglet) » retiré du
+            # texte visible (demande de Melvyn, 12/11 : l'onglet s'ouvre de lui-même) ; il reste dans le nom lu par les
+            # lecteurs d'écran (aria-label), qui ne voient pas l'onglet s'ouvrir (RGAA, critère 13.2)
             f'<a style="color:#4E5466" href="https://github.com/Melvy-hub/hackaviz_2026-equipe-18" target="_blank" '
-            f'rel="noopener noreferrer">code et données sur GitHub (nouvel onglet)</a></p>', unsafe_allow_html=True)
+            f'rel="noopener noreferrer" aria-label="code et données sur GitHub (nouvel onglet)">code et données sur '
+            f'GitHub</a></p>', unsafe_allow_html=True)
 
 # Pas de navigation_bas : les deux boutons ci-dessus la remplacent (« ← Chercher ma commune » aurait fait doublon)
 u.sources("INSEE (recensement 2023, enquête Emploi 2025) ; Île-de-France Mobilités (offre 2025, référentiel des arrêts) ; "
