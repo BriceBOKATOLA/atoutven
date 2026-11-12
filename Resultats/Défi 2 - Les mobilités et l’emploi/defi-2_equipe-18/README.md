@@ -53,7 +53,7 @@ Une conclusion reprend le message et propose trois actions à Île-de-France Mob
 **Accessibilité numérique, intégrée à chaque page** (jamais une page à part) :
 
 - un bouton « Écouter » lit un **commentaire complet** de la page, dans l'ordre où un voyant la lit : où l'on est, la réponse, ce que montre le graphique avec ses chiffres, le chiffre clé, « À retenir », la limite, ce qu'il y a à déplier et la page suivante. Chaque bloc « Pour aller plus loin » a son propre bouton ;
-- un bouton « **Écouter le graphique en sons** » (pages 1 et 4) : chaque valeur devient une note, plus aiguë quand la valeur est plus haute ; on entend l'écart entre les métiers et la chute de l'offre après minuit ;
+- un bouton « **Écouter le graphique en sons** » sur chaque page à graphique (stations 1 à 6) : chaque valeur devient une note, plus aiguë quand la valeur est plus haute ; on entend par exemple l'écart entre les métiers, le saut de la voiture quand il n'y a pas de gare, ou la chute de l'offre après minuit ;
 - pour les lecteurs d'écran, une **description d'ensemble** de chaque graphique (la comparaison, pas un texte par barre) et de **vrais tableaux** de données (titre, en-têtes) ; sur la page « Chercher ma commune », le résultat est annoncé dès qu'on change de commune ou de catégorie ;
 - aucune information portée par la couleur seule, textes de 14 px minimum, navigation au clavier, page déclarée en français, affichage adapté au téléphone et au zoom ;
 - synthèse vocale et sons produits par le navigateur (Web Speech API, Web Audio API) : aucun service extérieur ;
@@ -162,12 +162,6 @@ python preparation/preparer_offre_horaire.py  # et les autres scripts du dossier
 ```
 
 Un test vérifie que chaque page contient les éléments des maquettes validées : `python tests/verifier_conformite.py` (depuis `production/application/`).
-
-## Qui a fait quoi
-
-- **Melvyn MOTHO** : hypothèses et protocoles de test, analyses des données (scripts 00 à 12), maquettes et application.
-- **Pierre THAI** : relecture critique des maquettes, à partir de captures annotées. Ses recommandations ont donné le titre de l'Accueil (« Quand le lieu de travail impose la voiture »), la formulation « 13 fois moins » à la place d'un pourcentage mal compris, le titre, le sous-titre et le « À retenir » de la page sur le télétravail, et une description plus exacte de la page « Loin des gares » (« presque deux fois plus souvent »). Il a aussi proposé l'hypothèse sur le revenu (« la voiture comme luxe ? », script 09), qui est devenue le contrôle du résultat principal : à revenu égal, l'absence de gare fait toujours monter la voiture.
-- **Maroua Zoubir** : idée et premier travail sur la ponctualité des lignes de RER et de train, repris dans le script 11 et la page « Loin des gares ».
 
 ## La licence
 
