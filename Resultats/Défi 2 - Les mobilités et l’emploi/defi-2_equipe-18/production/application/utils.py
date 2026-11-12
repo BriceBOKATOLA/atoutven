@@ -261,7 +261,10 @@ def _ligne_de_metro(fichier_courant: str, nuit: bool) -> str:
     stations = []
     for i, (fichier, titre, numero, _) in enumerate(PAGES):
         courant = fichier == fichier_courant
-        adresse = "/" if i == 0 else "/" + Path(fichier).stem
+        # Adresses RELATIVES (« p1_metiers », pas « /p1_metiers ») : sur Streamlit Cloud, l'application tourne dans un
+        # cadre (iframe) à l'adresse /~/+/ ; un lien absolu rechargeait tout le site Streamlit Cloud dans ce cadre
+        # (l'application dans l'application, constaté le 2026-11-12). Le cadre interdit aussi target="_top".
+        adresse = "./" if i == 0 else Path(fichier).stem
         pastille = (f"width:30px;height:30px;background:#C0401A;border:3px solid {encre};color:#FFFFFF;font-size:14px"
                     if courant else
                     f"width:26px;height:26px;background:{fond_menu};border:3px solid {encre};color:{encre};font-size:12px")

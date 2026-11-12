@@ -58,11 +58,12 @@ with gauche:
                 + '</div>', unsafe_allow_html=True)
     # Boutons de la maquette : un bouton principal plein (clair sur fond nuit) et un lien simple.
     # De vrais liens <a> vers l'adresse de chaque page : atteignables au clavier (contour visible, voir utils).
+    # Adresses relatives, comme dans le menu : sur Streamlit Cloud, l'application tourne dans un cadre (voir utils.menu)
     st.markdown('<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:8px">'
-                '<a class="bouton-principal" href="/p1_metiers" target="_self" style="display:inline-flex;'
+                '<a class="bouton-principal" href="p1_metiers" target="_self" style="display:inline-flex;'
                 'align-items:center;gap:10px;padding:14px 26px;background:#F1F2F6;border-radius:999px;font-weight:800;'
                 'font-size:16px;color:#141A2E;text-decoration:none">Commencer le voyage →</a>'
-                '<a href="/p6_commune" target="_self" style="font-size:15px;font-weight:600;color:#8FC3DE">'
+                '<a href="p6_commune" target="_self" style="font-size:15px;font-weight:600;color:#8FC3DE">'
                 'Aller directement à ma commune</a></div>', unsafe_allow_html=True)
 
 with droite:

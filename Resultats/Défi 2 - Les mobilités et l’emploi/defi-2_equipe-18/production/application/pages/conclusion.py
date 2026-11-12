@@ -106,7 +106,10 @@ with d:
                 f'ouvertes</span><span class="pastille" style="{pastille}">Code open source</span><span class="pastille" '
                 f'style="{pastille}">Chaque chiffre vient d\'un script</span></div>'
                 f'<p style="margin:0;font-size:14px;color:#4E5466">Code et données : <a style="color:#1B1F2A" '
-                f'href="https://github.com/Melvy-hub/hackaviz_2026-equipe-18">dépôt GitHub de l\'équipe</a></p>'
+                # Nouvel onglet : GitHub refuse de s'afficher dans le cadre de Streamlit Cloud ; l'ouverture est
+                # annoncée dans le texte du lien (RGAA, critère 13.2)
+                f'href="https://github.com/Melvy-hub/hackaviz_2026-equipe-18" target="_blank" rel="noopener noreferrer">'
+                f'dépôt GitHub de l\'équipe (nouvel onglet)</a></p>'
                 f'</section>', unsafe_allow_html=True)
 
 u.navigation_bas(FICHIER)
