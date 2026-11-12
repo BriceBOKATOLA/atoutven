@@ -4,7 +4,7 @@ Application de storytelling en français pour le projet de l’équipe Rhizome. 
 
 ## Démarrage
 
-Prérequis : Node.js 20.9 ou plus récent et npm. Depuis la racine du projet :
+Prérequis pour le développement, les tests et l’export : Node.js 22.18 ou plus récent dans la branche 22, ou Node.js 24 ou plus récent, et npm. Le contrat `engines.node` est `^22.18.0 || >=24.0.0`. Depuis la racine du projet :
 
 ```sh
 cd production/web

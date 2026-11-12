@@ -38,12 +38,12 @@ Le site utilise les dépendances npm déclarées dans `package.json`. Le fichier
 
 | Dépendance | Plage déclarée | Version verrouillée | Rôle |
 | --- | --- | --- | --- |
-| Next.js | `^16.4.6` | 16.4.6 | Application et export statique |
+| Next.js | `16.4.5` | 16.4.5 | Application et export statique |
 | React et React DOM | `^19.3.1` | 19.3.1 | Rendu de l'interface |
 | Highcharts | `^13.1.1` | 13.1.1 | Cartes Highmaps et accessibilité |
-| TypeScript | `^7.0.2` | 7.0.2 | Vérification des types, en développement |
+| TypeScript | `6.0.3` | 6.0.3 | Vérification des types, en développement |
 
-Next.js 16.4.6 exige Node.js 20.9 ou plus récent. Les tests du graphique 2 utilisent l'exécution native de fichiers TypeScript et nécessitent Node.js 22.18 ou plus récent. Cette version active par défaut la [suppression des types TypeScript](https://nodejs.org/en/blog/release/v22.18.0). npm est nécessaire pour installer les dépendances et lancer les commandes du projet. Node.js 25.9.0 et npm 11.21.1 ont été utilisés pour les vérifications locales ; ce ne sont pas des versions minimales imposées.
+Pour le développement, les tests et l'export, le projet exige Node.js 22.18 ou plus récent dans la branche 22, ou Node.js 24 ou plus récent, et npm. Le contrat `engines.node` de `package.json` est `^22.18.0 || >=24.0.0`. Les tests du graphique 2 utilisent l'exécution native de fichiers TypeScript.
 
 `npm run typecheck` génère les types de routes puis vérifie les types. `npm run build` produit le site dans `out/` avec `output: "export"` et `trailingSlash: true`. Le site doit être servi par un serveur de fichiers statiques. Les URL des instantanés commencent à la racine `/data/` ; un hébergement sous un sous-chemin nécessite une adaptation des chemins. Les commandes détaillées figurent dans le [README du site](../README.md).
 
