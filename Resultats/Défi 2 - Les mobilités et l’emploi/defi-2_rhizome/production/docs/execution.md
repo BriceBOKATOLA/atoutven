@@ -13,7 +13,21 @@ python3 -m venv .venv
 
 Sur Windows, remplacez `.venv/bin/python` par `.venv\Scripts\python.exe` dans les commandes. L'installation nécessite un accès aux paquets Python. Les polices Barlow et Barlow Condensed améliorent la fidélité ; si elles sont absentes, Matplotlib utilise une police de remplacement.
 
-## Générer les planches
+## Générer la version statique du graphique 1
+
+Depuis la racine du projet, exécutez :
+
+```sh
+.venv/bin/python production/scripts/01_transport_extensions.py
+```
+
+Le script écrit `01_reseau_transport_extens.png` dans `production/pitch/png/` et `01_reseau_transport_extens.pdf` dans `production/pitch/PDF/`. Il remplace les fichiers existants de même nom. Pour choisir un autre dossier, ajoutez `--output-dir CHEMIN`.
+
+Le script utilise le même instantané que le graphique 1 du site. Les exports présents dans le dépôt n'ont pas nécessairement été générés avec le code et les données actuels.
+
+## Générer les planches conservées
+
+Les autres planches sont des travaux antérieurs. Les livrables du projet sont les trois graphiques du site et la version statique du graphique 1.
 
 Pour générer les cinq planches et enregistrer les PNG et PDF directement dans `production/pitch/`, lancez :
 

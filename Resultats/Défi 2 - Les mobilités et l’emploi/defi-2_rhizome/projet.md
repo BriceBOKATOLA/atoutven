@@ -14,7 +14,7 @@ La visualisation s'adresse au public du Hackaviz et aux personnes qui s'intéres
 
 ## Idée de visualisation
 
-La présentation propose un parcours en trois études : extension du réseau ferré, zones d'emploi et situation en 2025. Les [planches disponibles](production/docs/visualisation.md) présentent notamment les ouvertures de lignes, l'emploi salarié privé et les demandeurs d'emploi. Elles sont fournies en PNG et en PDF avec leurs données et scripts.
+Le [site interactif](https://dataviz-rhizome-liard.vercel.app/) propose un parcours en trois graphiques : le réseau ferré, les demandeurs d'emploi par zone d'emploi et les pôles d'emploi par département. Seul le graphique 1, consacré au réseau ferré, est également fourni en PNG et en PDF, avec ses données et son script de génération. La [documentation des visualisations](production/docs/visualisation.md) présente les livrables et les travaux antérieurs.
 
 ## Périmètre
 

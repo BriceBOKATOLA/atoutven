@@ -4,9 +4,11 @@ Ce dossier contient les cartes, leurs données et leur code. Le [README du proje
 
 Les formats de rendu sont précisés dans les [instructions de dépôt](../../../README.md).
 
-## Planches
+## Livrables
 
-Les cinq planches, leurs données et leurs scripts sont décrits dans [docs/visualisation.md](docs/visualisation.md). La documentation présente les sources, les limites et les commandes de reproduction.
+Les livrables sont les trois graphiques intégrés au [site web](web/README.md). Le graphique 1 dispose aussi d’une version statique générée par Python en PNG et PDF. Les [instructions d’exécution](docs/execution.md#générer-la-version-statique-du-graphique-1) décrivent sa génération.
+
+Les autres planches et leurs scripts sont conservés comme travaux antérieurs. Leurs fichiers sont décrits dans [docs/visualisation.md](docs/visualisation.md).
 
 Les [instructions d’exécution](docs/execution.md) détaillent les commandes, les dépendances et les étapes manquantes.
 

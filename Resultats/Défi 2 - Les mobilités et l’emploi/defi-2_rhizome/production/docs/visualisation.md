@@ -8,17 +8,23 @@ Explorer comment l'évolution du réseau de transport francilien se situe par ra
 
 Le territoire étudié est l'Île-de-France. Selon l'indicateur, les comparaisons portent sur 2015–2025, 2016–2024 ou 2017–2023.
 
-## Résultats disponibles
+## Livrables
+
+Les livrables sont les trois graphiques du [site interactif](../web/README.md) : réseau ferré, demandeurs d’emploi et zones d’emploi, puis pôles d’emploi et départements. Le graphique 1 peut aussi être [généré en PNG et PDF](execution.md#générer-la-version-statique-du-graphique-1) avec Python.
+
+## Planches conservées
+
+La planche 01 est la version statique du graphique 1. Les scripts et données des autres planches ci-dessous sont des travaux antérieurs ; leurs PNG et PDF ne sont pas présents dans l’arbre de travail.
 
 | Production | Contenu | Fichiers |
 |---|---|---|
 | 01 — Réseau et extensions | Lignes et gares ouvertes de 2015 à 2025. | [PNG](../pitch/png/01_reseau_transport_extens.png) · [PDF](../pitch/PDF/01_reseau_transport_extens.pdf) · [données](../datasets/clean/01_network/) |
-| 02 — Progression de l'emploi | Variation de l'emploi salarié privé par commune, avec le réseau récent. La planche indique environ 651 000 emplois supplémentaires en Île-de-France entre 2015 et 2025. | [PNG](../pitch/png/02_emploi_progress.png) · [PDF](../pitch/PDF/02_emploi_progress.pdf) · [données](../datasets/clean/02_employment_growth/) |
-| 04 — Demandeurs d'emploi | Évolution des inscrits en catégories A, B et C entre les moyennes du 4e trimestre 2016 et du 4e trimestre 2024, avec un focus sur le tram T4. | [PNG](../pitch/png/04_demandeurs_emplois.png) · [PDF existant](../pitch/PDF/03_demandeurs_emplois.pdf) · [données](../datasets/clean/04_jobseekers/) |
-| 05 — Ensemble du réseau | Comparaison des réseaux et de leurs longueurs en 2015 et 2025. | [PNG](../pitch/png/05_tous_reseaux_2015_2025.png) · [PDF](../pitch/PDF/05_tous_reseaux_2015_2025.pdf) · [données](../datasets/clean/05_all_networks_2015_2025/) |
-| 06 — Pôles d'emploi | Communes d'au moins 10 000 emplois salariés privés, et indicateurs complémentaires sur l'emploi et les auto-entrepreneurs. | [PNG](../pitch/png/06_poles_emploi_2015_2025.png) · [PDF](../pitch/PDF/06_poles_emploi_2015_2025.pdf) · [données](../datasets/clean/06_employment_centers_2015_2025/) |
+| 02 — Progression de l'emploi | Variation de l'emploi salarié privé par commune, avec le réseau récent. La planche indique environ 651 000 emplois supplémentaires en Île-de-France entre 2015 et 2025. | [données](../datasets/clean/02_employment_growth/) |
+| 04 — Demandeurs d'emploi | Évolution des inscrits en catégories A, B et C entre les moyennes du 4e trimestre 2016 et du 4e trimestre 2024, avec un focus sur le tram T4. | [données](../datasets/clean/04_jobseekers/) |
+| 05 — Ensemble du réseau | Comparaison des réseaux et de leurs longueurs en 2015 et 2025. | [données](../datasets/clean/05_all_networks_2015_2025/) |
+| 06 — Pôles d'emploi | Communes d'au moins 10 000 emplois salariés privés, et indicateurs complémentaires sur l'emploi et les auto-entrepreneurs. | [données](../datasets/clean/06_employment_centers_2015_2025/) |
 
-Pour la planche 04, le PNG est présent ; un PDF des demandeurs d'emploi est disponible sous le nom `03_demandeurs_emplois.pdf`, et non sous le nom indiqué dans le tableau. Les fichiers existants ne sont pas nécessairement identiques aux sorties des scripts actuels.
+Les [instructions d’exécution](execution.md#générer-les-planches-conservées) permettent de régénérer ces planches. Les fichiers existants ne sont pas nécessairement identiques aux sorties des scripts actuels.
 
 ## Sources et fichiers utilisés
 

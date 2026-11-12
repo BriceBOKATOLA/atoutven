@@ -20,7 +20,7 @@ Comment l'évolution des transports franciliens se situe-t-elle par rapport à c
 
 ## Notre visualisation
 
-Les [planches](production/docs/visualisation.md) présentent l’évolution du réseau ferré et des indicateurs d’emploi en Île-de-France. Les planches sont fournies avec leurs données et scripts. Certains exports sont absents du dépôt ; leur état est précisé dans la documentation des planches. Elles décrivent des évolutions sans établir de relation causale.
+Les livrables sont les trois graphiques du [site web](production/web/README.md) : le réseau ferré, les demandeurs d'emploi par zone d'emploi et les pôles d'emploi par département. Le graphique 1 dispose aussi d'un export statique PNG et PDF, généré par un [script Python](production/docs/execution.md#générer-la-version-statique-du-graphique-1). Les visualisations décrivent des évolutions sans établir de relation causale.
 
 ## Les données utilisées
 
