@@ -273,11 +273,12 @@ with droite:
     # d'écran et utilisables au clavier ; une ou plusieurs catégories allumées
     st.markdown('<div style="font-size:14px;font-weight:600;color:#4E5466;margin-bottom:-14px">Catégories affichées</div>',
                 unsafe_allow_html=True)
-    # Colonnes à la longueur des mots (« Cadres » plus court) : en ligne, « Employés » était coupé en « Emplo… »
-    # avec trois colonnes égales (12/11)
-    for colonne, (lettre, nom_cat, defaut) in zip(st.columns([0.85, 1.15, 1.05], gap="small"), CATEGORIES):
-        with colonne:
-            st.toggle(nom_cat, value=defaut, key=f"cat_{lettre}")
+    # Conteneur horizontal : chaque interrupteur prend la largeur de son mot. Avec des colonnes de largeur fixe, en ligne
+    # (police un peu plus large), « Employés » puis « Cadres » étaient coupés en « Emplo… » / « Cad… » (12/11).
+    # Si la place manque (téléphone), les interrupteurs passent à la ligne au lieu d'être coupés.
+    with st.container(horizontal=True, gap="medium"):
+        for lettre, nom_cat, defaut in CATEGORIES:
+            st.toggle(nom_cat, value=defaut, key=f"cat_{lettre}", width="content")
     # Annonce pour les lecteurs d'écran : quand on choisit une commune ou une catégorie, le résultat est lu tout seul
     u.annonce(resume_court)
 
