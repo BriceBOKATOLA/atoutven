@@ -126,7 +126,7 @@ La génération des planches commence avec des fichiers déjà préparés. Le [c
 | Télécharger les tracés et gares IDFM | Liens des deux jeux, date de collecte déclarée et GeoJSON locaux. | Commandes d'export, filtres, pagination et version de la réponse non conservés. Un téléchargement actuel ne prouverait pas l'identité avec la copie locale. |
 | Préparer les communes et noms | Géométries dans `clean/shared/hackathon_emploi.gpkg`, `src/dep_idf.geojson`, dictionnaire `src/noms_officiels.json` ; sources administratives citées. | Extraction exacte des contours, millésime du dictionnaire, jointures et traitement des changements de codes non fournis. Source et millésime de `src/rivieres_idf.geojson` non établis. |
 | Extraire et agréger l'emploi Urssaf | Jeu producteur identifié, valeurs communales 2015/2025 dans le GeoPackage, séries 2015–2025 dans `clean/shared/series_emploi_urssaf.json`. | Requêtes, filtres d'activité, agrégation, gestion des valeurs manquantes et construction du GeoPackage non conservés. Les séries annuelles communales nécessaires pour reconstruire chaque groupe ne sont pas fournies. |
-| Croiser gares et communes | Géométries locales et résultat `clean/shared/groupes_lignes.json` avec codes communaux, lignes et années. | Une nouvelle jointure spatiale est techniquement possible, mais la règle exacte aux limites communales, les exclusions et le traitement des doublons ne sont pas attestés par un script initial. Les planches consomment le résultat existant. |
+| Croiser gares et communes | Géométries locales et résultat `clean/shared/groupes_lignes.json` avec codes communaux, lignes et années. | `build_line_groups.py` reproduit les groupes conservés à partir des fichiers locaux. Le script initial et ses règles ne sont pas conservés ; la correspondance du résultat ne prouve pas que sa méthode était identique. |
 | Extraire les demandeurs Dares / France Travail | Jeu producteur identifié, `src/defm_2016_2024.txt` et `clean/shared/series_defm_dares.json`. | Téléchargement, filtres, traitement des valeurs manquantes et agrégation des groupes non fournis. La série par groupe ne permet pas de retrouver les séries de toutes les communes. |
 | Extraire l'emploi Insee et les auto-entrepreneurs Urssaf | Jeu Melodi `DS_RP_EMPLOI_LT_PRINC`, fichier texte communal 2017/2023, CSV départemental Urssaf 2015/2025 et constantes dans la planche 06. | Requêtes exactes, sélection des dimensions, filtres et rattachement des constantes aux réponses sources non conservés. |
 | Préparer les CSV et GeoPackages de chaque planche | Fichiers locaux et logique de filtrage/calcul visible dans les scripts des planches. | Ces scripts exportent des images et PDF, pas les tables ni les couches QGIS. `build_qgis_projects.py` lit les GeoPackages existants et écrit seulement les projets `.qgz`. |
@@ -138,6 +138,17 @@ Certains chiffres régionaux et textes des planches sont écrits en dur, notamme
 Le 12 novembre 2026, les six scripts de cartes ont été exécutés avec succès par `generate_pitch.py` dans une copie temporaire de `scripts/` et `datasets/`, avec l'interpréteur `production/.venv/bin/python` déjà disponible (Python 3.15.2, Matplotlib 3.11.2, GeoPandas 1.2.0). Les six PNG mesurent 5 400 × 3 450 pixels et déclarent 299,9994 dpi, valeur d'encodage correspondant au réglage 300 dpi ; les six PDF ont une signature valide. Les empreintes SHA-256 des fichiers existants dans `production/pitch/` sont restées identiques. Les imports explicites de `BASE` et `CLEAN` dans les planches 02, 03, 04 et 06 corrigent les erreurs de chargement rencontrées pendant ce contrôle.
 
 Les deux tests Python ont réussi. Les polices Barlow et Barlow Condensed sont absentes de cet environnement : le rendu utilise une substitution. Le résultat n'a pas fait l'objet d'une comparaison visuelle avec les exports historiques. Le script QGIS n'a pas été exécuté ; son fonctionnement reste à confirmer avec PyQGIS. Le test du récapitulatif ne peut plus être exécuté depuis la disparition de `scripts_recap`. Ce contrôle des cartes ne vérifie pas l'installation des dépendances dans un nouvel environnement ni les téléchargements depuis les producteurs.
+
+## Reconstituer les groupes de lignes
+
+Depuis `defi-2_rhizome`, générez le résultat dans un fichier temporaire et vérifiez-le sans remplacer le fichier conservé :
+
+```sh
+.venv/bin/python production/scripts/build_line_groups.py --output /tmp/rhizome-groupes.json
+.venv/bin/python -m unittest discover -s production/tests -p 'test_build_line_groups.py' -v
+```
+
+Le script croise les gares ouvertes de 2015 à 2025 avec les contours communaux locaux en EPSG:2154 et exclut Paris. Il retient les points strictement à l'intérieur des contours : les points sur une limite sont exclus. Les communes associées à plusieurs points sont dédoublonnées par ligne et année. Les superpositions peuvent attribuer un point à plusieurs communes historiques. Le résultat reproduit les 15 groupes conservés, y compris leurs noms. Les entrées peuvent être remplacées par les options `--stations`, `--communes` et `--official-names` ; `--output` est obligatoire et remplace le fichier indiqué.
 
 ## Site web
 
