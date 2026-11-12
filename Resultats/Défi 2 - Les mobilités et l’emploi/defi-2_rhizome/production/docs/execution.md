@@ -1,6 +1,6 @@
 # Exécuter les scripts des planches
 
-Les commandes ci-dessous partent du dossier `defi-2_rhizome`. Les scripts utilisent les données préparées dans `production/datasets/`. La planche 01 lit aussi `production/web/public/data/rail-network.json`, l'instantané du graphique web. Ils ne téléchargent pas les sources et ne reconstruisent pas les données préparées.
+Les commandes ci-dessous partent du dossier `defi-2_rhizome`. Les scripts utilisent les données préparées dans `production/datasets/`. La planche 01 lit aussi `production/web/public/data/rail-network.json`, l'instantané du graphique web. Ils ne téléchargent pas les sources. Le générateur de territoires décrit plus bas reconstruit une partie des données préparées.
 
 ## Installer les dépendances des cartes
 
@@ -125,7 +125,7 @@ Remplacez `/path/to/qgis-python` par l'interpréteur de votre installation QGIS.
 
 ## Récapitulatif
 
-Le dossier `scripts_recap` n’est plus présent dans le projet. Les commandes de génération et le test du récapitulatif ne sont donc pas disponibles.
+Le dossier local `michel data/scripts_recap` est vide et ignoré par Git. Les commandes de génération et le test du récapitulatif ne sont donc pas disponibles.
 
 ## Ce qui manque pour une reproduction complète
 
@@ -162,6 +162,29 @@ Depuis `defi-2_rhizome`, générez le résultat dans un fichier temporaire et v�
 
 Le script croise les gares ouvertes de 2015 à 2025 avec les contours communaux locaux en EPSG:2154 et exclut Paris. Il retient les points strictement à l'intérieur des contours : les points sur une limite sont exclus. Les communes associées à plusieurs points sont dédoublonnées par ligne et année. Les superpositions peuvent attribuer un point à plusieurs communes historiques. Le résultat reproduit les 15 groupes conservés, y compris leurs noms. Les entrées peuvent être remplacées par les options `--stations`, `--communes` et `--official-names` ; `--output` est obligatoire et remplace le fichier indiqué.
 
+## Reconstituer les données des territoires
+
+Le générateur utilise quatre fichiers locaux dans `production/datasets/src/`. Il ne télécharge pas les données et ne reconstruit pas les GeoJSON préparés en amont. Pour vérifier le résultat sans remplacer les données du projet :
+
+```sh
+python3 production/scripts/build_territories.py --output-dir /tmp/rhizome-territoires
+cmp /tmp/rhizome-territoires/territoires.json production/datasets/src/jobseekers/territoires.json
+python3 -B -m unittest discover -s production/scripts -p 'test_build_territories.py' -v
+```
+
+Sans `--output-dir`, le script remplace `territoires.json` et `couverture.json` dans `production/datasets/src/jobseekers/`. Le graphique 2 utilise les géométries des zones de `territoires.json`, mais ses indicateurs proviennent du classeur des zones d'emploi. L'[analyse des sources](analyse_sources.md) détaille les limites.
+
+## Reconstituer les indicateurs du classeur des zones
+
+Le script suivant calcule les six indicateurs des zones utilisés par le site à partir des sources locales citées dans le classeur. Il produit un rapport JSON et compare les valeurs avec l'onglet « Zones d’emploi », sans modifier le classeur :
+
+```sh
+python3 production/scripts/rebuild_workbook_indicators.py --output /tmp/rhizome-indicateurs-zones.json
+python3 -m unittest discover -s production/tests -p 'test_rebuild_workbook_indicators.py' -v
+```
+
+La copie locale donne 1 080 cellules comparées sans écart, dont 457 absentes. Les valeurs vides de secteurs Urssaf sont exclues des sommes et comptées dans le rapport ; leur absence ne prouve pas qu'elles valent zéro. Les communes manquantes empêchent le calcul de certains totaux de zone. Le rapport ne reconstruit ni le classeur complet ni les téléchargements en amont.
+
 ## Reconstituer l'extrait communal des demandeurs d'emploi
 
 Le script `build_defm.py` lit `datasets/src/mobility-employment/idf-raw-sources/defm_communes_idf.csv`. Il retient les données brutes ABC, tous sexes et tous âges, au quatrième trimestre de 2016 et 2024. Il conserve les communes avec au moins 300 demandeurs en 2016, même si leur valeur de 2024 est inférieure au seuil. Il refuse les doublons et les valeurs 2024 manquantes pour les communes retenues. Les données sources sont déjà préparées ; leur téléchargement initial n'est pas reconstitué.
@@ -185,29 +208,6 @@ python3 -m unittest discover -s production/tests -p 'test_build_defm_series.py' 
 
 Le test compare les données produites au JSON conservé. Les agrégats ne suivent pas le seuil de 300. Pour reproduire les séries historiques, le script exclut deux codes absents de toutes les années du CSV : 93059 dans le groupe T11 et 91182 dans le groupe T12. Ces séries sont donc incomplètes ; le script signale ces exclusions et refuse les autres observations manquantes détectées. La note descriptive est recopiée du fichier conservé. Les groupes restent des données préparées dont la construction initiale manque.
 
-## Reconstituer les données des territoires
-
-Le générateur utilise quatre fichiers locaux dans `production/datasets/src/`. Il ne télécharge pas les données et ne reconstruit pas les GeoJSON préparés en amont. Pour vérifier le résultat sans remplacer les données du projet :
-
-```sh
-python3 production/scripts/build_territories.py --output-dir /tmp/rhizome-territoires
-cmp /tmp/rhizome-territoires/territoires.json production/datasets/src/jobseekers/territoires.json
-python3 -B -m unittest discover -s production/scripts -p 'test_build_territories.py' -v
-```
-
-Sans `--output-dir`, le script remplace `territoires.json` et `couverture.json` dans `production/datasets/src/jobseekers/`. Le graphique 2 utilise les géométries des zones de `territoires.json`, mais ses indicateurs proviennent du classeur des zones d'emploi.
-
-## Reconstituer les indicateurs du classeur des zones
-
-Le script suivant calcule les six indicateurs des zones utilisés par le site à partir des sources locales citées dans le classeur. Il produit un rapport JSON et compare les valeurs avec l'onglet « Zones d’emploi », sans modifier le classeur :
-
-```sh
-python3 production/scripts/rebuild_workbook_indicators.py --output /tmp/rhizome-indicateurs-zones.json
-python3 -m unittest discover -s production/tests -p 'test_rebuild_workbook_indicators.py' -v
-```
-
-La copie locale donne 1 080 cellules comparées sans écart, dont 457 absentes. Les valeurs vides de secteurs Urssaf sont exclues des sommes et comptées dans le rapport ; leur absence ne prouve pas qu'elles valent zéro. Les communes manquantes empêchent le calcul de certains totaux de zone. Le rapport ne reconstruit ni le classeur complet ni les téléchargements en amont.
-
 ## Site web
 
 Le [README du site](../web/README.md) décrit son installation et son export statique. Les commandes suivantes partent du dossier `defi-2_rhizome` et remplacent les trois instantanés dans `production/web/public/data/` :
@@ -218,4 +218,4 @@ Le [README du site](../web/README.md) décrit son installation et son export sta
 .venv/bin/python production/scripts/export-employment-centers.py
 ```
 
-Le fichier `production/requirements.txt` comprend `openpyxl`, nécessaire à l'export des demandeurs d'emploi. Les trois scripts ont été testés avec leurs entrées par défaut et ont produit des fichiers identiques aux instantanés existants. Lors du test, `openpyxl` venait d'un cache accessible par `PYTHONPATH` et n'était pas installé dans l'environnement virtuel utilisé ; l'accès à PyPI était bloqué. Son installation dans cet environnement reste à vérifier. Le [catalogue des données web](../web/docs/donnees.md) décrit les sources et les étapes initiales qui restent indisponibles.
+Le fichier `production/requirements.txt` comprend `openpyxl`, nécessaire à l'export des demandeurs d'emploi. Après le retrait des sources non utilisées, les trois scripts ont été exécutés avec leurs entrées par défaut et des sorties temporaires. Leurs résultats JSON correspondent aux instantanés existants. Ce contrôle utilisait `openpyxl` 3.1.5 dans `production/.venv` ; il ne vérifie pas l'installation des dépendances dans un nouvel environnement. Le [catalogue des données web](../web/docs/donnees.md) décrit les sources et les étapes initiales qui restent indisponibles.

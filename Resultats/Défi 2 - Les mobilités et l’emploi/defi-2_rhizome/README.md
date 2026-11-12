@@ -4,7 +4,11 @@
 **Membres :** Aurélie Auzas, Amar Tamourt, Michel Huang, Elodie Thiébault et Loane Cotellon.
 
 **Défi :** 2, les mobilités et l’emploi.  
-**Contact :** à compléter avec au moins une adresse que l'équipe accepte de publier.
+**Contact :** Aurélie Auzas — adresse e-mail à compléter plus tard.
+
+**Site :** [EcloWork — site interactif](https://dataviz-rhizome-liard.vercel.app/).
+
+**En local :** [http://localhost:3000](http://localhost:3000), après compilation et démarrage du serveur selon les [instructions du site](production/web/README.md#vérification-et-export-statique).
 
 ## Par où commencer
 
@@ -32,7 +36,7 @@ Les cartes utilisent Python, GeoPandas, pandas, NumPy, Matplotlib, SciPy et adju
 
 ## Difficultés et suite du projet
 
-L'emploi Urssaf concerne les salariés du secteur privé. Les autres indicateurs couvrent des populations et des périodes différentes. La présence d'une gare dans une commune ne mesure pas l'accès réel à l'emploi. Certaines étapes de préparation des données ne sont pas disponibles, et la comparaison communale pour 2019 reste à documenter. Les [limites des sources](production/docs/visualisation.md#méthode-et-limites) et les [étapes manquantes pour la reproduction](production/docs/execution.md#ce-qui-manque-pour-une-reproduction-complète) précisent ces points.
+L'emploi Urssaf concerne les salariés du secteur privé. Les autres indicateurs couvrent des populations et des périodes différentes. La présence d'une gare dans une commune ne mesure pas l'accès réel à l'emploi. Certaines étapes de préparation des données ne sont pas disponibles. Les [limites des sources](production/docs/visualisation.md#méthode-et-limites) et les [étapes manquantes pour la reproduction](production/docs/execution.md#ce-qui-manque-pour-une-reproduction-complète) précisent ces points.
 
 ## Installation et utilisation
 

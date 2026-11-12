@@ -7,3 +7,5 @@ next-env.d.ts
 # Instantanés de données et captures générés.
 public/data/
 .playwright-mcp/
+# Cache généré par le contrôle visuel.
+.impeccable/hook.cache.json

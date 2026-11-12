@@ -7,5 +7,15 @@ export default defineConfig([
   ...nextVitals,
   ...nextTypeScript,
   prettier,
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    ".playwright-mcp/**",
+    "playwright.config.ts",
+    "tests/**",
+    "coverage/**",
+    "node_modules/**",
+  ]),
 ]);
