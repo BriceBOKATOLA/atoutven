@@ -152,7 +152,7 @@ with st.expander("Pour aller plus loin : de banlieue à banlieue"):
         f'color:#FFFFFF;border-radius:8px;padding:0 7px;font-weight:700">{sur_dix} communes sur 10</span>, plus de la '
         f'moitié des employés et ouvriers travaillent dans une autre commune de banlieue.</p>'
         f'{LEGENDE_FLUX}{graphique_flux(dest_cat)}'
-        f'<p style="margin:6px 0 0;font-size:13px;color:#5E6475">Chaque maison : les actifs de banlieue d\'une catégorie '
+        f'<p style="margin:6px 0 0;font-size:14px;color:#5E6475">Chaque maison : les actifs de banlieue d\'une catégorie '
         f'(100 %), qui travaillent en Île-de-France. Épaisseur d\'une branche = part de la catégorie qui va à ce lieu de '
         f'travail. En couleur, les deux catégories comparées ; les employés en gris.</p>'
         # Une décimale, comme sur le graphique (sans elle, Python arrondit 24,5 à 24 : arrondi au chiffre pair)
@@ -213,9 +213,9 @@ with st.expander("Pour aller plus loin : travailler dans un autre département d
         f'10 fait autrement (transports en commun, vélo, marche…)</span></div>'
         f'<div style="position:relative;padding:28px 10px 0">'
         f'<div aria-hidden="true" style="position:absolute;left:10px;right:10px;top:47px;height:8px;border-radius:4px;'
-        f'background:#1B1F2A"></div><div aria-hidden="true" style="position:absolute;left:10px;top:0;font-size:13px;'
+        f'background:#1B1F2A"></div><div aria-hidden="true" style="position:absolute;left:10px;top:0;font-size:14px;'
         f'font-weight:700;color:#5E6475">◂ Paris</div><div aria-hidden="true" style="position:absolute;right:10px;'
-        f'top:0;font-size:13px;font-weight:700;color:#5E6475">vers l\'extérieur ▸</div>'
+        f'top:0;font-size:14px;font-weight:700;color:#5E6475">vers l\'extérieur ▸</div>'
         f'<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">{stations_html}</div></div>'
         f'<p style="margin:14px 0 0;font-size:14px;line-height:1.5;color:#4E5466"><strong style="color:#1B1F2A">'
         f'Lecture :</strong> employés et ouvriers qui travaillent dans un autre département de banlieue que le leur. '
@@ -237,24 +237,27 @@ def ligne_panneau(nom: str, r) -> str:
     """Une ligne du panneau : pastille de la ligne, part à l'heure, « 1 sur X » en retard, étiquette éventuelle."""
     c = couleurs_lignes.loc[nom]
     sur = round(100 / (100 - r["ponctualite_pct"]))      # 17,5 % de voyageurs en retard -> 1 sur 6
-    etiquette = ('<span style="font-size:12px;font-weight:800;color:#141A2E;background:#E58BC4;border-radius:999px;'
-                 'padding:3px 8px;display:inline-block;line-height:1.15;text-align:center;max-width:120px">DESSERT LE PLUS DE '
+    etiquette = ('<span style="font-size:14px;font-weight:800;color:#141A2E;background:#E58BC4;border-radius:999px;'
+                 'padding:3px 8px;display:inline-block;line-height:1.15;text-align:center;max-width:150px">DESSERT LE PLUS DE '
                  'POSTES</span>') if r["dessert_le_plus"] else ""
     # (étiquette sur deux lignes si besoin : elle ne déborde plus sur la colonne voisine)
     return (f'<div role="row" aria-label="{nom} : {u.fr(r["ponctualite_pct"], 1)} % des voyageurs à l\'heure, 1 sur {sur} '
             f'en retard" style="display:grid;grid-template-columns:{COLONNES_PANNEAU};gap:12px;align-items:center;'
             f'padding:7px 0;border-bottom:1px solid #262E48">'
-            f'<span aria-hidden="true" style="width:30px;height:30px;border-radius:8px;background:{c["fond"]};'
+            # role="cell" sur chaque case : une ligne de tableau (role="row") doit contenir des cellules, sinon les
+            # lecteurs d'écran la lisent mal (audit axe-core du 12/11, règle aria-required-children)
+            f'<span role="cell" aria-label="{nom}" style="width:30px;height:30px;border-radius:8px;background:{c["fond"]};'
             f'color:{c["texte"]};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px">'
             f'{c["court"]}</span>'
-            f'<span style="font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:24px;color:{AMBRE}">'
-            f'{u.fr(r["ponctualite_pct"], 1)} %</span>'
-            f'<span style="font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:20px;color:#F1F2F6">'
-            f'1 sur <span style="color:{AMBRE};font-size:24px">{sur}</span></span><span>{etiquette}</span></div>')
+            f'<span role="cell" style="font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:24px;'
+            f'color:{AMBRE}">{u.fr(r["ponctualite_pct"], 1)} %</span>'
+            f'<span role="cell" style="font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:20px;'
+            f'color:#F1F2F6">1 sur <span style="color:{AMBRE};font-size:24px">{sur}</span></span>'
+            f'<span role="cell">{etiquette}</span></div>')
 
 
 entete_panneau = (f'<div aria-hidden="true" style="display:grid;grid-template-columns:{COLONNES_PANNEAU};gap:12px;'
-                  f'font-size:12px;font-weight:800;letter-spacing:0.08em;color:#9AA0B2;padding-bottom:6px;'
+                  f'font-size:14px;font-weight:800;letter-spacing:0.08em;color:#9AA0B2;padding-bottom:6px;'
                   f'border-bottom:2px solid #3A4368"><span>LIGNE</span><span>À L\'HEURE</span><span>EN RETARD</span>'
                   f'<span></span></div>')
 lignes_triees = list(ponct.iterrows())

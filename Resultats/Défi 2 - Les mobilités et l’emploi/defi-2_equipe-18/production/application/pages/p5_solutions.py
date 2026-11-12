@@ -78,8 +78,8 @@ def classement(lignes: list, maximum: float, unite: str, couleur: str) -> str:
     """Classement numéroté (1 à 5, comme les repères de la carte), barres-pastilles et valeur au bout."""
     return "".join(
         f'<div style="display:grid;grid-template-columns:24px 1fr 70px;gap:10px;align-items:center;font-size:15px">'
-        f'<span aria-hidden="true" style="width:22px;height:22px;border-radius:50%;background:{u.ENCRE};color:#FFFFFF;'
-        f'font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">{k + 1}</span>'
+        f'<span aria-hidden="true" style="width:24px;height:24px;border-radius:50%;background:{u.ENCRE};color:#FFFFFF;'
+        f'font-size:14px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">{k + 1}</span>'
         f'<div><div style="font-weight:600;margin-bottom:4px">{html.escape(nom)}</div><div aria-hidden="true" '
         f'style="height:10px;border-radius:5px;background:#EEF0EC"><div style="height:10px;border-radius:5px;'
         f'background:{couleur};width:{valeur / maximum * 100:.0f}%"></div></div></div>'
@@ -128,7 +128,7 @@ with st.container(border=True, key="carte_velo"):
         f"des trajets en voiture font moins de 5 km en petite couronne (grande couronne : {pct(gc['voiture_moins_5km_pct'])})",
         f"Toute la banlieue : {pct(courts['part_moins_5km_pct'])} des trajets en voiture d'une commune de banlieue à une "
         f"autre, soit {u.fr(round(courts['dont_moins_5km'], -3))} sur {u.fr(round(courts['trajets_voiture'], -3))}",
-        f'{pastille(str(compte["communes_velo_au_moins_un_tiers"]) + " communes", "#E4572E")} où au moins 1 trajet en '
+        f'{pastille(str(compte["communes_velo_au_moins_un_tiers"]) + " communes", ORANGE_TEXTE)} où au moins 1 trajet en '
         f'voiture sur 3 fait moins de 5 km',
         "carte_velo_lisible",
         f"Carte des communes d'Île-de-France : {compte['communes_velo_au_moins_un_tiers']} communes où au moins 1 trajet "

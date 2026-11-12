@@ -104,7 +104,10 @@ with st.expander("Pour aller plus loin : la voiture selon la destination (habita
     m = m[m["GS"].isin(metiers)].pivot(index="destination", columns="GS", values="part_voiture_pct")[metiers]
     st.dataframe(m.map(lambda val: f"{u.fr(val, 1)} %").reset_index().rename(columns={"destination": "Destination"}),
                  hide_index=True, width="stretch")
-    st.caption("Vers Paris, employés et cadres prennent aussi peu la voiture (16 %) ; entre banlieues, plus de 7 sur 10 la prennent.")
+    # Paragraphe en gris foncé plutôt que st.caption, dont le gris clair n'a pas assez de contraste sur notre fond
+    # (audit axe-core du 12/11) ; #5E6475 est le gris des notes de l'application
+    st.markdown('<p style="margin:0;font-size:14px;color:#5E6475">Vers Paris, employés et cadres prennent aussi peu la '
+                'voiture (16 %) ; entre banlieues, plus de 7 sur 10 la prennent.</p>', unsafe_allow_html=True)
 
 # Contrôle du résultat principal par le revenu (script 09) : réponse à « et si c'était une question d'argent ? »
 with st.expander("Et si c'était simplement une question de revenu ? Le contrôle"):
