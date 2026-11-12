@@ -1,7 +1,9 @@
 """
 p6_commune.py : station 6, « Chercher ma commune ».
 
-Le lecteur choisit sa commune ; la page montre, pour les employés et ouvriers qui y habitent :
+Le lecteur choisit sa commune et sa ou ses catégories (interrupteurs Cadres, Employés, Ouvriers : demande de Melvyn
+du 2026-11-12, les cadres manquaient ; employés et ouvriers allumés à l'ouverture, comme le récit). La page montre,
+pour les actifs des catégories allumées qui y habitent (effectifs additionnés, puis parts calculées) :
   - trois tuiles : combien ils sont, la part qui reste dans la commune, la part qui va à Paris ;
   - la carte des communes où ils travaillent (même dessin que la carte d'Évry de la maquette validée :
     5 classes de couleur, commune de résidence encadrée) et la liste de leurs principales communes de travail ;
@@ -42,8 +44,44 @@ MAX_LIGNES_AFFICHEES = 8        # au-delà (Paris, La Défense…), on résume :
 u.appliquer_style()
 u.menu(FICHIER)
 
-residence = u.lire("communes_residence.csv").astype({"code": str, "departement": str}).set_index("code")
-destinations = u.lire("communes_destinations.csv").astype({"code_residence": str, "code_travail": str})
+# Catégories du filtre : lettre des colonnes du fichier (preparer_communes.py), libellé, allumée à l'ouverture
+CATEGORIES = [("C", "Cadres", False), ("E", "Employés", True), ("O", "Ouvriers", True)]
+communes_brut = u.lire("communes_residence.csv").astype({"code": str, "departement": str}).set_index("code")
+flux_brut = u.lire("communes_destinations.csv").astype({"code_residence": str, "code_travail": str})
+
+
+@st.cache_data
+def vue(lettres: tuple) -> tuple:
+    """Communes et destinations pour les catégories allumées : effectifs additionnés, puis parts (%).
+
+    Mêmes noms de colonnes qu'avant le filtre : le reste de la page n'a pas changé. Mis en cache par combinaison
+    (7 combinaisons au plus) : changer d'interrupteur ne refait le calcul qu'une fois.
+    """
+    somme = lambda prefixe: communes_brut[[f"{prefixe}_{x}" for x in lettres]].sum(axis=1)
+    res = communes_brut[["nom", "departement", "gare", "lignes"]].copy()
+    res["actifs"] = somme("actifs")
+    total = res["actifs"].where(res["actifs"] > 0)
+    res["part_meme_commune_pct"] = 100 * somme("meme_commune") / total
+    res["part_paris_pct"] = 100 * somme("paris") / total
+    res["part_emplois_sans_gare_pct"] = 100 * somme("sans_gare") / total
+    d = flux_brut[["code_residence", "code_travail"]].copy()
+    d["part_pct"] = 100 * flux_brut[list(lettres)].sum(axis=1) / d["code_residence"].map(total)
+    # Seuil de la légende : en dessous de 0,25 %, la commune n'est pas colorée (parts exactes, voir preparer_communes.py)
+    d = d[d["part_pct"] >= 0.25].copy()
+    d["nom_travail"] = d["code_travail"].map(communes_brut["nom"]).fillna("Hors Île-de-France")
+    d["travail_avec_gare"] = d["code_travail"].map(communes_brut["gare"]).fillna(False).astype(bool)
+    res["communes_au_moins_0_25_pct"] = d.groupby("code_residence").size().reindex(res.index, fill_value=0)
+    # Commune sans actif dans ces catégories : parts mises à 0 (seules les colonnes de chiffres sont complétées)
+    chiffres = ["part_meme_commune_pct", "part_paris_pct", "part_emplois_sans_gare_pct"]
+    res[chiffres] = res[chiffres].fillna(0)
+    return res, d
+
+
+# Interrupteurs : état lu avant de les dessiner (ils sont plus bas, sous la recherche), car le bouton « Écouter » en
+# haut de page doit déjà décrire les catégories allumées
+allumees = [(lettre, nom_cat) for lettre, nom_cat, defaut in CATEGORIES if st.session_state.get(f"cat_{lettre}", defaut)]
+groupe = u.enumeration([n.lower() for _, n in allumees]) if allumees else ""      # « employés et ouvriers »
+residence, destinations = vue(tuple(l for l, _ in allumees) or ("C", "E", "O"))
 
 
 @st.cache_data
@@ -76,9 +114,10 @@ def boite(chemin: str) -> tuple:
 
 
 @st.cache_data
-def carte_svg(code: str, entiere: bool) -> str:
+def carte_svg(code: str, entiere: bool, groupe_cle: str) -> str:
     """Carte SVG des communes de travail des habitants de `code`, encodée pour une balise <img> (texte alternatif).
 
+    groupe_cle : catégories allumées ; il ne sert qu'à la clé du cache (la carte change avec les catégories).
     entiere=False : vue cadrée sur les communes de travail d'au moins 1 % (avec une marge), pour voir tout de suite où
     vont les habitants ; entiere=True : toute l'Île-de-France. Les 3 premières communes de travail sont écrites sur la
     carte avec leur part (texte foncé cerné de blanc, lisible sur toutes les nuances).
@@ -164,12 +203,61 @@ def libelle(code: str) -> str:
     return f"{r['nom']} ({NOMS_DEPARTEMENTS.get(r['departement'], r['departement'])} · {r['departement']})"
 
 
+def resume_commune(code_commune: str) -> tuple:
+    """Résultat de la commune en mots : (phrase complète pour le commentaire, phrase courte pour l'annonce).
+
+    Mêmes chiffres et mêmes arrondis que les tuiles, le titre de la carte et la case « Une gare dans la commune ? ».
+    """
+    rc = residence.loc[code_commune]
+    nom_c = rc["nom"]
+    d = destinations[destinations["code_residence"] == code_commune].sort_values("part_pct", ascending=False)
+    autres_c = d[d["code_travail"] != code_commune].head(2)
+    vers = ", et ".join(f"{a.nom_travail}, {pct(a.part_pct)}" for a in autres_c.itertuples())
+    phrases = [f"{nom_c} : {arrondi(rc['actifs'])} {groupe} y habitent."]
+    if rc["actifs"] < SEUIL_FRAGILE:
+        phrases.append(f"Attention : moins de {SEUIL_FRAGILE} {groupe} habitent cette commune ; ces parts "
+                       f"sont à lire avec prudence.")
+    phrases.append(f"{pct(rc['part_meme_commune_pct'])} travaillent {a_commune(nom_c)} même"
+                   + (f" ; les autres vont surtout vers {vers}." if vers else "."))
+    lignes_c = [x for x in str(rc["lignes"]).split(", ") if x and x != "nan"]
+    if rc["gare"]:
+        reste_c = len(lignes_c) - MAX_LIGNES_AFFICHEES
+        liste = (u.enumeration(lignes_c[:MAX_LIGNES_AFFICHEES]) if reste_c <= 0
+                 else ", ".join(lignes_c[:MAX_LIGNES_AFFICHEES]) + f" et {reste_c} autres lignes")
+        phrases.append(f"{nom_c} a une gare : {liste}.")
+    else:
+        phrases.append(f"{nom_c} n'a aucune gare.")
+    phrases.append(f"{pct(rc['part_emplois_sans_gare_pct'])} des emplois de ses habitants sont dans une commune sans gare.")
+    courte = (f"{nom_c} : {arrondi(rc['actifs'])} {groupe}, {pct(rc['part_meme_commune_pct'])} "
+              f"restent dans la commune, {pct(rc['part_emplois_sans_gare_pct'])} de leurs emplois sont sans gare.")
+    return " ".join(phrases), courte
+
+
+# Commune affichée, connue avant de dessiner la liste : le bouton « Écouter » (en haut de page) lit déjà son résultat.
+# st.session_state garde le choix de la liste (clé « commune ») d'un affichage à l'autre.
+code_choisi = st.session_state.get("commune", CODE_DEFAUT)
+if allumees:
+    resume_complet, resume_court = resume_commune(code_choisi)
+else:
+    resume_complet = resume_court = ("Aucune catégorie n'est allumée : allumez au moins un des interrupteurs Cadres, "
+                                     "Employés ou Ouvriers.")
+# Commentaire de la page (texte validé le 2026-11-12, avec la consigne pour la barre de recherche demandée par Melvyn)
+commentaire = u.commentaire_page(
+    FICHIER, "Et chez vous ?",
+    "Pour choisir une commune, allez dans la barre de recherche « Rechercher une commune », à côté du titre, ou juste "
+    "en dessous sur téléphone. Tapez le début du nom, puis choisissez la commune dans la liste avec les flèches et la "
+    "touche Entrée. Juste en dessous, trois interrupteurs choisissent les catégories affichées : cadres, employés, "
+    "ouvriers ; on peut en allumer une ou plusieurs. À l'ouverture, employés et ouvriers sont allumés. "
+    f"Ce commentaire décrit la commune affichée{', pour les ' + groupe if groupe else ''}.",
+    resume_complet,
+    "Le tableau sous la carte donne toutes leurs communes de travail.", reponse=False)
+
 # --- En-tête : à gauche le titre (maquette), à droite la recherche à la place du panneau-chiffre ---
 gauche, droite = st.columns([1.25, 1], vertical_alignment="top")
 with gauche:
     u.entete(FICHIER, 'Et chez <span style="color:#1F6A8C">vous</span> ?',
              f"Cherchez votre commune parmi les {u.fr(len(contours()['chemins']))} d'Île-de-France : où travaillent ses "
-             "employés et ouvriers, et si leurs lieux de travail ont une gare.")
+             "actifs, et si leurs lieux de travail ont une gare.", commentaire=commentaire)
 with droite:
     # st.selectbox plutôt qu'un champ de texte libre : on peut taper le début du nom pour filtrer la liste,
     # il se manie au clavier, et il ne propose que des communes qui existent dans les données.
@@ -177,15 +265,30 @@ with droite:
     st.markdown('<style>[data-testid="stSelectbox"] label p{font-size:14px;font-weight:600;color:#4E5466}'
                 '[data-testid="stSelectbox"] [role="group"]{background:#FFFFFF;border:2px solid #3A8FB7;border-radius:14px;'
                 'min-height:48px}[data-testid="stSelectbox"] input{font-size:16px;font-weight:600;color:#1B1F2A}</style>', unsafe_allow_html=True)
-    codes = sorted(residence.index, key=lambda c: residence.loc[c, "nom"])
+    avec_actifs = communes_brut[[f"actifs_{x}" for x, _, _ in CATEGORIES]].sum(axis=1) > 0
+    codes = sorted(communes_brut.index[avec_actifs], key=lambda c: communes_brut.loc[c, "nom"])
     code = st.selectbox("Rechercher une commune", codes, index=codes.index(CODE_DEFAUT), format_func=libelle,
                         key="commune", placeholder="Tapez le nom d'une commune")
+    # Un interrupteur par catégorie (choix de Melvyn) : vrais widgets, lus « interrupteur, activé » par les lecteurs
+    # d'écran et utilisables au clavier ; une ou plusieurs catégories allumées
+    st.markdown('<div style="font-size:14px;font-weight:600;color:#4E5466;margin-bottom:-14px">Catégories affichées</div>',
+                unsafe_allow_html=True)
+    for colonne, (lettre, nom_cat, defaut) in zip(st.columns(3, gap="small"), CATEGORIES):
+        with colonne:
+            st.toggle(nom_cat, value=defaut, key=f"cat_{lettre}")
+    # Annonce pour les lecteurs d'écran : quand on choisit une commune ou une catégorie, le résultat est lu tout seul
+    u.annonce(resume_court)
+
+if not allumees:
+    st.info("Allumez au moins une catégorie (Cadres, Employés ou Ouvriers) pour afficher les résultats de la commune.")
+    u.navigation_bas(FICHIER)
+    st.stop()
 
 r = residence.loc[code]
 nom = html.escape(r["nom"])
 dest = destinations[destinations["code_residence"] == code].sort_values("part_pct", ascending=False)
-if r["employes_ouvriers"] < SEUIL_FRAGILE:
-    st.warning(f"Moins de {SEUIL_FRAGILE} employés et ouvriers habitent cette commune : les parts ci-dessous reposent "
+if r["actifs"] < SEUIL_FRAGILE:
+    st.warning(f"Moins de {SEUIL_FRAGILE} {groupe} habitent cette commune : les parts ci-dessous reposent "
                "sur peu de réponses au recensement et sont à lire avec prudence (l'INSEE conseille la prudence sous 200 "
                "personnes).")
 
@@ -211,7 +314,7 @@ else:
     troisieme = tuile("Vont à Paris", pct(r["part_paris_pct"]),
                       f"{int(r['communes_au_moins_0_25_pct'])} communes pèsent au moins 0,25 %", "#3A8FB7")
 st.markdown('<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:6px 0 18px">'
-            + tuile("Employés et ouvriers", arrondi(r["employes_ouvriers"]), f"qui habitent {nom}", "#E4572E")
+            + tuile(groupe[:1].upper() + groupe[1:], arrondi(r["actifs"]), f"qui habitent {nom}", "#E4572E")
             + tuile("Restent dans la commune", pct(r["part_meme_commune_pct"]), f"travaillent {a_commune(nom)} même", "#B23A86")
             + troisieme + '</div>', unsafe_allow_html=True)
 
@@ -222,7 +325,7 @@ if len(noms_top) >= 2:
     enumeration = "surtout " + ", ".join(noms_top[:-1]) + " et " + noms_top[-1]
 else:
     enumeration = f"surtout {noms_top[0]}" if noms_top else "aucune commune ne dépasse 0,25 %"
-alt = f"Carte des communes où travaillent les employés et ouvriers {de_commune(r['nom'])} : {enumeration}."
+alt = f"Carte des communes où travaillent les {groupe} {de_commune(r['nom'])} : {enumeration}."
 legende = "".join(u.pastille_legende(lib, f"width:12px;height:12px;border-radius:3px;background:{c}")
                   for _, lib, c in CLASSES)
 legende += u.pastille_legende("Moins de 0,25 %", f"width:12px;height:12px;border-radius:3px;background:{SANS_COULEUR};"
@@ -239,8 +342,8 @@ lecture = (f"plus la commune est foncée, plus elle attire d'habitants {de_commu
            "travail ; l'interrupteur au-dessus montre toute la région.")
 figure = (f'<figure style="margin:0;background:#FFFFFF;border:1px solid #E7EAE4;border-radius:16px;padding:18px 20px;'
           f'display:flex;flex-direction:column;gap:12px">{titre_carte}<figcaption style="font-size:15px;font-weight:600;'
-          f'color:#4E5466">Où travaillent les employés et ouvriers qui habitent {nom} (commune encadrée)</figcaption>'
-          f'<div class="cadre-carte"><img class="carte-zoomable" src="data:image/svg+xml;base64,{carte_svg(code, entiere)}" '
+          f'color:#4E5466">Où travaillent les {groupe} qui habitent {nom} (commune encadrée)</figcaption>'
+          f'<div class="cadre-carte"><img class="carte-zoomable" src="data:image/svg+xml;base64,{carte_svg(code, entiere, groupe)}" '
           f'alt="{html.escape(alt)}" style="width:100%;height:auto;display:block"></div>'
           f'<div style="display:flex;flex-wrap:wrap;gap:6px;font-size:14px;font-weight:600">{legende}</div>'
           f'<p style="margin:0;font-size:14px;line-height:1.5;color:#4E5466"><strong style="color:#1B1F2A">Lecture :</strong> '
@@ -296,7 +399,7 @@ st.markdown(f'<div class="pile-mobile" style="display:grid;grid-template-columns
 # Alternative accessible à la carte : toutes les communes colorées, avec leur part et la présence d'une gare
 u.tableau(pd.DataFrame({
     "Commune de travail": dest["nom_travail"],
-    "Part des employés et ouvriers (%)": [u.fr(p, 1) for p in dest["part_pct"]],
+    f"Part des {groupe} (%)": [u.fr(p, 1) for p in dest["part_pct"]],
     "Gare dans la commune": ["Oui" if g else "Non" for g in dest["travail_avec_gare"]]}),
     "Voir les données de la carte")
 
