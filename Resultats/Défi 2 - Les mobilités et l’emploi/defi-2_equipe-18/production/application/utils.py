@@ -299,6 +299,32 @@ def _ligne_de_metro(fichier_courant: str, nuit: bool) -> str:
 ZOOM_CARTES_JS = (DOSSIER / "zoom_cartes.js").read_text(encoding="utf-8")
 
 
+# Choix de la voix, commun au bouton « Écouter » et à la sonification. Règle (Melvyn, 13/11) : JAMAIS de voix étrangère,
+# l'application est faite pour les Franciliens. Constat d'un utilisateur sur téléphone : accent anglais. Cause : sur
+# téléphone, la liste des voix arrive en retard ; au clic elle était vide, aucune voix française n'était choisie et le
+# téléphone lisait avec sa voix par défaut. Donc : on attend la liste (événement voiceschanged, 1,5 s au plus, sans
+# dépasser le délai pendant lequel le navigateur accepte encore de parler après un clic) ; on prend fr-FR, sinon une
+# autre voix française ; s'il n'y en a aucune, on ne lit pas et on le dit sur le bouton.
+VOIX_FRANCAISE_JS = """
+function voixFrancaise(s) {
+  const v = s.getVoices();
+  return v.find(x => x.lang && x.lang.replace('_', '-').toLowerCase() === 'fr-fr')
+      || v.find(x => x.lang && x.lang.toLowerCase().startsWith('fr')) || null;
+}
+// suite(voix) : une voix française ; suite(null) : le navigateur ne donne pas sa liste (on demande alors le français
+// par la langue, lang = fr-FR) ; suite(false) : la liste existe mais sans aucune voix française
+function avecVoixFrancaise(s, suite) {
+  const choisir = () => s.getVoices().length ? (voixFrancaise(s) || false) : undefined;
+  const r = choisir();
+  if (r !== undefined) { suite(r); return; }
+  let fini = false;
+  const finir = () => { if (fini) return; fini = true; const r2 = choisir(); suite(r2 === undefined ? null : r2); };
+  s.addEventListener('voiceschanged', finir, { once: true });
+  setTimeout(finir, 1500);
+}
+"""
+
+
 def bouton_ecouter(texte: str, nuit: bool = False, libelle: str = "Écouter cette page") -> None:
     """Bouton « Écouter » : lit le texte avec la synthèse vocale du navigateur (Web Speech API).
 
@@ -337,9 +363,11 @@ try {{
     const s = d.createElement('script'); s.textContent = {json.dumps(ZOOM_CARTES_JS)}; d.head.appendChild(s);
   }}
 }} catch (e) {{}}
+{VOIX_FRANCAISE_JS}
 const texte = {json.dumps(texte)}, libelle = {json.dumps(libelle)};
 const b = document.getElementById('b'), t = document.getElementById('t');
 const s = window.speechSynthesis;
+s.getVoices();   // demande la liste des voix dès l'affichage : sur téléphone, elle sera prête au moment du clic
 // Une page qui s'affiche coupe la lecture en cours (sinon la page précédente continuerait de parler)
 s.cancel();
 // Phrases : on coupe après un point, un point d'interrogation ou d'exclamation suivi d'un espace
@@ -347,15 +375,18 @@ const phrases = texte.split(/(?<=[.!?])\\s+/).filter(p => p.trim());
 const repos = () => {{ t.textContent = libelle; b.setAttribute('aria-pressed','false'); }};
 b.onclick = () => {{
   if (s.speaking || s.pending) {{ s.cancel(); repos(); return; }}
-  // Une voix française si l'ordinateur en a une (sinon la voix par défaut lit le français avec un accent étranger)
-  const voix = s.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('fr'));
-  phrases.forEach((p, i) => {{
-    const u = new SpeechSynthesisUtterance(p); u.lang = 'fr-FR'; u.rate = 0.95;
-    if (voix) u.voice = voix;
-    if (i === phrases.length - 1) u.onend = repos;   // fin de la dernière phrase : le bouton redevient « Écouter »
-    s.speak(u);
-  }});
   t.textContent = 'Arrêter la lecture'; b.setAttribute('aria-pressed','true');
+  avecVoixFrancaise(s, voix => {{
+    if (voix === false) {{   // aucune voix française : on ne lit pas avec un accent étranger, on le dit
+      t.textContent = 'Aucune voix française sur cet appareil'; b.setAttribute('aria-pressed','false'); return;
+    }}
+    phrases.forEach((p, i) => {{
+      const u = new SpeechSynthesisUtterance(p); u.lang = 'fr-FR'; u.rate = 0.95;
+      if (voix) u.voice = voix;
+      if (i === phrases.length - 1) u.onend = repos;   // fin de la dernière phrase : le bouton redevient « Écouter »
+      s.speak(u);
+    }});
+  }});
 }};
 </script>""", height=52, alt=f"Bouton « {libelle} » : lecture à voix haute")
 
@@ -479,15 +510,16 @@ body {{ margin: 0; padding: 4px; }}</style>
 <script>
 const intro = {json.dumps(intro)}, conclusion = {json.dumps(conclusion)}, points = {json.dumps(points)};
 const duree = {duree_note}, libelle = {json.dumps(libelle)};
+{VOIX_FRANCAISE_JS}
 const b = document.getElementById('b'), t = document.getElementById('t'), s = window.speechSynthesis;
-let actif = false, audio = null;
-const voix = () => s.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('fr'));
+let actif = false, audio = null, voixChoisie = null;
+s.getVoices();   // demande la liste des voix dès l'affichage (voir VOIX_FRANCAISE_JS)
 // Dit un texte puis appelle suite() (rien à dire : suite() tout de suite)
 function dire(texte, suite) {{
   if (!actif) return;
   if (!texte) {{ suite(); return; }}
   const u = new SpeechSynthesisUtterance(texte); u.lang = 'fr-FR'; u.rate = 0.95;
-  const v = voix(); if (v) u.voice = v;
+  if (voixChoisie) u.voice = voixChoisie;
   u.onend = () => suite(); s.speak(u);
 }}
 // Joue une note : fréquence de 220 à 880 Hz selon la valeur (0 à 1), attaque et fin adoucies (pas de clic)
@@ -512,7 +544,14 @@ b.onclick = () => {{
   audio = audio || new (window.AudioContext || window.webkitAudioContext)();
   audio.resume();
   t.textContent = 'Arrêter'; b.setAttribute('aria-pressed', 'true');
-  dire(intro, () => jouer(0));
+  avecVoixFrancaise(s, v => {{
+    if (v === false) {{   // aucune voix française : pas de lecture avec un accent étranger
+      actif = false; t.textContent = 'Aucune voix française sur cet appareil'; b.setAttribute('aria-pressed', 'false');
+      return;
+    }}
+    voixChoisie = v;
+    dire(intro, () => jouer(0));
+  }});
 }};
 </script>""", height=52, alt=f"Bouton « {libelle} » : sonification du graphique")
 
