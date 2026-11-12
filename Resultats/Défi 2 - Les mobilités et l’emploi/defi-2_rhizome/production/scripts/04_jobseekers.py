@@ -13,14 +13,14 @@ new = fer[(fer.an >= 2015) & (fer.an <= 2025) & (~fer.res_com.str.contains("TER"
 old = fer[fer.an < 2015]
 ng = gar[(gar.an >= 2015) & (gar.an <= 2025)].copy()
 d = {}
-for t in open((BASE / "defm_2016_2024.txt")).read().strip().split(","):
+for t in (BASE / "defm_2016_2024.txt").read_text(encoding="utf-8").strip().split(","):
     c, a, b = t.split(":"); d[c] = (int(a), int(b))
 com["d16"] = com.code.map(lambda c: d.get(c, (None, None))[0]); com["d24"] = com.code.map(lambda c: d.get(c, (None, None))[1])
 com["pct"] = (com.d24 / com.d16 - 1) * 100
-S = json.load(open((CLEAN / "series_defm_dares.json"))); A = S["annees"]; i16, i24 = A.index(2016), A.index(2024)
+S = json.loads((CLEAN / "series_defm_dares.json").read_text(encoding="utf-8")); A = S["annees"]; i16, i24 = A.index(2016), A.index(2024)
 ev = lambda k: (S[k][i24] / S[k][i16] - 1) * 100
 idf, t4, rest = ev("IDF"), ev("T4 (2019)"), ev("IDF hors desservies et Paris")
-G = json.load(open((CLEAN / "groupes_lignes.json"))); served = {c for v in G.values() for c in v["codes"]}
+G = json.loads((CLEAN / "groupes_lignes.json").read_text(encoding="utf-8")); served = {c for v in G.values() for c in v["codes"]}
 
 bins = [(-1e9, -5, "#2C7FB8", "Baisse de plus de 5 %"), (-5, 0, "#A6CEE3", "Baisse de 0 à 5 %"), (0, 5, "#FBE6CC", "Hausse de 0 à 5 %"),
         (5, 15, "#F5AE6B", "Hausse de 5 à 15 %"), (15, 1e9, "#D9531E", "Hausse de plus de 15 %")]

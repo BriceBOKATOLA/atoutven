@@ -12,7 +12,7 @@ com["km2"] = com.area / 1e6; com["pt"] = com.geometry.representative_point()
 SEUIL = 10000
 # Sources complémentaires (récupérées le 09/11/2026)
 I = {}
-for t in open((BASE / "insee_emploi_rp_2017_2023.txt")).read().strip().split(","):
+for t in (BASE / "insee_emploi_rp_2017_2023.txt").read_text(encoding="utf-8").strip().split(","):
     c, a, b, x, y = t.split(":"); I[c] = (int(a), int(b), int(x), int(y))
 INSEE = {"2017": (5720649, 630178), "2023": (6029602, 712304)}          # emploi total au lieu de travail, dont non-salariés (RP)
 AE = {"2015": (212191, 116115), "2025": (706791, 325509)}               # auto-entrepreneurs Urssaf, adm. actifs / éco. actifs, fin d'année

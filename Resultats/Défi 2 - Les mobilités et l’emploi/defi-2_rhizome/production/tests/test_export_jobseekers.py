@@ -13,10 +13,10 @@ class JobseekersExportTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / "export.json"
             subprocess.run([sys.executable, str(PRODUCTION / "scripts/export-jobseekers.py"), "--output", str(output)], check=True, capture_output=True, text=True)
-            data = json.loads(output.read_text())
+            data = json.loads(output.read_text(encoding="utf-8"))
         metric = next(m for m in data["metrics"] if m["name"] == "Demandeurs ABC")
         self.assertEqual(metric["scope"], "4e trimestre ; rupture 2025")
-        snapshot = json.loads((PRODUCTION / "web/public/data/jobseekers-employment-zones.json").read_text())
+        snapshot = json.loads((PRODUCTION / "web/public/data/jobseekers-employment-zones.json").read_text(encoding="utf-8"))
         self.assertEqual(data, snapshot)
 
 if __name__ == "__main__":

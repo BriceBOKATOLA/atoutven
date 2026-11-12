@@ -56,7 +56,7 @@ def load():
     fer["an"] = pd.to_datetime(fer.date_mes, errors="coerce").dt.year
     gar["an"] = pd.to_datetime(gar.date_mise, errors="coerce").dt.year
     gar["nom_gares"] = gar.nom_gares.map(clean)
-    off = json.load(open((BASE / "noms_officiels.json")))
+    off = json.loads((BASE / "noms_officiels.json").read_text(encoding="utf-8"))
     com["nom"] = com.code.map(off).fillna(com.nom).map(clean)
     return com, dep, riv, fer, gar
 

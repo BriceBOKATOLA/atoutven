@@ -22,7 +22,7 @@ class PlateResolutionTest(unittest.TestCase):
     def test_each_plate_exports_a_300_dpi_png_and_a_pdf(self):
         for script in sorted(SCRIPTS.glob("0[1-6]_*.py")):
             with self.subTest(script=script.name), tempfile.TemporaryDirectory() as temp:
-                tree = ast.parse(script.read_text())
+                tree = ast.parse(script.read_text(encoding="utf-8"))
                 exports = [
                     statement for statement in ast.walk(tree)
                     if isinstance(statement, ast.Expr)

@@ -13,7 +13,7 @@ new = fer[(fer.an >= 2015) & (fer.an <= 2025) & (~fer.res_com.str.contains("TER"
 old = fer[fer.an < 2015]
 COL = {}
 for _, r in new.iterrows(): COL.setdefault(r.lg, "#" + (r.colourweb_hexa or "888888"))
-grp = json.load(open((CLEAN / "groupes_lignes.json"))); served = {c for v in grp.values() for c in v["codes"]}
+grp = json.loads((CLEAN / "groupes_lignes.json").read_text(encoding="utf-8")); served = {c for v in grp.values() for c in v["codes"]}
 
 X0, X1, Y0, Y1 = 619000, 692000, 6825000, 6885000
 fig, ax = plate("02", "Où l'emploi a progressé depuis 2015",
