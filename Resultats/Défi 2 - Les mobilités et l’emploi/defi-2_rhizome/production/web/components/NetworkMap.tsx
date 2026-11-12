@@ -1,0 +1,201 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import type Highcharts from "highcharts/highmaps";
+
+type MapPath = { name: string; path: string };
+type MapPoint = { name: string; x: number; y: number; line?: string; year?: number };
+type Period = {
+  name: string;
+  color: string;
+  openings: { line: string; year: number }[];
+  tracks: MapPath[];
+  stations: MapPoint[];
+};
+type NetworkData = {
+  summary: { lines: number; stations: number; kilometres: number };
+  communes: MapPath[];
+  paris: MapPath[];
+  departments: MapPath[];
+  existing: MapPath[];
+  periods: Period[];
+  labels: MapPoint[];
+  termini: MapPoint[];
+  departmentLabels: MapPoint[];
+};
+
+function createOptions(data: NetworkData): Highcharts.Options {
+  const periodSymbols = ["circle", "square", "diamond"] as const;
+  const periodDashes: Highcharts.DashStyleValue[] = ["Solid", "ShortDash", "ShortDot"];
+  const mapLayer = (name: string, shapes: MapPath[], color: string, borderColor: string, borderWidth: number): Highcharts.SeriesMapOptions => ({
+    type: "map", name, mapData: shapes, data: shapes.map(() => 1), joinBy: "_i",
+    color, nullColor: color, borderColor, borderWidth,
+    enableMouseTracking: false, showInLegend: false,
+    accessibility: { enabled: false }, states: { inactive: { opacity: 1 }, hover: { enabled: false } },
+  });
+  const lineLayer = (name: string, shapes: MapPath[], color: string, lineWidth: number, interactive = false, dashStyle: Highcharts.DashStyleValue = "Solid"): Highcharts.SeriesMaplineOptions => ({
+    type: "mapline", name, mapData: shapes, data: shapes.map(() => 1), joinBy: "_i",
+    color, lineWidth, dashStyle, enableMouseTracking: interactive, showInLegend: false,
+    accessibility: { enabled: false }, states: { inactive: { opacity: 1 }, hover: { lineWidthPlus: 1 } },
+    tooltip: { pointFormat: "{point.name}" },
+  });
+  const labelLayer = (name: string, points: MapPoint[], color: string, size: string, backgroundColor?: string, alwaysShow = false): Highcharts.SeriesMappointOptions => ({
+    type: "mappoint", name, data: points.map(point => ({ ...point, labelrank: backgroundColor ? 2 : 1 })), enableMouseTracking: false,
+    showInLegend: false, marker: { enabled: false }, accessibility: { enabled: false },
+    dataLabels: {
+      enabled: true, format: "{point.name}", padding: backgroundColor ? 2 : 0,
+      backgroundColor, borderRadius: 0, allowOverlap: alwaysShow,
+      style: { color, fontSize: size, fontWeight: backgroundColor ? "bold" : "normal", textOutline: backgroundColor ? "none" : "2px #F1EFEA" },
+    },
+  });
+  return {
+    chart: { backgroundColor: "#F1EFEA", spacing: [8, 8, 8, 8], animation: false, style: { fontFamily: "Arial, Helvetica, sans-serif" } },
+    title: { text: undefined }, credits: { enabled: true, style: { fontSize: "12px", color: "#526071" } }, legend: { enabled: false },
+    mapView: { padding: 0 },
+    mapNavigation: { enabled: true, enableButtons: false, enableMouseWheelZoom: true, enableDoubleClickZoom: false },
+    lang: { zoomIn: "Agrandir la carte", zoomOut: "Réduire la carte" },
+    accessibility: {
+      description: `Extensions du réseau ferré francilien entre 2015 et 2025. ${data.summary.lines} lignes créées ou prolongées, ${data.summary.stations} gares ouvertes et ${data.summary.kilometres} kilomètres de voies nouvelles. Les couleurs indiquent les périodes d’ouverture. Les tronçons du prolongement du métro 11 sont présents dans la source mais sans date : ils sont exclus de cette carte et du total ; ses gares de 2024 figurent.`,
+      landmarkVerbosity: "one",
+      keyboardNavigation: { enabled: true },
+      point: { valueDescriptionFormat: "{point.name}, {point.line}, ouverture en {point.year}." },
+    },
+    tooltip: { useHTML: false, headerFormat: "", pointFormat: "<b>{point.name}</b><br/>{point.line} — {point.year}", animation: false },
+    plotOptions: { series: { animation: false, states: { inactive: { opacity: 1 } } } },
+    series: [
+      mapLayer("Communes", data.communes, "#E3E4DF", "#FFFFFF", .35),
+      mapLayer("Paris", data.paris, "#D4D9D4", "#FFFFFF", .35),
+      lineLayer("Limites départementales", data.departments, "#D9739F", .8),
+      lineLayer("Réseau existant avant 2015", data.existing, "#8B929B", 1),
+      ...data.periods.flatMap((period, index) => [
+        lineLayer(`Contour ${period.name}`, period.tracks, "#FFFFFF", 5),
+        lineLayer(`Ouvertures ${period.name}`, period.tracks, period.color, 2.6, true, periodDashes[index]),
+      ]),
+      ...data.periods.map((period, index): Highcharts.SeriesMappointOptions => ({
+        type: "mappoint", name: `Gares ouvertes en ${period.name}`, data: period.stations,
+        color: period.color, showInLegend: false,
+        marker: { radius: 2.8, lineWidth: 1.4, lineColor: period.color, fillColor: "#FFFFFF", symbol: periodSymbols[index] },
+        dataLabels: { enabled: false },
+        accessibility: { point: { valueDescriptionFormat: "{point.name}, {point.line}, ouverture en {point.year}." } },
+      })),
+      mapLayer("Nord", [{ name: "Nord", path: "M 69.5 -57.2 L 69.9 -55.4 L 71.7 -55 L 69.9 -54.6 L 69.5 -52.8 L 69.1 -54.6 L 67.3 -55 L 69.1 -55.4 Z" }], "#0E1B2C", "#0E1B2C", 0),
+      lineLayer("Échelle 0 à 2,5 km", [{ name: "", path: "M 2.5 -2.2 L 5 -2.2" }], "#0E1B2C", 4),
+      lineLayer("Échelle 2,5 à 5 km", [{ name: "", path: "M 5 -2.2 L 7.5 -2.2" }], "#6B7280", 4),
+      labelLayer("Orientation et échelle", [{ name: "N", x: 69.5, y: -58 }, { name: "0", x: 2.5, y: -3 }, { name: "2,5", x: 5, y: -3 }, { name: "5 km", x: 7.5, y: -3 }], "#0E1B2C", "12px", undefined, true),
+      labelLayer("Départements", data.departmentLabels, "#526071", "12px"),
+      labelLayer("Terminus des nouvelles sections", data.termini, "#344052", "12px"),
+      labelLayer("Lignes et années d’ouverture", data.labels, "#0E1B2C", "12px", "#FFFEFA"),
+    ],
+  };
+}
+
+export function NetworkMap() {
+  const container = useRef<HTMLDivElement>(null);
+  const chart = useRef<Highcharts.MapChart | null>(null);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [attempt, setAttempt] = useState(0);
+  const [data, setData] = useState<NetworkData | null>(null);
+
+  useEffect(() => {
+    let disposed = false;
+    const controller = new AbortController();
+    async function initialize() {
+      try {
+        const [network, highchartsModule] = await Promise.all([
+          fetch("/data/rail-network.json", { signal: controller.signal }).then(async response => {
+            if (!response.ok) throw new Error("Network map data unavailable");
+            const network: NetworkData = await response.json();
+            if (!disposed) setData(network);
+            return network;
+          }),
+          import("highcharts/highmaps"),
+        ]);
+        await import("highcharts/modules/accessibility");
+        if (disposed || !container.current) return;
+        chart.current = highchartsModule.default.mapChart(container.current, createOptions(network));
+        setState("ready");
+      } catch {
+        if (!disposed) setState("error");
+      }
+    }
+    setState("loading");
+    void initialize();
+    return () => {
+      disposed = true;
+      controller.abort();
+      chart.current?.destroy();
+      chart.current = null;
+    };
+  }, [attempt]);
+
+  function panMap(direction: "left" | "up" | "down" | "right") {
+    const currentChart = chart.current;
+    const view = currentChart?.mapView;
+    if (!currentChart || !view) return;
+    const x = currentChart.plotWidth * (direction === "left" ? .3 : direction === "right" ? .7 : .5);
+    const y = currentChart.plotHeight * (direction === "up" ? .3 : direction === "down" ? .7 : .5);
+    const center = view.pixelsToLonLat({ x, y });
+    if (center) view.setView([center.lon, center.lat], view.zoom, true, false);
+  }
+
+  return (
+    <figure className="visualization network-visualization" aria-labelledby="network-map-title">
+      <figcaption className="visualization-caption"><h3 id="network-map-title">Dix ans d’extension du réseau ferré</h3><span>2015 — 2025</span></figcaption>
+      <div className="network-atlas">
+        <div className="network-map-area">
+          <div className={`network-map-canvas${state !== "ready" ? " network-map-pending" : ""}`} ref={container} aria-hidden={state !== "ready"} aria-describedby={state === "ready" ? "network-map-help" : undefined} />
+          {state === "ready" && (
+            <div className="network-map-tools" role="group" aria-label="Déplacer et zoomer la carte">
+              <div className="network-map-pan" role="group" aria-label="Déplacement">
+                <button type="button" aria-label="Déplacer la carte vers l’ouest" onClick={() => panMap("left")}><span aria-hidden="true">←</span></button>
+                <button type="button" aria-label="Déplacer la carte vers le nord" onClick={() => panMap("up")}><span aria-hidden="true">↑</span></button>
+                <button type="button" aria-label="Déplacer la carte vers le sud" onClick={() => panMap("down")}><span aria-hidden="true">↓</span></button>
+                <button type="button" aria-label="Déplacer la carte vers l’est" onClick={() => panMap("right")}><span aria-hidden="true">→</span></button>
+              </div>
+              <div className="network-map-zoom" role="group" aria-label="Zoom">
+                <button type="button" aria-label="Réduire la carte" onClick={() => chart.current?.mapView?.zoomBy(-.5, undefined, undefined, false)}><span aria-hidden="true">−</span></button>
+                <button type="button" aria-label="Agrandir la carte" onClick={() => chart.current?.mapView?.zoomBy(.5, undefined, undefined, false)}><span aria-hidden="true">+</span></button>
+              </div>
+              <button type="button" onClick={() => chart.current?.mapView?.zoomBy(undefined, undefined, undefined, false)}>Recadrer</button>
+            </div>
+          )}
+          {state === "ready" && <p className="network-map-help" id="network-map-help">Déplacez la carte avec les boutons fléchés ou en la faisant glisser. Zoomez avec +, − ou deux doigts. Le bouton « Recadrer » rétablit la vue initiale. Sur écran tactile, utilisez deux doigts pour déplacer la carte. Vous pouvez aussi zoomer avec la molette. Survolez ou touchez une gare pour voir son nom. Au clavier, entrez dans la carte avec Tab, puis utilisez les flèches pour parcourir les gares.</p>}
+          <p className={`network-map-status${state === "ready" ? " network-map-status-ready" : ""}`} role="status" aria-live="polite" aria-atomic="true">{state === "loading" ? "Chargement de la carte interactive…" : state === "error" ? <>La carte interactive n’a pas pu être chargée. Vérifiez votre connexion, puis réessayez. <button type="button" onClick={() => setAttempt(value => value + 1)}>Réessayer</button></> : "Carte interactive chargée."}</p>
+        </div>
+        {data && (
+          <>
+            <aside className="network-map-key" aria-label="Chiffres clés du réseau">
+              <h4>Le réseau de 2015 à 2025</h4>
+              <dl className="network-map-stats"><div><dt>{data.summary.lines}</dt><dd>lignes créées<br />ou prolongées</dd></div><div><dt>{data.summary.stations}</dt><dd>gares<br />ouvertes</dd></div><div><dt>{data.summary.kilometres} km</dt><dd>de voies<br />nouvelles</dd></div></dl>
+              <p className="network-key-note">La plupart des nouvelles lignes desservent la petite couronne, où se concentrent les emplois.</p>
+            </aside>
+            <section className="network-map-legend" aria-label="Légende de la carte">
+              <div>
+                <h4>Ouvertures par période</h4>
+                <ul className="network-periods">{data.periods.map((period, index) => <li key={period.name}><span className={`network-period-symbol network-period-symbol-${index}`} style={{ borderColor: period.color }} aria-hidden="true" /><div><strong>{period.name}</strong><p>{period.openings.map(opening => `${opening.line} (${opening.year})`).join(", ")}</p></div></li>)}</ul>
+              </div>
+              <div>
+                <h4>Lecture</h4>
+                <ul className="network-symbols"><li><span className="key-existing" aria-hidden="true" />Réseau existant avant 2015</li><li><span className="key-station" aria-hidden="true" />Gare ouverte : forme et couleur selon la période</li><li><span className="key-department" aria-hidden="true" />Limite départementale</li></ul>
+              </div>
+            </section>
+          </>
+        )}
+      </div>
+      <div className="chart-sources network-map-sources" role="group" aria-labelledby="network-sources-title">
+        <h4 id="network-sources-title">Sources et notes</h4>
+        <div className="sources-grid">
+          <div className="source-group">
+            <p><strong>Île-de-France Mobilités.</strong> <a href="https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/">Tracés du réseau ferré</a> et <a href="https://data.iledefrance-mobilites.fr/explore/dataset/emplacement-des-gares-idf/">gares par ligne</a>, consultés le 08/11/2026.</p>
+            <p><strong>IGN / INSEE.</strong> Limites administratives.</p>
+          </div>
+          <div className="source-group">
+            <p><strong>Notes de lecture.</strong> Les tronçons du prolongement du métro 11 sont présents dans la source mais sans date : ils sont exclus de cette carte et du total ; ses gares de 2024 figurent.</p>
+            <p>Le T14, renommé en 2025, reprend une ligne ancienne entre Esbly et Crécy-la-Chapelle : il figure dans le réseau existant et ne compte pas parmi les ouvertures.</p>
+          </div>
+        </div>
+      </div>
+      <noscript><p className="visualization-description">JavaScript est nécessaire pour afficher la carte, ses chiffres clés et sa légende.</p></noscript>
+    </figure>
+  );
+}

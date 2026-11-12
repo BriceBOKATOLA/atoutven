@@ -72,5 +72,5 @@ ptitle(fig, 0.25, "À retenir")
 ptext(fig, 0.225, "Le train et le RER, déjà très étendus, bougent peu.\nLa croissance vient du tramway et du métro,\nen petite couronne : de rocade en rocade,\nle réseau se densifie autour de Paris.", 10)
 footer(fig, "Sources : Île-de-France Mobilités — tracés du réseau ferré et emplacement des gares, avec leurs dates de mise en service (jeux « traces-du-reseau-ferre-idf » et « emplacement-des-gares-idf »). "
             "Hors TER et hors bus (les lignes de bus n'ont pas de date de mise en service dans les données ouvertes). Longueurs : somme des tracés par mode ; un tronçon partagé par deux lignes compte deux fois.")
-fig.savefig(PNG, dpi=200, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
+fig.savefig(PNG, dpi=300, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
 print("ok")

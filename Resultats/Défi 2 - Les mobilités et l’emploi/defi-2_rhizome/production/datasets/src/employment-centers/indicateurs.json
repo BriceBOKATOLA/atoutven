@@ -1,0 +1,38 @@
+[
+  {
+    "id": "salarie",
+    "column": "B",
+    "name": "Emploi salarié",
+    "period": "2e trimestre 2026",
+    "unit": "milliers d’emplois",
+    "scale": 1000,
+    "color": "#E0A52A"
+  },
+  {
+    "id": "interim",
+    "column": "C",
+    "name": "Emploi intérimaire",
+    "period": "2e trimestre 2026",
+    "unit": "milliers d’emplois",
+    "scale": 1000,
+    "color": "#3D5A3A"
+  },
+  {
+    "id": "creations",
+    "column": "H",
+    "name": "Créations d’entreprises",
+    "period": "3e trimestre 2026",
+    "unit": "entreprises",
+    "scale": 1,
+    "color": "#E06A55"
+  },
+  {
+    "id": "defaillances",
+    "column": "I",
+    "name": "Défaillances d’entreprises",
+    "period": "Août 2026 — cumul des 12 derniers mois",
+    "unit": "entreprises",
+    "scale": 1,
+    "color": "#4A2545"
+  }
+]

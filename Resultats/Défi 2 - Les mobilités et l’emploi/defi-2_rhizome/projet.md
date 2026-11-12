@@ -1,7 +1,5 @@
 # Cadrer Eclowork
 
-Complétez ce document ensemble avant de choisir les outils ou le format.
-
 ## Défi principal
 
 Défi 2 : les mobilités et l’emploi. Explorez le lien entre mobilité et accès à l’emploi, ainsi que la manière dont les réseaux de transport répondent aux besoins du monde du travail. Consultez la [présentation des défis](../../../Docs/Présentation_des_défis.md).
@@ -29,3 +27,7 @@ Le territoire étudié est l'Île-de-France. La présentation propose les dates 
 | Accessibilité | Les ouvertures de lignes et la présence d'une gare ne mesurent pas les temps de trajet ou l'accès effectif à l'emploi. | Non précisée |
 | Relation causale | Les cartes décrivent des évolutions ; elles ne démontrent pas l'effet d'une ouverture sur l'emploi. | Non précisée |
 | Comparaison 2019 | Vérifier les données communales et le traitement nécessaires avant de présenter cette date comme un résultat. | Non précisée |
+
+## Site interactif
+
+Le [site web](production/web/README.md) intègre les trois cartes au récit. Ses [spécifications](production/web/docs/specifications.md) décrivent les vues et leurs limites.

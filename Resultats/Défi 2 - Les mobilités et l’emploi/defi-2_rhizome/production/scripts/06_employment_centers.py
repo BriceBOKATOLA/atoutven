@@ -3,6 +3,7 @@ from export_paths import export_paths
 PNG, PDF = export_paths("06_poles_emploi_2015_2025")
 
 from map_theme import *
+from map_utils import BASE
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, FancyBboxPatch
 
@@ -15,7 +16,7 @@ for t in open((BASE / "insee_emploi_rp_2017_2023.txt")).read().strip().split(","
     c, a, b, x, y = t.split(":"); I[c] = (int(a), int(b), int(x), int(y))
 INSEE = {"2017": (5720649, 630178), "2023": (6029602, 712304)}          # emploi total au lieu de travail, dont non-salariés (RP)
 AE = {"2015": (212191, 116115), "2025": (706791, 325509)}               # auto-entrepreneurs Urssaf, adm. actifs / éco. actifs, fin d'année
-DEFM = (972835, 1015850)                                                # France Travail, cat. A B C, fin 2016 / fin 2024
+DEFM = (972835, 1015850)                                                # France Travail, cat. A B C, moyennes du 4e trimestre 2016 / 2024, sommes de valeurs communales arrondies
 
 BINS = [(0, 100, "#F1EFEA", "Moins de 100"), (100, 500, "#DCE3EC", "100 à 500"), (500, 2000, "#B3C3D9", "500 à 2 000"), (2000, 1e9, "#7F9BC2", "Plus de 2 000")]
 def dcol(v):
@@ -68,7 +69,7 @@ row(0.785, "Emplois salariés privés", com.emploi_2015.sum(), com.emploi_2025.s
 row(0.735, "Emploi total (public compris)", INSEE["2017"][0], INSEE["2023"][0], "INSEE, recensement 2017 à 2023")
 row(0.685, "dont non-salariés", INSEE["2017"][1], INSEE["2023"][1], "INSEE, recensement 2017 à 2023")
 row(0.635, "Auto-entrepreneurs inscrits", AE["2015"][0], AE["2025"][0], "Urssaf, fin 2015 à fin 2025")
-row(0.585, "Demandeurs d'emploi (A, B, C)", DEFM[0], DEFM[1], "France Travail / DARES, fin 2016 à fin 2024")
+row(0.585, "Demandeurs d'emploi (A, B, C)", DEFM[0], DEFM[1], "France Travail / DARES, moyennes du 4e trimestre 2016 et 2024")
 ptitle(fig, 0.525, "Lecture")
 items = [Patch(facecolor=c, edgecolor="#D0CBC1", label=f"{l} emplois / km²") for *_, c, l in BINS]
 items += [Line2D([], [], marker="o", ls="", mfc="#E69F00", mec="#A86F00", ms=10, alpha=.8, label="Pôle d'au moins 10 000 emplois"),
@@ -85,6 +86,6 @@ for _, r in tp.iterrows():
 ptitle(fig, 0.185, "À retenir")
 ptext(fig, 0.162, "Les grands pôles restent à l'ouest (La Défense) et au\nnord (Saint-Denis, Roissy). Les nouveaux pôles naissent\nen grande couronne (Brétigny, Lieusaint, Serris).\nLes auto-entrepreneurs ont été multipliés par 3.", 9.8)
 footer(fig, "Sources : Urssaf — effectifs salariés du secteur privé par commune au 31/12/2015 et au 31/12/2025, auto-entrepreneurs par département (fin d'année) ; INSEE — recensement de la population, emploi au lieu de travail 2017 et 2023 (API Melodi) ; "
-            "France Travail / DARES — demandeurs d'emploi A, B, C au 4e trimestre ; Île-de-France Mobilités — réseau ferré. Les chiffres 2026 ne sont pas encore publiés : fin 2025 est la donnée la plus récente. Pôle : commune d'au moins 10 000 emplois salariés privés.")
-fig.savefig(PNG, dpi=200, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
+            "France Travail / DARES — demandeurs d'emploi A, B, C : moyennes du 4e trimestre, sommes de valeurs communales arrondies au multiple de 5 ; Île-de-France Mobilités — réseau ferré. Les chiffres 2026 ne sont pas encore publiés : fin 2025 est la donnée la plus récente. Pôle : commune d'au moins 10 000 emplois salariés privés.")
+fig.savefig(PNG, dpi=300, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
 print("ok")

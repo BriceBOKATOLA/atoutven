@@ -3,6 +3,7 @@ from export_paths import export_paths
 PNG, PDF = export_paths("04_demandeurs_emplois")
 
 from map_theme import *
+from map_utils import BASE, CLEAN
 from adjustText import adjust_text
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Rectangle
@@ -31,7 +32,7 @@ com["fill"] = com.pct.apply(colr)
 
 X0, X1, Y0, Y1 = 619000, 692000, 6825000, 6885000
 fig, ax = plate("04", "Plus d'emplois, pas forcément moins de chômeurs",
-                "Évolution du nombre de demandeurs d'emploi (catégories A, B, C) par commune, de fin 2016 à fin 2024. Les emplois créés près des gares ne profitent pas toujours aux habitants.")
+                "Évolution du nombre de demandeurs d'emploi (catégories A, B, C) par commune, entre les moyennes du 4e trimestre 2016 et 2024. Les emplois créés près des gares ne profitent pas toujours aux habitants.")
 ax.set_xlim(X0, X1); ax.set_ylim(Y0, Y1); ax.set_aspect("equal", adjustable="datalim")
 basemap(ax, com, dep, fill=com.fill)
 old.plot(ax=ax, color="#9CA3AF", linewidth=.7, zorder=3)
@@ -66,8 +67,8 @@ for t in lg.get_texts(): t.set_color(WHITE)
 ptitle(fig, 0.415, "À retenir")
 ptext(fig, 0.39, "Autour du Tram T4, l'emploi salarié a progressé\nplus vite que dans le reste de la région\n(+9,6 pts), mais les demandeurs d'emploi aussi.\nLes emplois créés vont-ils aux habitants ?\nLa ligne seule ne suffit pas : formation et\nrecrutement local comptent autant.", 10)
 ptitle(fig, 0.215, "Précaution")
-ptext(fig, 0.19, "2015 : rupture de série. 2025 : inscriptions\nautomatiques (loi pour le plein emploi).\nOn compare donc fin 2016 et fin 2024.", 9, MUTE)
-footer(fig, "Sources : DARES / France Travail, « Inscrits à France Travail – données communales » (catégories A, B, C, données brutes, 4e trimestre 2016 et 2024), data.dares.travail-emploi.gouv.fr ; "
-            "Île-de-France Mobilités, tracés du réseau ferré et emplacement des gares. Paris regroupe ses 20 arrondissements. Écart d'emploi du T4 : voir planche 03.")
-fig.savefig(PNG, dpi=200, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
+ptext(fig, 0.19, "2015 : rupture de série. 2025 : inscriptions\nautomatiques (loi pour le plein emploi).\nOn compare les moyennes du 4e trimestre\n2016 et 2024.", 9, MUTE)
+footer(fig, "Sources : DARES / France Travail, « Inscrits à France Travail – données communales » (catégories A, B, C, données brutes arrondies au multiple de 5, moyennes du 4e trimestre 2016 et 2024), data.dares.travail-emploi.gouv.fr ; "
+            "Île-de-France Mobilités, tracés du réseau ferré et emplacement des gares. Les agrégats régionaux sont des sommes de valeurs communales arrondies. Paris regroupe ses 20 arrondissements. Écart d'emploi du T4 : voir planche 03.")
+fig.savefig(PNG, dpi=300, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
 print("ok", round(idf, 1), round(t4, 1), round(rest, 1))

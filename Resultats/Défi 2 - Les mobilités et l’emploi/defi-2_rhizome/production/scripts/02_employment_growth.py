@@ -3,6 +3,7 @@ from export_paths import export_paths
 PNG, PDF = export_paths("02_emploi_progress")
 
 from map_theme import *
+from map_utils import CLEAN
 from adjustText import adjust_text
 from matplotlib.lines import Line2D
 GAIN, LOSS = "#E69F00", "#0072B2"
@@ -63,5 +64,5 @@ ptitle(fig, 0.215, "À retenir")
 ptext(fig, 0.19, "Certains grands pôles ont reçu une ligne récente\n(Métro 14 à Saint-Ouen, RER E à Nanterre),\nd'autres non (Issy, Neuilly, Levallois) :\nla desserte n'explique pas tout.", 10)
 footer(fig, "Sources : Urssaf — effectifs salariés du secteur privé par commune au 31/12/2015 et au 31/12/2025 (open.urssaf.fr) ; Île-de-France Mobilités — tracés du réseau ferré. "
             "Champ : emploi salarié privé, hors fonction publique ; l'intérim est compté au lieu de l'agence. Paris est compté comme une seule commune ; son gain n'est pas dessiné pour garder la lisibilité.")
-fig.savefig(PNG, dpi=200, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
+fig.savefig(PNG, dpi=300, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
 print("ok")

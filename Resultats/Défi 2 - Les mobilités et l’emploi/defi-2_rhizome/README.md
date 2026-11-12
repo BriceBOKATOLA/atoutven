@@ -20,7 +20,7 @@ Comment l'évolution des transports franciliens se situe-t-elle par rapport à c
 
 ## Notre visualisation
 
-Les [planches](production/docs/visualisation.md) présentent l’évolution du réseau ferré et des indicateurs d’emploi en Île-de-France. Les six cartes disponibles sont fournies en PDF et en PNG, avec leurs données et scripts. Elles décrivent des évolutions sans établir de relation causale.
+Les [planches](production/docs/visualisation.md) présentent l’évolution du réseau ferré et des indicateurs d’emploi en Île-de-France. Les planches sont fournies avec leurs données et scripts. Certains exports sont absents du dépôt ; leur état est précisé dans la documentation des planches. Elles décrivent des évolutions sans établir de relation causale.
 
 ## Les données utilisées
 
@@ -41,3 +41,7 @@ Les [instructions d'exécution](production/docs/execution.md) décrivent l'insta
 ## Licences
 
 Le code et la documentation du projet utilisent la [licence MIT](LICENSE), reprise du dépôt Hackaviz 2026. Les licences des données et des éléments réutilisés restent à vérifier et à documenter avant publication.
+
+## Site interactif
+
+Le [site web](production/web/README.md) présente le récit et trois cartes interactives. Ses [spécifications](production/web/docs/specifications.md) et son [catalogue de données](production/web/docs/donnees.md) précisent les indicateurs, leurs sources et les limites de reproduction.

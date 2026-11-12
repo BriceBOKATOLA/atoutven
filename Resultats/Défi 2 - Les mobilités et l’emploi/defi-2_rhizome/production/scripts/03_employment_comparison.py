@@ -3,6 +3,7 @@ from export_paths import export_paths
 PNG, PDF = export_paths("03_avant_apres")
 
 from map_theme import *
+from map_utils import CLEAN
 from matplotlib.lines import Line2D
 
 E = json.load(open((CLEAN / "series_emploi_urssaf.json"))); Y = E["annees"]; ref = E["IDF hors communes desservies et Paris"]
@@ -78,5 +79,5 @@ ptitle(fig, 0.36, "Comment lire ce graphique")
 ptext(fig, 0.335, "+13,4 pts pour le Tram T11 : ses communes ont\ngagné 13 emplois de plus pour 100 que le reste\nde la région, depuis l'année précédant l'ouverture.\n\nPointillés : avant l'ouverture, ces communes ne\nprogressaient pas plus vite que la région.\nCercle blanc : année 2020 (crise sanitaire).\n\nLes lignes ouvertes depuis 2021 ont trop peu\nde recul pour conclure (lignes grises\nsans étiquette, chiffres dans le tableau).", 9.8, "#4B5563")
 footer(fig, "Méthode : communes contenant au moins une gare ouverte par la ligne cette année-là (Paris exclu). Écart = croissance de l'emploi des communes desservies − croissance du reste de l'Île-de-France (hors Paris et communes desservies), "
             "depuis l'année précédant l'ouverture. Corrélation, pas causalité : d'autres projets jouent aussi (ZAC, Jeux olympiques 2024). Sources : Urssaf, effectifs salariés privés par commune 2015-2025 ; Île-de-France Mobilités, dates de mise en service.")
-fig.savefig(PNG, dpi=200, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
+fig.savefig(PNG, dpi=300, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
 print("ok")
