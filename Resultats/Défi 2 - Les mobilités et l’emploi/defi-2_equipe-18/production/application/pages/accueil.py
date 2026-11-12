@@ -44,7 +44,18 @@ with gauche:
                 f'stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M13 5l7 7-7 7"/></svg></span>'
                 f'Mobilités et emploi en Île-de-France</div>', unsafe_allow_html=True)
     # Titre et formulation des chiffres repris des recommandations de Pierre THAI (captures annotées des maquettes, 11/11)
-    u.bouton_ecouter("Quand le lieu de travail impose la voiture. " + message, nuit=True)
+    # Commentaire de l'accueil (texte validé le 2026-11-12) : message, les quatre chiffres, la carte, comment commencer
+    millions = f"{(actifs['Employé'] + actifs['Ouvrier']) / 1e6:.0f} millions"
+    commentaire = u.oral(
+        f"Accueil. Quand le lieu de travail impose la voiture. {message} Quatre chiffres pour commencer. {millions} "
+        f"d'actifs ne peuvent presque pas télétravailler : ce sont les employés et les ouvriers. "
+        f"{u.fr(round(h21.loc['Employés et ouvriers', 'emplois_sans_gare'], -3))} d'entre eux travaillent dans une "
+        f"commune sans gare. {gc_ouvriers:.0f} % des ouvriers de grande couronne vont de banlieue à banlieue. Et la nuit, "
+        f"il y a {fois_moins_nuit} fois moins de bus et de trains qu'entre 7 heures et 10 heures. À droite, une carte de "
+        f"l'Île-de-France : chaque point représente 200 employés ou ouvriers, placé dans leur commune de résidence. Le "
+        f"récit compte 6 stations, puis une conclusion. Pour commencer, le bouton « Commencer le voyage », ou le lien "
+        f"« Aller directement à ma commune ».")
+    u.bouton_ecouter(commentaire, nuit=True)
     st.markdown(f'<h1 class="titre" style="font-size:30px;line-height:1.1;color:#F1F2F6">Quand le lieu de travail '
                 f'<span style="color:#F28B6B">impose la voiture</span></h1>'
                 f'<p class="description" style="line-height:1.6">{message}</p>', unsafe_allow_html=True)
@@ -77,5 +88,6 @@ with droite:
                 f'<span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:#F28B6B;flex-shrink:0">'
                 f'</span>Chaque point = 200 employés ou ouvriers, placé au hasard dans leur commune de résidence '
                 f'(2 millions au total).</figcaption>'
-                f'<div style="font-size:14px;color:#9AA0B2">Sources : INSEE, recensement 2023 ; contours des communes, '
-                f'geo.api.gouv.fr.</div></figure>', unsafe_allow_html=True)
+                f'<div style="font-size:14px;color:#9AA0B2">Sources : '
+                f'{u.lier_sources("INSEE, recensement 2023 ; contours des communes, geo.api.gouv.fr.")}</div></figure>',
+                unsafe_allow_html=True)

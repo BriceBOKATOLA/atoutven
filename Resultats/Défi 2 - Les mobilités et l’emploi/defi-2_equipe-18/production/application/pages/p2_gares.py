@@ -31,21 +31,38 @@ combien = "presque deux fois" if 1.7 <= rapport < 2 else f"{u.fr(rapport, 1)} fo
 # Pas de lien de cause affirmé ici : la voiture est montrée à la station suivante.
 retenir = ("Les emplois d'ouvriers sont plus souvent dans des communes sans gare. Pour s'y rendre, de banlieue à "
            "banlieue, la voiture devient souvent la solution (station suivante).")
+metiers = ["Cadres", "Employés", "Ouvriers"]
+part_sg = {m: h21.loc[m, "part_sans_gare_pct"] for m in metiers}
+# Commentaire de la page (textes validés le 2026-11-12) ; la phrase « graphique » sert aussi de description du graphique
+graphique = ("Le graphique compare la part des emplois hors Paris situés dans une commune sans gare : "
+             + ", ".join(f"{u.pc(part_sg[m], 1)} pour les {m.lower()}" for m in metiers[:2])
+             + f", {u.pc(part_sg['Ouvriers'], 1)} pour les ouvriers.")
+commentaire = u.commentaire_page(
+    FICHIER, "leurs emplois sont loin des gares",
+    f"Hors de Paris, les ouvriers travaillent {combien} plus souvent que les cadres dans une commune sans gare, "
+    f"c'est-à-dire sans métro, ni RER, ni train, ni tram.",
+    graphique,
+    f"Au total, hors Paris, {u.fr(round(sans_gare_sur_place, -3))} emplois d'employés et d'ouvriers sont dans une "
+    f"commune sans gare.",
+    u.a_retenir(retenir).replace(" (station suivante).", ", comme le montre la station suivante."),
+    "Limite : on regarde la commune entière ; une gare peut se trouver juste à côté, dans la commune voisine.",
+    a_deplier=("de banlieue à banlieue", "travailler dans un autre département de banlieue",
+               "la ponctualité des lignes de RER et de train"))
 u.entete(FICHIER, 'Leurs emplois sont <span style="color:#B23A86">loin des gares</span>',
          f"Hors de Paris, les ouvriers travaillent {combien} plus souvent que les cadres dans une commune sans gare "
          f"(ni métro, ni RER, ni train, ni tram).", retenir,
          u.panneau("Emplois sans gare", u.fr(round(sans_gare_sur_place, -3)), "d'employés et d'ouvriers, hors Paris",
-                   "#B23A86", "#B23A86", "train_barre"))
+                   "#B23A86", "#B23A86", "train_barre"), commentaire=commentaire)
 
 # --- Visuel principal : barres dessinées comme la maquette validée (maquettes_validees/Ou.dc.html) : rond du métier
 # avec sa silhouette, barre sur fond gris clair (échelle de 0 à 30 %), valeur en gros chiffres. Valeurs calculées (script 07).
-metiers = ["Cadres", "Employés", "Ouvriers"]
 
 
 def ligne_barre(metier: str) -> str:
-    """Une ligne du graphique : métier, barre, valeur ; décrite en mots pour les lecteurs d'écran."""
-    v = h21.loc[metier, "part_sans_gare_pct"]
-    return (f'<div role="img" aria-label="{metier} : {u.fr(v, 1)} % des emplois hors Paris dans une commune sans gare" '
+    """Une ligne du graphique : métier, barre, valeur. Masquée aux lecteurs d'écran : le graphique entier a une
+    description d'ensemble (la comparaison des trois métiers), au lieu d'un texte par barre."""
+    v = part_sg[metier]
+    return (f'<div aria-hidden="true" '
             f'class="barre-metier" style="display:grid;grid-template-columns:170px 1fr 80px;gap:14px;align-items:center">'
             f'{u.libelle_metier(metier)}<div aria-hidden="true" style="height:22px;background:#EEF0EC;border-radius:11px;'
             f'overflow:hidden"><div style="height:22px;border-radius:11px;background:{u.METIERS[metier]["donnee"]};'
@@ -56,7 +73,10 @@ def ligne_barre(metier: str) -> str:
 st.markdown(f'<section style="background:#FFFFFF;border:1px solid #E7EAE4;border-radius:16px;padding:22px 28px;'
             f'display:flex;flex-direction:column;gap:16px"><div style="display:flex;align-items:center;gap:10px">'
             f'{u.badge_mode("train_barre")}<h2 class="sous-titre" style="margin:0">Part des emplois hors Paris situés '
-            f'dans une commune sans gare</h2></div>' + "".join(ligne_barre(m) for m in metiers)
+            f'dans une commune sans gare</h2></div>'
+            # Un seul texte pour tout le graphique (description d'ensemble), lu par les lecteurs d'écran
+            f'<div role="img" aria-label="{html.escape(graphique)}" style="display:flex;flex-direction:column;gap:16px">'
+            + "".join(ligne_barre(m) for m in metiers) + '</div>'
             + '<p style="margin:0;font-size:14px;line-height:1.5;color:#5E6475">Emplois situés en Île-de-France hors '
               'Paris, quel que soit le lieu de résidence. Commune avec gare : au moins un arrêt de métro, de train, de RER '
               'ou de tramway (407 communes sur 1 266).</p></section>', unsafe_allow_html=True)
@@ -143,7 +163,17 @@ LEGENDE_FLUX = ('<div style="display:flex;flex-wrap:wrap;gap:22px;align-items:ce
 dest_cat = u.lire("destinations_categories.csv").set_index(["categorie", "destination"])["part_pct"]
 compte_bab = u.lire("banlieue_a_banlieue_compte.csv").iloc[0]
 sur_dix = round(10 * compte_bab["communes_plus_de_la_moitie"] / compte_bab["communes"])
+part_dest = lambda cat, d: u.pc(dest_cat.loc[(cat, d)], 1)
 with st.expander("Pour aller plus loin : de banlieue à banlieue"):
+    # Commentaire de la partie (point 6 validé le 2026-11-12) : titre, chiffre clé, graphique raconté, lecture
+    u.ecouter_partie(
+        f"De banlieue à banlieue. Les ouvriers restent plus souvent dans leur département, les cadres vont plus souvent "
+        f"à Paris. Dans {sur_dix} communes sur 10, plus de la moitié des employés et ouvriers travaillent dans une autre "
+        f"commune de banlieue. Le graphique relie le domicile de chaque catégorie à trois lieux de travail. "
+        + " ".join(f"{cat} : {part_dest(cat, 'Leur département')} dans leur département, "
+                   f"{part_dest(cat, 'Autre département')} dans un autre département, {part_dest(cat, 'Paris')} à Paris."
+                   for cat in ("Ouvriers", "Cadres", "Employés"))
+        + " Ces trajets de proximité, de banlieue à banlieue, sont ceux où la voiture est la plus utilisée.")
     st.markdown(
         f'<h3 style="margin:4px 0 8px;font-family:Poppins,sans-serif;font-size:22px;font-weight:800;line-height:1.4">'
         f'Les ouvriers restent plus souvent <span style="color:#B23A86">dans leur département</span>, les cadres vont '
@@ -162,9 +192,10 @@ with st.expander("Pour aller plus loin : de banlieue à banlieue"):
         f'{u.fr(dest_cat.loc[("Cadres", "Paris")], 1)} % des cadres vont à Paris, contre '
         f'{u.fr(dest_cat.loc[("Ouvriers", "Paris")], 1)} % des ouvriers. Ces trajets de proximité, de banlieue à banlieue, '
         f'sont ceux où la voiture est la plus utilisée (station suivante).</p>', unsafe_allow_html=True)
-    st.dataframe(dest_cat.unstack()[DESTINATIONS].reset_index().rename(columns={"categorie": "Catégorie"})
-                 .assign(**{d: lambda df, d=d: df[d].map(lambda x: f"{u.fr(x, 1)} %") for d in DESTINATIONS}),
-                 hide_index=True, width="stretch")
+    # Vrai tableau HTML (titre, en-têtes) au lieu de st.dataframe : lisible case par case au lecteur d'écran
+    st.markdown(u.table_html(dest_cat.unstack()[DESTINATIONS].reset_index().rename(columns={"categorie": "Catégorie"})
+                             .assign(**{d: lambda df, d=d: df[d].map(lambda x: f"{u.fr(x, 1)} %") for d in DESTINATIONS}),
+                             "Lieu de travail des actifs de banlieue, par catégorie"), unsafe_allow_html=True)
 
 # Détail par département (tableaux 8 x 8 de la maquette) retiré le 2026-11-11 : jugé trop technique par Melvyn.
 # À sa place, validé le même jour (canevas « Proposition p2 : ligne « plus on s'éloigne » + tableau des départs ») :
@@ -201,6 +232,12 @@ stations_html = "".join(
     for k, texte, gras, d, c in STATIONS)
 avant, apres = round(liaisons["petite"] / 10), round(liaisons["grande"] / 10)
 with st.expander("Pour aller plus loin : travailler dans un autre département de banlieue"):
+    u.ecouter_partie(
+        f"Travailler dans un autre département de banlieue. Plus on s'éloigne de Paris, plus la voiture s'impose : de "
+        f"1 trajet sur {round(10 / avant)} à {apres} sur 10. Pour les employés et ouvriers qui travaillent dans un autre "
+        f"département de banlieue que le leur : entre deux communes de petite couronne, {u.pc(liaisons['petite'])} des "
+        f"trajets se font en voiture ; de la petite à la grande couronne, {u.pc(liaisons['mixte'])} ; entre deux "
+        f"communes de grande couronne, {u.pc(liaisons['grande'])}.")
     st.markdown(
         f'<h3 style="margin:4px 0 10px;font-family:Poppins,sans-serif;font-size:22px;font-weight:800;line-height:1.5">'
         f'Plus on s\'éloigne de Paris, plus la voiture s\'impose : de <span style="background:{ROUGE_VOITURE};'
@@ -230,33 +267,35 @@ with st.expander("Pour aller plus loin : travailler dans un autre département d
 ponct = u.lire("ponctualite_lignes.csv").set_index("ligne_nom").sort_values("ponctualite_pct")
 couleurs_lignes = u.lire("couleurs_lignes.csv").set_index("ligne")
 AMBRE, FOND_PANNEAU = "#FFC93C", "#141A2E"
-COLONNES_PANNEAU = "48px 82px 96px minmax(0,1fr)"   # largeurs pour la page (plus étroite que la maquette)
+# Largeurs pour la page (plus étroite que la maquette). Colonne « en retard » 96 -> 86 px et écarts 12 -> 10 px (12/11) :
+# la pastille « Top 4 postes » (environ 105 px) dépassait du panneau dans la colonne de droite à 960 px
+COLONNES_PANNEAU = "48px 82px 86px minmax(0,1fr)"
 
 
 def ligne_panneau(nom: str, r) -> str:
     """Une ligne du panneau : pastille de la ligne, part à l'heure, « 1 sur X » en retard, étiquette éventuelle."""
     c = couleurs_lignes.loc[nom]
     sur = round(100 / (100 - r["ponctualite_pct"]))      # 17,5 % de voyageurs en retard -> 1 sur 6
-    etiquette = ('<span style="font-size:14px;font-weight:800;color:#141A2E;background:#E58BC4;border-radius:999px;'
-                 'padding:3px 8px;display:inline-block;line-height:1.15;text-align:center;max-width:150px">DESSERT LE PLUS DE '
-                 'POSTES</span>') if r["dessert_le_plus"] else ""
-    # (étiquette sur deux lignes si besoin : elle ne déborde plus sur la colonne voisine)
-    return (f'<div role="row" aria-label="{nom} : {u.fr(r["ponctualite_pct"], 1)} % des voyageurs à l\'heure, 1 sur {sur} '
-            f'en retard" style="display:grid;grid-template-columns:{COLONNES_PANNEAU};gap:12px;align-items:center;'
+    # Étiquette allégée « Top 4 postes » (option A validée le 2026-11-12, canevas « étiquette allégée ») : l'ancienne
+    # « DESSERT LE PLUS DE POSTES », en capitales extra-grasses, s'écrasait sur 4 lignes à 960 px. Graisse 600, une
+    # seule ligne (nowrap) ; même police de texte que le reste (Plus Jakarta Sans), le sens est expliqué dans « Lecture ».
+    etiquette = ('<span style="font-size:14px;font-weight:600;color:#141A2E;background:#E58BC4;border-radius:999px;'
+                 'padding:1px 9px;white-space:nowrap">Top 4 postes</span>') if r["dessert_le_plus"] else ""
+    # Panneau visuel seulement (aria-hidden plus haut) : le vrai tableau HTML sous le panneau porte les mêmes chiffres
+    # pour les lecteurs d'écran, avec ses en-têtes
+    return (f'<div style="display:grid;grid-template-columns:{COLONNES_PANNEAU};gap:10px;align-items:center;'
             f'padding:7px 0;border-bottom:1px solid #262E48">'
-            # role="cell" sur chaque case : une ligne de tableau (role="row") doit contenir des cellules, sinon les
-            # lecteurs d'écran la lisent mal (audit axe-core du 12/11, règle aria-required-children)
-            f'<span role="cell" aria-label="{nom}" style="width:30px;height:30px;border-radius:8px;background:{c["fond"]};'
+            f'<span style="width:30px;height:30px;border-radius:8px;background:{c["fond"]};'
             f'color:{c["texte"]};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px">'
             f'{c["court"]}</span>'
-            f'<span role="cell" style="font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:24px;'
+            f'<span style="font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:24px;'
             f'color:{AMBRE}">{u.fr(r["ponctualite_pct"], 1)} %</span>'
-            f'<span role="cell" style="font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:20px;'
+            f'<span style="font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:20px;'
             f'color:#F1F2F6">1 sur <span style="color:{AMBRE};font-size:24px">{sur}</span></span>'
-            f'<span role="cell">{etiquette}</span></div>')
+            f'<span>{etiquette}</span></div>')
 
 
-entete_panneau = (f'<div aria-hidden="true" style="display:grid;grid-template-columns:{COLONNES_PANNEAU};gap:12px;'
+entete_panneau = (f'<div aria-hidden="true" style="display:grid;grid-template-columns:{COLONNES_PANNEAU};gap:10px;'
                   f'font-size:14px;font-weight:800;letter-spacing:0.08em;color:#9AA0B2;padding-bottom:6px;'
                   f'border-bottom:2px solid #3A4368"><span>LIGNE</span><span>À L\'HEURE</span><span>EN RETARD</span>'
                   f'<span></span></div>')
@@ -265,30 +304,45 @@ moitie = (len(lignes_triees) + 1) // 2           # deux colonnes : 7 lignes puis
 colonne = lambda lignes: entete_panneau + "".join(ligne_panneau(nom, r) for nom, r in lignes)
 haut = ponct.loc[ponct["dessert_le_plus"], "ponctualite_pct"].mean()
 autres = ponct.loc[~ponct["dessert_le_plus"], "ponctualite_pct"].mean()
+top4 = list(ponct[ponct["dessert_le_plus"]].sort_values("rang_emplois").index)
+pire, meilleure = ponct.index[0], ponct.index[-1]
 with st.expander("Pour aller plus loin : la ponctualité des lignes de RER et de train"):
+    u.ecouter_partie(
+        f"La ponctualité des lignes de RER et de train. Près d'une gare, encore faut-il que le train soit à l'heure. "
+        f"Les 4 lignes qui desservent le plus de postes d'employés et d'ouvriers hors de Paris, {u.enumeration(top4)}, "
+        f"sont à {u.pc(haut, 1)} à l'heure ; les 9 autres lignes, à {u.pc(autres, 1)}. La moins ponctuelle est le "
+        f"{pire} : {u.pc(ponct.loc[pire, 'ponctualite_pct'], 1)} des voyageurs à l'heure, 1 sur "
+        f"{round(100 / (100 - ponct.loc[pire, 'ponctualite_pct']))} en retard. La plus ponctuelle est le {meilleure} : "
+        f"{u.pc(ponct.loc[meilleure, 'ponctualite_pct'], 1)}. Période : novembre 2025 à octobre 2026. Le tableau qui "
+        f"suit donne les 13 lignes.", nuit=False)
     st.markdown(
         f'<h3 style="margin:4px 0 12px;font-family:Poppins,sans-serif;font-size:21px;font-weight:800">Près d\'une gare, '
         f'encore faut-il que le train soit à l\'heure</h3>'
-        f'<div role="table" aria-label="Ponctualité des 13 lignes de RER et de train" class="defile-mobile" '
+        f'<div aria-hidden="true" class="defile-mobile" '
         f'style="--largeur-mobile:440px;background:{FOND_PANNEAU};'
         f'border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 34px;'
         f'color:#F1F2F6"><div>{colonne(lignes_triees[:moitie])}</div><div>{colonne(lignes_triees[moitie:])}</div></div>'
         f'<p style="margin:12px 0 0;font-size:15px;line-height:1.5"><strong>Lecture :</strong> lignes classées de la '
         f'moins ponctuelle à la plus ponctuelle (novembre 2025 à octobre 2026). « En retard : 1 sur 6 » = un voyageur sur six arrive '
-        f'en retard. « Dessert le plus de postes » : les 4 lignes qui desservent le plus de postes d\'employés et '
+        f'en retard. « Top 4 postes » : les 4 lignes qui desservent le plus de postes d\'employés et '
         f'd\'ouvriers hors de Paris ; elles sont à {u.fr(haut, 1)} % à l\'heure, les 9 autres à {u.fr(autres, 1)} %. Ce '
         f'sont surtout des RER, moins ponctuels que les Transilien.</p>'
         f'<p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:#5E6475">Limite : 13 lignes seulement '
         f'(RER A à E, Transilien H, J, K, L, N, P, R, U). Le métro, le tram, le bus et la ligne V ne sont pas publiés '
         f'dans ce jeu de données de la SNCF. La ponctualité ne dit pas qui voyage. Idée et premier travail : Maroua '
         f'Zoubir.</p>', unsafe_allow_html=True)
-    # Tableau affiché directement : Streamlit n'accepte pas un bloc à déplier (u.tableau) dans un autre
-    st.dataframe(ponct.reset_index().assign(
-        Ligne=lambda d: d["ligne_nom"], **{"À l'heure (%)": lambda d: d["ponctualite_pct"].map(lambda x: u.fr(x, 1)),
-                                           "Postes d'employés et d'ouvriers desservis (hors Paris)":
-                                               lambda d: d["emplois_eo_desservis"].map(lambda x: u.fr(round(x, -3)))})
-                 [["Ligne", "À l'heure (%)", "Postes d'employés et d'ouvriers desservis (hors Paris)"]],
-                 hide_index=True, width="stretch")
+    # Tableau affiché directement : Streamlit n'accepte pas un bloc à déplier (u.tableau) dans un autre.
+    # Vrai tableau HTML ; colonnes « En retard » et « Top 4 postes » ajoutées pour reprendre tout ce que montre le
+    # panneau visuel (masqué aux lecteurs d'écran)
+    st.markdown(u.table_html(ponct.reset_index().assign(
+        Ligne=lambda d: d["ligne_nom"],
+        **{"À l'heure (%)": lambda d: d["ponctualite_pct"].map(lambda x: u.fr(x, 1)),
+           "En retard": lambda d: d["ponctualite_pct"].map(lambda x: f"1 sur {round(100 / (100 - x))}"),
+           "Top 4 postes": lambda d: d["dessert_le_plus"].map(lambda x: "Oui" if x else "Non"),
+           "Postes d'employés et d'ouvriers desservis (hors Paris)":
+               lambda d: d["emplois_eo_desservis"].map(lambda x: u.fr(round(x, -3)))})
+        [["Ligne", "À l'heure (%)", "En retard", "Top 4 postes", "Postes d'employés et d'ouvriers desservis (hors Paris)"]],
+        "Ponctualité des 13 lignes de RER et de train, de la moins à la plus ponctuelle"), unsafe_allow_html=True)
 
 
 u.navigation_bas(FICHIER)

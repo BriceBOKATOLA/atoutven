@@ -31,7 +31,7 @@ ATTENDU = {
         ("titre validé", "Quand le lieu de travail"),
         ("carte à points (image d'origine de la maquette)", "Carte à points de l'Île-de-France"),
         ("légende de la carte (texte de la maquette)", "Chaque point = 200 employés ou ouvriers"),
-        ("sources sous la carte", "contours des communes, geo.api.gouv.fr"),
+        ("sources sous la carte (avec liens depuis le 12/11)", "contours des communes, <a "),
         ("quatre chiffres", "13 fois moins"),
         ("bouton principal plein « Commencer le voyage »", 'class="bouton-principal"'),
         ("lien « Aller directement à ma commune »", "Aller directement à ma commune"),
@@ -40,7 +40,7 @@ ATTENDU = {
     "pages/p1_metiers.py": [
         ("bande de couleur à gauche de la page", 'class="bande-page"'),
         ("titre validé", "surtout pour les cadres"),
-        ("trois silhouettes-jauges", "Ouvriers : 0 % télétravaillent"),
+        ("trois silhouettes-jauges (description d'ensemble, 12/11)", "0 % des ouvriers"),
         ("panneau-chiffre", "Sans télétravail possible"),
         ("encadré « À retenir »", "À retenir"),
         ("encadré « Limite »", "Limite"),
@@ -54,6 +54,7 @@ ATTENDU = {
         ("graphique de flux de banlieue à banlieue (validé le 2026-11-11, remplace la carte)", "Où travaillent les actifs de banlieue"),
         # Tableaux par département retirés le 2026-11-11 (jugés trop techniques par Melvyn)
         ("ponctualité des lignes (travail de Maroua, validé le 2026-11-11)", "encore faut-il que le train soit"),
+        ("étiquette allégée « Top 4 postes » (option A validée le 2026-11-12)", "Top 4 postes"),
     ],
     "pages/p3_voiture.py": [
         ("bande de couleur à gauche de la page", 'class="bande-page"'),

@@ -71,7 +71,8 @@ def silhouette(metier: str, part: int) -> str:
              "Employés": '<rect x="68" y="98" width="20" height="13" rx="3" fill="#FFFFFF" stroke="#1B1F2A" stroke-width="2"/>',
              "Ouvriers": '<path d="M33 24a27 23 0 0 1 54 0z" fill="#1B1F2A"/><rect x="27" y="22" width="66" height="7" rx="3.5" fill="#1B1F2A"/>'}[metier]
     ident = "s" + metier[:3].lower()
-    return (f'<figure role="img" aria-label="{metier} : {part} % télétravaillent au moins un jour par semaine" '
+    # Masquée aux lecteurs d'écran : les trois silhouettes ont une seule description d'ensemble (voir plus bas)
+    return (f'<figure aria-hidden="true" '
             f'style="margin:0;display:flex;flex-direction:column;align-items:center;gap:8px">'
             f'<svg aria-hidden="true" width="132" height="210" viewBox="0 0 120 200"><defs><clipPath id="{ident}">'
             f'<path d="{SILHOUETTE}"/></clipPath></defs>'
@@ -94,14 +95,27 @@ sur_place = actifs["Employé"] + actifs["Ouvrier"]
 retenir = "Sans télétravail, chaque journée travaillée commence par un trajet."
 
 # « Surtout » et non « réservé » : 48 % des cadres ne télétravaillent pas ; titre affirmatif plutôt qu'une question
-u.entete(FICHIER, 'Le télétravail, <span style="color:#C0401A">surtout pour les cadres</span>',
-         "Pour de nombreux employés et ouvriers, la mobilité n'est pas une option : c'est une condition d'accès à "
-         "l'emploi.", retenir,
-         u.panneau("Sans télétravail possible", f"{sur_place / 1e6:.0f} millions".replace(".", ","),
-                   "d'actifs en Île-de-France (employés et ouvriers)", "#E4572E", "#C0401A"))
+description = ("Pour de nombreux employés et ouvriers, la mobilité n'est pas une option : c'est une condition d'accès "
+               "à l'emploi.")
+millions = f"{sur_place / 1e6:.0f} millions"
+limite = ("Parts de télétravail nationales (INSEE, enquête Emploi 2025) et nombre d'actifs franciliens "
+          "(INSEE, recensement 2023) : deux sources distinctes, non combinées.")
+# Commentaire de la page (texte validé le 2026-11-12) ; la phrase « graphique » sert aussi de description du graphique
+graphique = ("Le graphique montre trois silhouettes, remplies selon la part des salariés qui télétravaillent au moins un "
+             "jour par semaine : " + ", ".join(f"{p} % des {m.lower()}" for m, p in TELETRAVAIL_PCT.items()) + ".")
+commentaire = u.commentaire_page(
+    FICHIER, "le télétravail, surtout pour les cadres", description, graphique,
+    f"En Île-de-France, cela concerne {millions} d'actifs employés et ouvriers.",
+    u.a_retenir(retenir),
+    "Limite : les parts de télétravail sont nationales, le nombre d'actifs est francilien ; les deux sources ne sont "
+    "pas combinées.")
+u.entete(FICHIER, 'Le télétravail, <span style="color:#C0401A">surtout pour les cadres</span>', description, retenir,
+         u.panneau("Sans télétravail possible", millions,
+                   "d'actifs en Île-de-France (employés et ouvriers)", "#E4572E", "#C0401A"), commentaire=commentaire)
 
 st.markdown('<div class="carte"><h2 class="sous-titre">Télétravail selon la catégorie socioprofessionnelle : part des salariés qui '
-            'télétravaillent au moins un jour par semaine</h2><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">'
+            'télétravaillent au moins un jour par semaine</h2>'
+            f'<div role="img" aria-label="{graphique}" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">'
             + "".join(silhouette(m, p) for m, p in TELETRAVAIL_PCT.items())
             + '</div><p style="font-size:14px;color:#5E6475;margin:12px 0 0">Le niveau de remplissage indique la part de '
               'télétravailleurs dans chaque catégorie (calculé sur la surface de la silhouette).</p>'
@@ -117,8 +131,7 @@ u.tableau(pd.DataFrame({"Métier": list(TELETRAVAIL_PCT),
                         "Actifs résidant en Île-de-France": [u.fr(actifs[m.rstrip("s") if m != "Cadres" else m]) for m in TELETRAVAIL_PCT]}))
 
 # Limite fidèle au calcul : les deux sources sont affichées côte à côte, jamais multipliées entre elles
-u.encadres(retenir, "Parts de télétravail nationales (INSEE, enquête Emploi 2025) et nombre d'actifs franciliens "
-           "(INSEE, recensement 2023) : deux sources distinctes, non combinées.")
+u.encadres(retenir, limite)
 u.navigation_bas(FICHIER)
 u.sources("INSEE, enquête Emploi 2025 (Insee Références, juillet 2026) ; INSEE, recensement 2023, actifs résidant "
           "en Île-de-France.")

@@ -42,9 +42,27 @@ def en_mots(pct: float) -> str:
 
 AVEC, SANS = en_mots(part["avec gare"]), en_mots(part["sans gare"])
 
+# Actions pour IDFM : définies ici, car le commentaire lu par « Écouter » (en haut de page) les reprend
+ACTIONS = [  # (icône, couleur de la page d'origine, action, et ensuite)
+    ("velo", "#E4572E", "Le vélo, en petite couronne", "mesurer les trajets réels à vélo, pas à vol d'oiseau"),
+    ("navette", "#B23A86", "Des navettes vers les emplois sans gare", "les tester avec les employeurs qui peinent à recruter"),
+    ("lune", "#CF5CA6", "Penser aux horaires de nuit", "mesurer les temps de trajet en bus de nuit"),
+]
+# Commentaire de la conclusion (texte validé le 2026-11-12) : message, schéma raconté, les trois actions, les boutons
+commentaire = u.oral(
+    f"Conclusion. Ce n'est pas le métier, c'est le lieu de travail qui décide. Le réseau mène à Paris, pas aux emplois "
+    f"de banlieue. Le schéma montre les cadres, les employés et les ouvriers qui arrivent au même aiguillage : le lieu "
+    f"de travail. S'il a une gare, {AVEC} se fait en voiture ; mais dans {int(gare.communes_au_dessus)} des "
+    f"{int(gare.communes_avec_gare)} communes avec gare, 2 actifs sur 3 ou plus viennent encore en voiture. S'il n'a "
+    f"pas de gare, {SANS} se font en voiture, quel que soit le métier : le vélo si le trajet est court, une navette "
+    f"sinon. Ce que ça change pour Île-de-France Mobilités, en trois actions. "
+    + " ".join(f"{numero} : {action[0].lower() + action[1:]} ; et ensuite, {ensuite}."
+               for numero, (_, _, action, ensuite) in zip(("Un", "Deux", "Trois"), ACTIONS))
+    + " Pour finir, deux boutons : « Et votre commune ? » et « Revenir à l'accueil ».")
+
 u.entete(FICHIER, f'Ce n\'est pas le métier, c\'est le <span style="background:{ORANGE};color:#FFFFFF;border-radius:10px;'
                   f'padding:0 10px">lieu de travail</span> qui décide',
-         "Le réseau mène à Paris, pas aux emplois de banlieue.")
+         "Le réseau mène à Paris, pas aux emplois de banlieue.", commentaire=commentaire)
 
 
 # --- Schéma en aiguillage (SVG 800 x 252, mêmes silhouettes et couleurs que le reste de l'application)
@@ -110,11 +128,6 @@ st.markdown(f'<div class="carte defile-mobile" style="--largeur-mobile:800px;pad
 
 # --- Ce que ça change pour IDFM : 3 actions courtes, chacune avec sa perspective « Et ensuite » (sans chiffre :
 # les chiffres sont sur les pages 4 et 5 et sur le schéma)
-ACTIONS = [  # (icône, couleur de la page d'origine, action, et ensuite)
-    ("velo", "#E4572E", "Le vélo, en petite couronne", "mesurer les trajets réels à vélo, pas à vol d'oiseau"),
-    ("navette", "#B23A86", "Des navettes vers les emplois sans gare", "les tester avec les employeurs qui peinent à recruter"),
-    ("lune", "#CF5CA6", "Penser aux horaires de nuit", "mesurer les temps de trajet en bus de nuit"),
-]
 actions = "".join(
     f'<div class="piste" style="display:flex;gap:16px;align-items:center;padding:12px 0;border-top:1px solid #E1E4DE">'
     f'<span aria-hidden="true" style="flex-shrink:0;width:42px;height:42px;border-radius:50%;background:{c};display:flex;'

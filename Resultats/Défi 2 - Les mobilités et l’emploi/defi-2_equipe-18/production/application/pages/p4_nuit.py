@@ -9,6 +9,8 @@ Limite affichée : les passages sont prévus, ils ne disent ni qui voyage ni pou
 Données : donnees/offre_par_heure.csv (preparation/preparer_offre_horaire.py, même méthode que le script 05).
 """
 
+import html
+
 import pandas as pd
 import streamlit as st
 
@@ -41,15 +43,29 @@ dimanche = 100 * offre["passages_dimanche"].sum() / offre["passages_semaine"].su
 retenir = (f"L'offre de transport de nuit s'affaiblit sur l'ensemble de l'Île-de-France, pas seulement là où travaillent "
            f"les ouvriers. Ce qui "
            f"change, c'est qui en a besoin : les ouvriers, deux fois plus souvent de nuit que les cadres.")
+# Commentaire de la page (texte validé le 2026-11-12) ; la partie « graphique » sert aussi de description de la courbe
+description = (f"Entre minuit et 5h, l'offre de transport tombe à {u.fr(rapport, 1)} % de celle de 7h à 10h "
+               ": il ne reste presque que des bus de nuit.")
+graphique = (f"La courbe suit les passages prévus heure par heure, un jour de semaine, dans toute l'Île-de-France. Elle "
+             f"culmine vers 8 heures et vers 18 heures, autour de {u.fr(round(pointe, -3))} passages par heure aux heures "
+             f"de pointe, baisse le soir, puis tombe à environ {u.fr(round(nuit, -3))} passages par heure entre minuit et "
+             f"5 heures.")
+commentaire = u.commentaire_page(
+    FICHIER, f"la nuit, une offre de transport {round(100 / rapport)} fois moins importante",
+    description.replace("minuit et 5h", "minuit et 5 heures").replace("7h à 10h", "7 heures à 10 heures"), graphique,
+    f"{TRAVAIL_NUIT_PCT['Ouvriers']} % des ouvriers travaillent la nuit au moins une fois par mois, contre "
+    f"{TRAVAIL_NUIT_PCT['Cadres']} % des cadres.",
+    u.a_retenir(retenir),
+    "Limite : on compte l'offre prévue, pas qui la prend ni pourquoi.",
+    a_deplier=("la carte de la nuit et le dimanche",))
 # « 13 fois moins » plutôt que « 8 % des passages » : le pourcentage avait été mal compris (remarque de Pierre THAI, 11/11)
 u.entete(FICHIER, f'La nuit, une offre de transport <span style="color:{ROSE_NUIT}">{round(100 / rapport)} fois moins'
                   f'</span> importante',
          # « Heures de pointe » plutôt que « pointe » (mot jugé incompréhensible par Melvyn, 11/11)
-         f"Entre minuit et 5h, l'offre de transport tombe à {u.fr(rapport, 1)} % de celle de 7h à 10h "
-         ": il ne reste presque que des bus de nuit.", retenir,
+         description, retenir,
          u.panneau("Travaillent la nuit", f"{TRAVAIL_NUIT_PCT['Ouvriers']} %",
                    f"des ouvriers (cadres : {TRAVAIL_NUIT_PCT['Cadres']} %), au moins une fois par mois", ROSE_NUIT,
-                   "#FFFFFF", "lune", nuit=True), nuit=True)
+                   "#FFFFFF", "lune", nuit=True), nuit=True, commentaire=commentaire)
 
 # --- Visuel principal : variante A (courbe) validée le 2026-11-11 (canevas « Proposition p4, variante A »,
 # inspirée de HAP Express : on éclaire l'information clé et on efface le reste). Par rapport aux 24 barres de la maquette :
@@ -111,8 +127,7 @@ xm, yp, yn = (xn0 + xn1) / 2, py(pointe), py(nuit)
 ym = (yp + yn) / 2 + 20
 fois = round(100 / rapport)
 svg = (
-    f'<svg role="img" aria-label="Courbe des passages par heure. De 7h à 10h, environ {u.fr(round(pointe, -3))} passages '
-    f'par heure. De minuit à 5h, environ {u.fr(round(nuit, -3))} passages par heure : {fois} fois moins." '
+    f'<svg role="img" aria-label="{html.escape(graphique)}" '
     f'viewBox="0 0 {LARGEUR} {BASE + 40}" style="width:100%;height:auto;display:block;font-family:\'Plus Jakarta Sans\','
     f'sans-serif">'
     # Zones nommées (fond)
@@ -207,6 +222,13 @@ sur_dix = round(10 * compte["communes_aucun_passage"] / compte["communes_total"]
 LEGENDE_NUIT = [("Aucun passage de minuit à 5h", u.echantillon("#3A4368", "#8E96B3")),
                 ("Au moins un passage", u.echantillon(ROSE_NUIT))]
 with st.expander("Pour aller plus loin : la carte de la nuit et le dimanche"):
+    u.ecouter_partie(
+        f"La carte de la nuit et le dimanche. {sur_dix} communes sur 10 n'ont aucune offre de transport de nuit : "
+        f"{u.fr(compte['communes_aucun_passage'])} communes sur {u.fr(compte['communes_total'])} n'ont aucun bus ni "
+        f"train entre minuit et 5 heures, surtout en grande couronne. La nuit, l'offre de transport se resserre sur Paris "
+        f"et la petite couronne. Le dimanche, l'offre de transport est de {dimanche:.0f} % de celle d'un jour de "
+        f"semaine ; {TRAVAIL_DIMANCHE_PCT['Employés']} % des employés travaillent le dimanche, contre "
+        f"{TRAVAIL_DIMANCHE_PCT['Cadres']} % des cadres.", nuit=True)
     st.markdown(u.figure_carte(
         "carte_nuit_2couleurs.svg",
         f"Carte nocturne des communes d'Île-de-France : {u.fr(compte['communes_aucun_passage'])} communes sur "

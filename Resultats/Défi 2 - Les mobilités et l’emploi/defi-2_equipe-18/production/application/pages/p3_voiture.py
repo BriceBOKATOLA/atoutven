@@ -10,6 +10,8 @@ Visuel principal : barres-pilules (12/11). Barre pleine = sans gare, rond creux 
 deux, pas seulement la couleur. Bande grise « Sans gare : 71 à 77 %, quel que soit le métier » sur les trois barres.
 """
 
+import html
+
 import pandas as pd
 import streamlit as st
 
@@ -25,12 +27,27 @@ trajets_sans_gare = v[(v["commune_de_travail"] == "sans gare") & v["groupe"].isi
 retenir = ("Ce n'est pas le métier qui met en voiture, c'est l'absence de gare au lieu de travail. Les employés et ouvriers "
            "en souffrent plus, parce que leurs emplois sont plus souvent sans gare.")
 
+description = ("Entre deux communes de banlieue, la voiture fait environ un trajet sur deux quand le lieu de travail a "
+               "une gare ; quand il n'en a pas, elle l'emporte quel que soit le métier, cadres compris.")
+metiers = ["Cadres", "Employés", "Ouvriers"]
+part_v = v.set_index(["groupe", "commune_de_travail"])["part_voiture_pct"]
+# Commentaire de la page (texte validé le 2026-11-12) ; la partie « graphique » sert aussi de description du graphique
+graphique = ("Le graphique donne, pour chaque métier, la part des trajets faits en voiture. Quand le lieu de travail a "
+             "une gare : " + ", ".join(f"{u.pc(part_v[(m, 'avec gare')])} pour les {m.lower()}" for m in metiers)
+             + ". Quand il n'en a pas : "
+             + ", ".join(f"{u.pc(part_v[(m, 'sans gare')])} pour les {m.lower()}" for m in metiers) + ".")
+commentaire = u.commentaire_page(
+    FICHIER, "sans gare, près de 3 trajets sur 4 se font en voiture", description, graphique,
+    f"Cela concerne {u.fr(round(trajets_sans_gare, -3))} employés et ouvriers, qui vont travailler dans une commune "
+    f"sans gare depuis une autre commune de banlieue.",
+    u.a_retenir(retenir),
+    "Limite : la catégorie « voiture » de l'INSEE inclut les camions et les fourgonnettes.",
+    a_deplier=("la voiture selon la destination", "un contrôle par le revenu"))
 u.entete(FICHIER, 'Sans gare, <span style="color:#C0401A">près de 3 trajets sur 4</span> se font en voiture',   # espaces insécables : le « 4 » ne passe pas seul à la ligne
-         "Entre deux communes de banlieue, la voiture fait environ un trajet sur deux quand le lieu de travail a une "
-         "gare ; quand il n'en a pas, elle l'emporte quel que soit le métier, cadres compris.", retenir,
+         description, retenir,
          u.panneau("Personnes concernées", u.fr(round(trajets_sans_gare, -3)),
                    "employés et ouvriers vont travailler, depuis une autre commune de banlieue, dans une commune sans gare",
-                   "#E4572E", "#C0401A", "train_barre"))
+                   "#E4572E", "#C0401A", "train_barre"), commentaire=commentaire)
 
 # --- Visuel principal : barres-pilules (planche « Proposition p3 : barres-pilules », validée par Melvyn le 2026-11-12,
 # dans le style du skill infographie-storytelling : formes larges, pastille ronde à la silhouette du métier).
@@ -41,7 +58,6 @@ u.entete(FICHIER, 'Sans gare, <span style="color:#C0401A">près de 3 trajets su
 #     « sans gare », avec la pastille « Sans gare : 71 à 77 %, quel que soit le métier ». Bornes calculées.
 # Échelle de 0 à 100 % (honnêteté) ; formes différentes pour « avec » (rond creux) et « sans » (barre pleine) : le sens ne
 # repose pas sur la couleur seule.
-metiers = ["Cadres", "Employés", "Ouvriers"]
 large = v.pivot(index="groupe", columns="commune_de_travail", values="part_voiture_pct").loc[metiers].reset_index()
 large.columns = ["Métier", "avec", "sans"]
 BAS, HAUT = round(large["sans"].min()), round(large["sans"].max())
@@ -69,8 +85,7 @@ def silhouette(metier: str) -> str:
 def ligne_pilule(metier: str, avec: float, sans: float) -> str:
     """Une ligne : métier, piste grise, barre vive jusqu'à « sans gare » + pastille, rond pâle « avec gare », valeur."""
     c, texte = u.METIERS[metier]["donnee"], u.METIERS[metier]["texte"]
-    return (f'<div role="img" aria-label="{metier} : {avec:.0f} % en voiture quand le lieu de travail a une gare, '
-            f'{sans:.0f} % quand il n\'en a pas" class="ligne-p3" style="display:grid;grid-template-columns:{COLONNES};gap:16px;'
+    return (f'<div aria-hidden="true" class="ligne-p3" style="display:grid;grid-template-columns:{COLONNES};gap:16px;'
             f'align-items:center;padding:22px 0 18px;position:relative;z-index:1">{u.libelle_metier(metier)}'
             f'<div aria-hidden="true" style="position:relative;height:30px;border-radius:15px;background:{PISTE_GRISE}">'
             f'<div style="position:absolute;left:0;top:0;bottom:0;width:{sans:.1f}%;border-radius:15px;background:{c}"></div>'
@@ -98,7 +113,7 @@ st.markdown(f'<section class="defile-mobile jauges-p3" style="--largeur-mobile:2
             f'border-radius:16px;padding:22px 28px;display:flex;flex-direction:column;gap:14px">'
             f'<h2 class="sous-titre" style="margin:0">Part des trajets faits en voiture, de banlieue à banlieue, selon le lieu '
             f'de travail</h2>{legende}'
-            f'<div class="zone-jauges" style="position:relative;padding-top:52px">'
+            f'<div class="zone-jauges" role="img" aria-label="{html.escape(graphique)}" style="position:relative;padding-top:52px">'
             f'<div aria-hidden="true" style="position:absolute;top:0;bottom:0;left:{bande_gauche};width:{bande_largeur};'
             f'background:#EEF0EC;border-radius:16px;z-index:0"></div>'
             f'<div class="conteneur-pastille" style="position:absolute;top:10px;left:{bande_gauche};width:{bande_largeur};'
@@ -122,8 +137,16 @@ u.encadres(retenir, "La catégorie INSEE « voiture » inclut camions et fourgon
 with st.expander("Pour aller plus loin : la voiture selon la destination (habitants de grande couronne)"):
     m = u.lire("modes_par_destination_grande_couronne.csv")
     m = m[m["GS"].isin(metiers)].pivot(index="destination", columns="GS", values="part_voiture_pct")[metiers]
-    st.dataframe(m.map(lambda val: f"{u.fr(val, 1)} %").reset_index().rename(columns={"destination": "Destination"}),
-                 hide_index=True, width="stretch")
+    # Commentaire de la partie : chiffres calculés (vers Paris, cadres et employés ; entre banlieues, le plus bas)
+    vers_paris = round(m.loc["Paris", ["Cadres", "Employés"]].mean())
+    entre_banlieues = m.loc["Grande couronne (autre commune)"].min()
+    u.ecouter_partie(
+        f"La voiture selon la destination, pour les habitants de grande couronne. Vers Paris, employés et cadres prennent "
+        f"aussi peu la voiture : {vers_paris} %. Entre banlieues, plus de {int(entre_banlieues // 10)} sur 10 la "
+        f"prennent. Le tableau qui suit donne la part de la voiture pour chaque destination et chaque métier.")
+    st.markdown(u.table_html(m.map(lambda val: f"{u.fr(val, 1)} %").reset_index().rename(columns={"destination": "Destination"}),
+                             "Part des trajets en voiture selon la destination, habitants de grande couronne"),
+                unsafe_allow_html=True)
     # Paragraphe en gris foncé plutôt que st.caption, dont le gris clair n'a pas assez de contraste sur notre fond
     # (audit axe-core du 12/11) ; #5E6475 est le gris des notes de l'application
     st.markdown('<p style="margin:0;font-size:14px;color:#5E6475">Vers Paris, employés et cadres prennent aussi peu la '
@@ -132,17 +155,25 @@ with st.expander("Pour aller plus loin : la voiture selon la destination (habita
 # Contrôle du résultat principal par le revenu (script 09) : réponse à « et si c'était une question d'argent ? »
 with st.expander("Et si c'était simplement une question de revenu ? Le contrôle"):
     r = u.lire("effet_gare_a_revenu_egal.csv")
+    u.ecouter_partie(
+        f"Et si c'était simplement une question de revenu ? On a classé les trajets selon le niveau de vie médian de la "
+        f"commune de résidence, en quatre parts égales. Dans chacune, l'absence de gare au lieu de travail fait monter la "
+        f"voiture de {r['ecart_points'].min():.0f} à {r['ecart_points'].max():.0f} points. Le résultat ne s'explique donc "
+        f"pas par le revenu. Attention : le revenu est celui de la commune, pas de la personne.")
     st.markdown(f"On a classé les trajets selon le **niveau de vie médian de la commune de résidence**, en quatre parts "
                 f"égales. Dans chacune, l'absence de gare au lieu de travail fait monter la voiture de "
                 f"**{r['ecart_points'].min():.0f} à {r['ecart_points'].max():.0f} points**. Le résultat ne s'explique donc "
                 f"pas par le revenu.")
-    st.dataframe(pd.DataFrame({
+    st.markdown(u.table_html(pd.DataFrame({
         "Communes de résidence": ["Les plus modestes", "Plutôt modestes", "Plutôt aisées", "Les plus aisées"],
         "Voiture, lieu de travail avec gare (%)": [u.fr(x, 1) for x in r["voiture_avec_gare_pct"]],
         "Voiture, lieu de travail sans gare (%)": [u.fr(x, 1) for x in r["voiture_sans_gare_pct"]],
-        "Écart (points)": [f"+{u.fr(x, 1)}" for x in r["ecart_points"]]}), hide_index=True, width="stretch")
-    st.caption("Revenu : INSEE, Filosofi 2023 (niveau de vie médian par commune). Trajets de banlieue à banlieue, "
-               "tous métiers. Le revenu est celui de la commune, pas de la personne.")
+        "Écart (points)": [f"+{u.fr(x, 1)}" for x in r["ecart_points"]]}),
+        "Part de la voiture selon le niveau de vie de la commune de résidence"), unsafe_allow_html=True)
+    # Paragraphe gris foncé au lieu de st.caption, dont le gris clair manquait de contraste (audit axe-core du 12/11)
+    st.markdown('<p style="margin:0;font-size:14px;color:#5E6475">Revenu : INSEE, Filosofi 2023 (niveau de vie médian '
+                'par commune). Trajets de banlieue à banlieue, tous métiers. Le revenu est celui de la commune, pas de la '
+                'personne.</p>', unsafe_allow_html=True)
 
 u.navigation_bas(FICHIER)
 u.sources("INSEE, recensement 2023, mobilités professionnelles ; INSEE, Filosofi 2023 ; IDFM, offre hebdomadaire 2025 et "

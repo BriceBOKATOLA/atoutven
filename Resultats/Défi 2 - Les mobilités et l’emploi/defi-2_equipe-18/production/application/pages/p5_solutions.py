@@ -55,6 +55,24 @@ def pastille(texte: str, couleur: str) -> str:
 
 retenir = ("Pour le défi : le vélo en petite couronne, où les trajets en voiture sont courts ; des navettes en grande "
            "couronne, où les emplois sont loin des gares et où les employeurs peinent le plus à recruter.")
+# Commentaire de la page (texte validé le 2026-11-12) : les deux blocs, leurs cartes et leurs premières communes
+description = ("Chaque territoire a sa solution : le vélo là où les trajets en voiture sont courts, des navettes là où les "
+               "emplois sont loin des gares.")
+commentaire = u.commentaire_page(
+    FICHIER, f"le vélo pour {pct(courts['part_moins_5km_pct'])} des trajets en voiture, des navettes pour les "
+             f"{pct(sans_gare['part_sans_gare_pct'])} d'emplois sans gare",
+    "Chaque territoire a sa solution.",
+    f"Premier bloc : le vélo, pour la petite couronne. {pct(pc['voiture_moins_5km_pct'])} des trajets en voiture y font "
+    f"moins de 5 kilomètres, contre {pct(gc['voiture_moins_5km_pct'])} en grande couronne. La carte montre "
+    f"{compte['communes_velo_au_moins_un_tiers']} communes où au moins un trajet en voiture sur 3 fait moins de 5 "
+    f"kilomètres ; elles forment un anneau autour de Paris. En tête : {u.enumeration(list(velo['nom'].head(3)))}.",
+    f"Second bloc : les navettes, pour la grande couronne. {pct(gc['emplois_eo_sans_gare_pct'])} des postes "
+    f"d'employés et d'ouvriers y sont dans une commune sans gare, contre {u.pc(pc['emplois_eo_sans_gare_pct'], 1)} en "
+    f"petite couronne. La carte montre {compte['communes_sans_gare_500_emplois']} communes sans gare qui comptent au "
+    f"moins 500 de ces postes ; celles qui en comptent le plus sont {u.enumeration(list(communes['nom'].head(3)))}. "
+    f"Les employeurs de grande couronne jugent difficiles {pct(gc['part_A_pct'])} de leurs projets de recrutement.",
+    u.a_retenir(retenir),
+    "Limite : ce sont des potentiels, pas des prévisions, et les distances sont à vol d'oiseau.")
 # Interligne plus grand sur ce titre seulement : les pastilles ont besoin de place entre les deux lignes
 u.entete(FICHIER,
          f'<span style="display:block;line-height:1.45">Le vélo pour '
@@ -62,8 +80,7 @@ u.entete(FICHIER,
          f'pour les {pastille(pct(sans_gare["part_sans_gare_pct"]), ROSE)} d\'emplois sans gare</span>',
          # « les 20 % d'emplois sans gare » et non « 20 % des emplois sans gare », qui se lisait comme
          # « 20 % des emplois qui sont sans gare » (relecture du 12/11)
-         "Chaque territoire a sa solution : le vélo là où les trajets en voiture sont courts, des navettes là où les "
-         "emplois sont loin des gares.", retenir)
+         description, retenir, commentaire=commentaire)
 
 # Interrupteur commun aux deux cartes : vue cadrée (par défaut) ou toute l'Île-de-France
 entiere = st.toggle("Voir toute l'Île-de-France sur les cartes", key="vue_entiere_solutions")

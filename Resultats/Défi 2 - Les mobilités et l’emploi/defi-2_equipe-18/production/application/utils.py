@@ -160,6 +160,19 @@ a:focus-visible, button:focus-visible, summary:focus-visible {{ outline: 3px sol
   padding: 20px 24px !important; }}
 [class*="st-key-carte"] [data-testid="stVerticalBlock"] {{ gap: 10px; }}
 [data-testid="stSidebar"] nav a:hover span:last-child {{ text-decoration: underline; }}
+/* Texte réservé aux lecteurs d'écran : hors de la vue, mais lu (technique « visually hidden » du W3C / RGAA) */
+.lecteur-ecran {{ position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0; }}
+/* Tableaux de données en vrai HTML (<table>, <caption>, <th>) : lus case par case avec leurs en-têtes par les
+   lecteurs d'écran (RGAA, thème 5), ce que la grille st.dataframe (dessinée dans un canevas) ne permet pas bien */
+table.donnees {{ width: 100%; border-collapse: collapse; font-size: 15px; }}
+/* Sur téléphone : largeur minimale, les cellules ne se coupent plus en trois lignes ; le cadre défile de côté */
+@media (max-width: 600px) {{ table.donnees {{ min-width: 520px; }} }}
+table.donnees caption {{ text-align: left; font-weight: 700; font-size: 15px; padding: 0 0 8px; color: {encre}; }}
+table.donnees th, table.donnees td {{ text-align: left; padding: 7px 10px; border-bottom: 1px solid {bord}; color: {encre};
+  font-size: 15px; }}
+table.donnees thead th {{ font-weight: 700; border-bottom: 2px solid {"#5A6386" if nuit else "#C9CDD3"}; }}
+table.donnees tbody th {{ font-weight: 600; white-space: nowrap; }}   /* « Train U » sur une seule ligne */
 /* --- Accessibilité au clavier (constats du test au clavier du 2026-11-11) --- */
 /* Contour bien visible sur tout élément qui reçoit le focus, y compris les liens-boutons de Streamlit */
 a:focus-visible, button:focus-visible, summary:focus-visible, [data-testid="stPageLink"] a:focus-visible {{
@@ -286,10 +299,13 @@ def _ligne_de_metro(fichier_courant: str, nuit: bool) -> str:
 ZOOM_CARTES_JS = (DOSSIER / "zoom_cartes.js").read_text(encoding="utf-8")
 
 
-def bouton_ecouter(texte: str, nuit: bool = False) -> None:
-    """Bouton « Écouter cette page » : lit le texte avec la synthèse vocale du navigateur (Web Speech API).
+def bouton_ecouter(texte: str, nuit: bool = False, libelle: str = "Écouter cette page") -> None:
+    """Bouton « Écouter » : lit le texte avec la synthèse vocale du navigateur (Web Speech API).
 
     Aucun service extérieur : la voix est celle de l'ordinateur du visiteur. Un second clic arrête la lecture.
+    libelle : « Écouter cette page » en haut de page, « Écouter cette partie » dans un bloc « Pour aller plus loin ».
+    Le texte est lu phrase par phrase (une file d'énoncés) : sous Chrome, un énoncé long est coupé au bout d'une
+    quinzaine de secondes, c'est pourquoi la fin des textes n'était pas lue (constat des tests du 12/11).
     """
     couleur, fond = ("#F1F2F6", "#1E2640") if nuit else (ENCRE, "#FFFFFF")
     # st.iframe exécute notre propre HTML (jamais un contenu venu de l'extérieur) : le script de lecture y fonctionne
@@ -301,7 +317,7 @@ body {{ margin: 0; padding: 4px; }}</style>
  font:700 15px 'Plus Jakarta Sans',sans-serif;cursor:pointer">
  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
  stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/>
- <path d="M19 5a10 10 0 0 1 0 14"/></svg><span id="t">Écouter cette page</span></button>
+ <path d="M19 5a10 10 0 0 1 0 14"/></svg><span id="t">{libelle}</span></button>
 <script>
 // Langue de la page : Streamlit déclare « en » ; un lecteur d'écran lirait alors le français avec une voix anglaise.
 // Ce cadre est sur le même domaine que l'application : il peut corriger la page qui l'accueille.
@@ -321,23 +337,35 @@ try {{
     const s = d.createElement('script'); s.textContent = {json.dumps(ZOOM_CARTES_JS)}; d.head.appendChild(s);
   }}
 }} catch (e) {{}}
-const texte = {json.dumps(texte)};
+const texte = {json.dumps(texte)}, libelle = {json.dumps(libelle)};
 const b = document.getElementById('b'), t = document.getElementById('t');
+const s = window.speechSynthesis;
+// Une page qui s'affiche coupe la lecture en cours (sinon la page précédente continuerait de parler)
+s.cancel();
+// Phrases : on coupe après un point, un point d'interrogation ou d'exclamation suivi d'un espace
+const phrases = texte.split(/(?<=[.!?])\\s+/).filter(p => p.trim());
+const repos = () => {{ t.textContent = libelle; b.setAttribute('aria-pressed','false'); }};
 b.onclick = () => {{
-  const s = window.speechSynthesis;
-  if (s.speaking) {{ s.cancel(); t.textContent = 'Écouter cette page'; b.setAttribute('aria-pressed','false'); return; }}
-  const u = new SpeechSynthesisUtterance(texte); u.lang = 'fr-FR'; u.rate = 0.95;
-  u.onend = () => {{ t.textContent = 'Écouter cette page'; b.setAttribute('aria-pressed','false'); }};
-  s.speak(u); t.textContent = 'Arrêter la lecture'; b.setAttribute('aria-pressed','true');
+  if (s.speaking || s.pending) {{ s.cancel(); repos(); return; }}
+  // Une voix française si l'ordinateur en a une (sinon la voix par défaut lit le français avec un accent étranger)
+  const voix = s.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('fr'));
+  phrases.forEach((p, i) => {{
+    const u = new SpeechSynthesisUtterance(p); u.lang = 'fr-FR'; u.rate = 0.95;
+    if (voix) u.voice = voix;
+    if (i === phrases.length - 1) u.onend = repos;   // fin de la dernière phrase : le bouton redevient « Écouter »
+    s.speak(u);
+  }});
+  t.textContent = 'Arrêter la lecture'; b.setAttribute('aria-pressed','true');
 }};
-</script>""", height=52, alt="Bouton pour écouter la page à voix haute")
+</script>""", height=52, alt=f"Bouton « {libelle} » : lecture à voix haute")
 
 
 def entete(fichier: str, titre_html: str, description: str, a_lire_en_plus: str = "",
-           panneau_html: str = "", nuit: bool = False) -> None:
+           panneau_html: str = "", nuit: bool = False, commentaire: str = "") -> None:
     """En-tête de page : station et question, bouton d'écoute, titre (la réponse), description, panneau-chiffre.
 
-    Le texte lu à voix haute = question + titre + description + a_lire_en_plus (le « À retenir »).
+    Le texte lu à voix haute = le commentaire de la page (voir commentaire_page) s'il est donné ; sinon, à défaut,
+    question + titre + description + a_lire_en_plus.
     """
     _, titre_court, numero, question = next(p for p in PAGES if p[0] == fichier)
     surtitre = f"{numero} / 6 · {question}" if numero else titre_court
@@ -345,7 +373,8 @@ def entete(fichier: str, titre_html: str, description: str, a_lire_en_plus: str 
     with gauche:
         st.markdown(f'<div class="surtitre">{surtitre}</div>', unsafe_allow_html=True)
         titre_texte = html.unescape(_sans_balises(titre_html))
-        bouton_ecouter(". ".join(x for x in (question, titre_texte, description, a_lire_en_plus) if x), nuit)
+        bouton_ecouter(commentaire or oral(" ".join(x for x in (question, titre_texte, description, a_lire_en_plus) if x)),
+                       nuit)
         st.markdown(f'<h1 class="titre">{titre_html}</h1><p class="description">{description}</p>',
                     unsafe_allow_html=True)
     if droite is not None:
@@ -357,6 +386,86 @@ def _sans_balises(texte: str) -> str:
     """Retire les balises HTML d'un titre, pour la lecture à voix haute."""
     import re
     return re.sub(r"<[^>]+>", "", texte)
+
+
+# ---------------------------------------------------------------------------
+# Commentaire de page (lecture à voix haute et description pour les lecteurs d'écran)
+# ---------------------------------------------------------------------------
+# Textes validés par Melvyn le 2026-11-12. Le bouton « Écouter » lisait seulement le titre, la description et le
+# « À retenir » : jamais le graphique, le panneau-chiffre ni la suite. Le commentaire suit l'ordre de lecture d'un
+# voyant : où je suis, la réponse, le graphique raconté, le panneau-chiffre, « À retenir », « Limite », ce qu'il y a à
+# déplier, la station suivante. La partie « graphique » sert aussi de description du graphique pour les lecteurs
+# d'écran (méthode du W3C pour les images complexes et RGAA, critère 1.6 : une description d'ensemble, pas un texte
+# par barre).
+
+def oral(texte: str) -> str:
+    """Nettoie un texte pour l'oral : balises retirées, ponctuation doublée corrigée (« ?. », « .. »), espaces."""
+    import re
+    t = html.unescape(_sans_balises(texte)).replace(" ", " ").replace(" ", " ")
+    t = re.sub(r"([.!?:;])\s*\.", r"\1", t)            # « ?. » et « .. » : une seule ponctuation
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def pc(valeur: float, decimales: int = 0) -> str:
+    """Pourcentage pour l'oral et les descriptions : « 13 % » plutôt que « 13,0 % »."""
+    return f"{fr(valeur, decimales).removesuffix(',0')} %"
+
+
+def _phrase(texte: str) -> str:
+    """Termine un morceau de texte par un point s'il n'a pas déjà une ponctuation finale."""
+    texte = texte.strip()
+    return texte if not texte or texte[-1] in ".!?" else texte + "."
+
+
+def _premiere_minuscule(texte: str) -> str:
+    """« Où sont leurs emplois ? » -> « où sont leurs emplois ? » (après « Station suivante : »)."""
+    return texte[:1].lower() + texte[1:]
+
+
+def enumeration(elements: list) -> str:
+    """« a », « a et b », « a, b et c »."""
+    return elements[0] if len(elements) == 1 else ", ".join(elements[:-1]) + " et " + elements[-1]
+
+
+def commentaire_page(fichier: str, titre: str, *parties: str, a_deplier: tuple = (), reponse: bool = True) -> str:
+    """Commentaire complet d'une station, dans l'ordre de lecture d'un voyant.
+
+    « Station 2 sur 6 : où sont leurs emplois ? Réponse : <titre>. <parties…> Trois parties sont à déplier sous le
+    graphique : … Station suivante : <question de la station suivante> »
+    parties : description, graphique raconté, panneau-chiffre, « À retenir », « Limite » (dans cet ordre).
+    reponse=False : pas de « Réponse : » (station 6, dont le titre est une question).
+    """
+    i = next(k for k, p in enumerate(PAGES) if p[0] == fichier)
+    _, _, numero, question = PAGES[i]
+    morceaux = [_phrase(f"Station {numero} sur 6 : {_premiere_minuscule(question)}"),
+                _phrase(f"Réponse : {titre}" if reponse else titre)]
+    morceaux += [_phrase(p) for p in parties if p]
+    if a_deplier:
+        nombre = {1: "Une partie est", 2: "Deux parties sont", 3: "Trois parties sont"}[len(a_deplier)]
+        morceaux.append(f"{nombre} à déplier sous le graphique : {enumeration(list(a_deplier))}.")
+    suivante = PAGES[i + 1]
+    morceaux.append(_phrase(f"Station suivante : {_premiere_minuscule(suivante[3])}") if suivante[2]
+                    else f"Suite : la {suivante[1].lower()}.")
+    return oral(" ".join(morceaux))
+
+
+def a_retenir(retenir: str) -> str:
+    """« À retenir : … » pour le commentaire, avec une minuscule après les deux-points (typographie française)."""
+    return "À retenir : " + _premiere_minuscule(retenir)
+
+
+def ecouter_partie(texte: str, nuit: bool = False) -> None:
+    """Bouton « Écouter cette partie », en tête d'un bloc « Pour aller plus loin » (validé le 2026-11-12)."""
+    bouton_ecouter(oral(texte), nuit, "Écouter cette partie")
+
+
+def annonce(texte: str) -> None:
+    """Phrase invisible annoncée par les lecteurs d'écran quand elle change (zone aria-live « polite »).
+
+    Sert à la station 6 : quand on choisit une commune, le résultat est annoncé sans avoir à le chercher dans la page.
+    """
+    st.markdown(f'<div class="lecteur-ecran" role="status" aria-live="polite">{html.escape(texte)}</div>',
+                unsafe_allow_html=True)
 
 
 def panneau(libelle: str, valeur: str, detail: str, couleur_bande: str, couleur_valeur: str,
@@ -401,15 +510,87 @@ def navigation_bas(fichier: str) -> None:
             st.page_link(DOSSIER / PAGES[i + 1][0], label=f"Station suivante : {PAGES[i + 1][1]} →")
 
 
+# Mention courte d'accessibilité en pied de page (seule mention autorisée : l'accessibilité est intégrée à chaque
+# page, jamais une page à part ; décision de Melvyn du 2026-11-10). Elle dit ce qui est fait ET ce qui reste imparfait.
+MENTION_ACCESSIBILITE = ("Accessibilité numérique : commentaire à écouter et description de chaque graphique, tableaux de données, "
+                         "navigation au clavier, information jamais portée par la couleur seule. Reste imparfait : "
+                         "certains éléments de Streamlit (menu, listes) ne sont pas entièrement maîtrisés, et "
+                         "l'application n'a pas encore été testée par une personne non voyante.")
+
+
+# Liens des sources (demande de Melvyn, 12/11) : le texte des sources reste le même, un lien est posé derrière chaque
+# nom de source. Adresses reprises des README de l'équipe et des données, vérifiées le 2026-11-12 (réponse 200 et titre
+# de la page). Les libellés longs passent avant les courts (« INSEE, recensement 2023, mobilités professionnelles »
+# avant « INSEE, recensement 2023 »). Seuil de 5 km (Insee Première n° 1835) : pas d'adresse vérifiée, laissé sans lien.
+_RECENSEMENT = "https://www.insee.fr/fr/statistiques/9004795"
+_EMPLOI = "https://www.insee.fr/fr/statistiques/8733073"
+_OFFRE = "https://data.iledefrance-mobilites.fr/explore/dataset/offre_hebdomadaire_moyenne_hors_vacances/"
+_BMO = "https://www.data.gouv.fr/datasets/enquete-besoins-en-main-doeuvre-bmo"
+LIENS_SOURCES = {
+    "INSEE, recensement 2023, fichier détail des mobilités professionnelles": _RECENSEMENT,
+    "INSEE, recensement 2023, mobilités professionnelles": _RECENSEMENT,
+    "INSEE, recensement 2023, actifs résidant en Île-de-France": _RECENSEMENT,
+    "INSEE, recensement 2023": _RECENSEMENT,
+    "recensement 2023": _RECENSEMENT,
+    "INSEE, Filosofi 2023": "https://www.insee.fr/fr/statistiques/8984752",
+    "INSEE, enquête Emploi 2025 (Insee Références, juillet 2026)": _EMPLOI,
+    "INSEE, enquête Emploi 2025": _EMPLOI,
+    "enquête Emploi 2025": _EMPLOI,
+    "IDFM, offre hebdomadaire moyenne hors vacances 2025": _OFFRE,
+    "IDFM, offre hebdomadaire 2025": _OFFRE,
+    "offre 2025": _OFFRE,
+    "référentiel des arrêts": "https://data.iledefrance-mobilites.fr/explore/dataset/zones-de-correspondance/",
+    "IDFM, référentiel des lignes": "https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes/",
+    "SNCF, régularité mensuelle Transilien": "https://ressources.data.sncf.com/explore/dataset/ponctualite-mensuelle-transilien/",
+    "France Travail, enquête Besoins en main-d'œuvre 2026": _BMO,
+    "Besoins en main-d'œuvre 2026": _BMO,
+    "geo.api.gouv.fr": "https://geo.api.gouv.fr/decoupage-administratif/communes",
+}
+
+
+def lier_sources(texte: str) -> str:
+    """Pose un lien derrière chaque nom de source connu, sans changer le texte.
+
+    Couleur héritée (color:inherit) : les sources gardent leurs couleurs, seul le soulignement signale le lien.
+    Nouvel onglet : un site extérieur ne s'ouvre pas dans le cadre de Streamlit Cloud ; le nom accessible le
+    signale (« (nouvel onglet) », RGAA critère 13.2) et commence par le texte visible (WCAG 2.5.3).
+    """
+    import re
+    motif = re.compile("|".join(re.escape(k) for k in sorted(LIENS_SOURCES, key=len, reverse=True)))
+    return motif.sub(lambda m: (f'<a href="{LIENS_SOURCES[m.group(0)]}" target="_blank" rel="noopener noreferrer" '
+                                f'aria-label="{html.escape(m.group(0))} (nouvel onglet)" '
+                                f'style="color:inherit;text-decoration:underline">{m.group(0)}</a>'), texte)
+
+
 def sources(texte: str) -> None:
-    """Ligne des sources en bas de page."""
-    st.markdown(f'<p class="source">Sources : {texte}</p>', unsafe_allow_html=True)
+    """Ligne des sources en bas de page (avec leurs liens), puis la mention d'accessibilité."""
+    st.markdown(f'<p class="source">Sources : {lier_sources(texte)}</p><p class="source" style="margin-top:6px">'
+                f'{MENTION_ACCESSIBILITE}</p>', unsafe_allow_html=True)
 
 
-def tableau(df: pd.DataFrame, titre: str = "Voir les données du graphique") -> None:
+def table_html(df: pd.DataFrame, legende: str) -> str:
+    """Tableau de données en vrai HTML : titre (<caption>), en-têtes de colonnes, première colonne en en-tête de ligne.
+
+    Un lecteur d'écran annonce ainsi « Cadres, Part (%), 13,0 » au lieu d'une suite de chiffres sans repère.
+    """
+    entetes = "".join(f'<th scope="col">{html.escape(str(c))}</th>' for c in df.columns)
+    lignes = "".join(
+        "<tr>" + "".join((f'<th scope="row">{html.escape(str(v))}</th>' if k == 0 else f"<td>{html.escape(str(v))}</td>")
+                         for k, v in enumerate(ligne)) + "</tr>"
+        for ligne in df.itertuples(index=False))
+    # Cadre qui défile de côté sur téléphone (le tableau garde ses colonnes lisibles au lieu d'être coupé). Il reçoit
+    # le focus (tabindex) et porte un nom : on peut le faire défiler au clavier (règle axe « scrollable-region-focusable »)
+    return (f'<div role="region" aria-label="{html.escape(legende)}" tabindex="0" style="overflow-x:auto">'
+            f'<table class="donnees"><caption>{html.escape(legende)}</caption><thead><tr>{entetes}</tr></thead>'
+            f'<tbody>{lignes}</tbody></table></div>')
+
+
+def tableau(df: pd.DataFrame, titre: str = "Voir les données du graphique", legende: str = "") -> None:
     """Alternative accessible à un graphique : le tableau des chiffres, dans un bloc à déplier."""
     with st.expander(titre):
-        st.dataframe(df, hide_index=True, width="stretch")
+        # Titre du tableau par défaut : celui du bloc sans « Voir », majuscule initiale (sans toucher au reste : « Paris »)
+        defaut = titre.removeprefix("Voir ")
+        st.markdown(table_html(df, legende or defaut[:1].upper() + defaut[1:]), unsafe_allow_html=True)
 
 
 @st.cache_data
