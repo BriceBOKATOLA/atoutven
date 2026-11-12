@@ -127,7 +127,7 @@ La génération des planches commence avec des fichiers déjà préparés. Le [c
 | Préparer les communes et noms | Géométries dans `clean/shared/hackathon_emploi.gpkg`, `src/dep_idf.geojson`, dictionnaire `src/noms_officiels.json` ; sources administratives citées. | Extraction exacte des contours, millésime du dictionnaire, jointures et traitement des changements de codes non fournis. Source et millésime de `src/rivieres_idf.geojson` non établis. |
 | Extraire et agréger l'emploi Urssaf | Jeu producteur identifié, valeurs communales 2015/2025 dans le GeoPackage, séries 2015–2025 dans `clean/shared/series_emploi_urssaf.json`. | Requêtes, filtres d'activité, agrégation, gestion des valeurs manquantes et construction du GeoPackage non conservés. Les séries annuelles communales nécessaires pour reconstruire chaque groupe ne sont pas fournies. |
 | Croiser gares et communes | Géométries locales et résultat `clean/shared/groupes_lignes.json` avec codes communaux, lignes et années. | `build_line_groups.py` reproduit les groupes conservés à partir des fichiers locaux. Le script initial et ses règles ne sont pas conservés ; la correspondance du résultat ne prouve pas que sa méthode était identique. |
-| Extraire les demandeurs Dares / France Travail | Jeu producteur identifié, `src/defm_2016_2024.txt` et `clean/shared/series_defm_dares.json`. | Téléchargement, filtres, traitement des valeurs manquantes et agrégation des groupes non fournis. La série par groupe ne permet pas de retrouver les séries de toutes les communes. |
+| Extraire les demandeurs Dares / France Travail | Jeu producteur identifié, CSV communal local, `src/defm_2016_2024.txt` et `clean/shared/series_defm_dares.json`. | Le téléchargement et la préparation initiale du CSV ne sont pas fournis. L'extrait communal est reproductible depuis ce CSV ; voir ci-dessous. |
 | Extraire l'emploi Insee et les auto-entrepreneurs Urssaf | Jeu Melodi `DS_RP_EMPLOI_LT_PRINC`, fichier texte communal 2017/2023, CSV départemental Urssaf 2015/2025 et constantes dans la planche 06. | Requêtes exactes, sélection des dimensions, filtres et rattachement des constantes aux réponses sources non conservés. |
 | Préparer les CSV et GeoPackages de chaque planche | Fichiers locaux et logique de filtrage/calcul visible dans les scripts des planches. | Ces scripts exportent des images et PDF, pas les tables ni les couches QGIS. `build_qgis_projects.py` lit les GeoPackages existants et écrit seulement les projets `.qgz`. |
 
@@ -149,6 +149,20 @@ Depuis `defi-2_rhizome`, générez le résultat dans un fichier temporaire et v�
 ```
 
 Le script croise les gares ouvertes de 2015 à 2025 avec les contours communaux locaux en EPSG:2154 et exclut Paris. Il retient les points strictement à l'intérieur des contours : les points sur une limite sont exclus. Les communes associées à plusieurs points sont dédoublonnées par ligne et année. Les superpositions peuvent attribuer un point à plusieurs communes historiques. Le résultat reproduit les 15 groupes conservés, y compris leurs noms. Les entrées peuvent être remplacées par les options `--stations`, `--communes` et `--official-names` ; `--output` est obligatoire et remplace le fichier indiqué.
+
+## Reconstituer l'extrait communal des demandeurs d'emploi
+
+Le script `build_defm.py` lit `datasets/src/mobility-employment/idf-raw-sources/defm_communes_idf.csv`. Il retient les données brutes ABC, tous sexes et tous âges, au quatrième trimestre de 2016 et 2024. Il conserve les communes avec au moins 300 demandeurs en 2016, même si leur valeur de 2024 est inférieure au seuil. Il refuse les doublons et les valeurs 2024 manquantes pour les communes retenues. Les données sources sont déjà préparées ; leur téléchargement initial n'est pas reconstitué.
+
+Depuis `defi-2_rhizome`, pour générer et comparer le résultat sans remplacer le fichier du projet :
+
+```sh
+python3 production/scripts/build_defm.py --output /tmp/rhizome-defm.txt
+cmp /tmp/rhizome-defm.txt production/datasets/src/defm_2016_2024.txt
+python3 -m unittest discover -s production/tests -p 'test_build_defm.py' -v
+```
+
+L'option `--output` est obligatoire et remplace le fichier indiqué s'il existe. L'option `--source` permet de choisir une autre copie du CSV. Avec la copie locale actuelle, le résultat est identique au fichier de 362 communes conservé. Cette correspondance n'établit pas la méthode initiale ni la provenance du CSV.
 
 ## Site web
 
