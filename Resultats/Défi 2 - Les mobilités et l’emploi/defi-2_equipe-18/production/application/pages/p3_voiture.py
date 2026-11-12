@@ -63,7 +63,7 @@ def ligne_jauge(metier: str, avec: float, sans: float) -> str:
             f'<div class="val-avec" style="position:absolute;top:10px;left:calc({avec:.1f}% - 40px);width:80px;text-align:center;'
             f'font-size:16px;font-weight:600;color:#5E6475">{avec:.0f} %</div>'
             f'<div style="position:absolute;top:2px;left:calc({sans:.1f}% - 40px);width:80px;text-align:center;'
-            f'font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:28px;line-height:1.1;color:{texte}">'
+            f'font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:22px;line-height:1.1;color:{texte}">'
             f'{sans:.0f} %</div>'
             f'<span style="position:absolute;top:37px;left:calc({avec:.1f}% - 14px);width:28px;height:28px;border-radius:50%;'
             f'background:#FFFFFF;border:4px solid {c};box-sizing:border-box"></span>'

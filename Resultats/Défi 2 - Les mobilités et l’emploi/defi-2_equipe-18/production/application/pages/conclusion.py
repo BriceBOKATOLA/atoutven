@@ -45,7 +45,7 @@ def station_html(numero: int, icone: str, nom: str, chiffre: str, texte: str, co
     """Une station du plan de ligne : icône de la page, rond (double si correspondance), nom, chiffre, phrase."""
     rond = ("width:38px;height:38px;border:4px solid #1B1F2A;box-shadow:0 0 0 4px #fff,0 0 0 8px #1B1F2A"
             if coeur else "width:32px;height:32px;border:4px solid #1B1F2A")
-    taille, couleur = ("38px", "#C0401A") if coeur else ("26px", u.ENCRE)
+    taille, couleur = ("30px", "#C0401A") if coeur else ("21px", u.ENCRE)   # 80 % (variante B, 12/11)
     return (f'<li style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">'
             f'{u.badge_mode(icone)}<span aria-hidden="true" style="height:44px;display:flex;align-items:center">'
             f'<span style="{rond};border-radius:50%;background:#fff;box-sizing:border-box;display:flex;align-items:center;'

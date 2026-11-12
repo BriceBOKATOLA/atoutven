@@ -120,13 +120,13 @@ svg = (
     f'fill-opacity="0.07"/>'
     f'<rect x="{xs0:.1f}" y="{Y0 - 44}" width="{xn0 - xs0 - 4:.1f}" height="{BASE - Y0 + 44}" rx="10" fill="{SOIR}" '
     f'fill-opacity="0.14"/>'
-    f'<text x="{(xs0 + xn0) / 2:.1f}" y="{Y0 - 20}" text-anchor="middle" font-size="17" font-weight="700" '
+    f'<text x="{(xs0 + xn0) / 2:.1f}" y="{Y0 - 20}" text-anchor="middle" font-size="19" font-weight="700" '
     f'fill="{SOIR}">Soir 20h-minuit</text>'
     f'<rect x="{xn0:.1f}" y="{Y0 - 44}" width="{xn1 - xn0:.1f}" height="{BASE - Y0 + 44}" rx="10" fill="{ROSE_NUIT}" '
     f'fill-opacity="0.13"/>'
-    f'<text x="{(xp0 + xp1) / 2:.1f}" y="{Y0 - 20}" text-anchor="middle" font-size="17" font-weight="700" '
+    f'<text x="{(xp0 + xp1) / 2:.1f}" y="{Y0 - 20}" text-anchor="middle" font-size="19" font-weight="700" '
     f'fill="#F1F2F6">7h-10h</text>'
-    f'<text x="{xm:.1f}" y="{Y0 - 20}" text-anchor="middle" font-size="17" font-weight="700" fill="{ROSE_NUIT}">'
+    f'<text x="{xm:.1f}" y="{Y0 - 20}" text-anchor="middle" font-size="19" font-weight="700" fill="{ROSE_NUIT}">'
     f'Nuit minuit-5h</text>'
     # Courbe : aire claire, trait de journée, aire et trait de nuit, un point par heure de nuit
     f'<path d="{lisse(pts)}L{pts[-1][0]:.1f},{BASE}L{pts[0][0]:.1f},{BASE}Z" fill="{GRIS_JOUR}" fill-opacity="0.18"/>'
@@ -139,20 +139,20 @@ svg = (
     # Repères : niveau de la pointe prolongé, flèche vers la nuit, pastille du rapport
     + f'<line x1="{xp1:.1f}" y1="{yp:.1f}" x2="{xm:.1f}" y2="{yp:.1f}" stroke="#F1F2F6" stroke-width="1.5" '
     f'stroke-dasharray="5 6" stroke-opacity="0.75"/>'
-    f'<text x="{xp1 + 32:.1f}" y="{yp + 24:.1f}" font-size="17" font-weight="600" fill="#F1F2F6">'
+    f'<text x="{xp1 + 32:.1f}" y="{yp + 24:.1f}" font-size="19" font-weight="600" fill="#F1F2F6">'
     f'<tspan x="{xp1 + 32:.1f}">De 7h à 10h :</tspan><tspan x="{xp1 + 32:.1f}" dy="21">'
     f'{u.fr(round(pointe, -3))} / h</tspan></text>'   # deux lignes courtes : le texte ne croise pas la courbe
     f'<line x1="{xm:.1f}" y1="{yp + 4:.1f}" x2="{xm:.1f}" y2="{yn - 12:.1f}" stroke="{ROSE_NUIT}" stroke-width="2"/>'
     f'<path d="M{xm - 6:.1f},{yn - 19:.1f} L{xm:.1f},{yn - 10:.1f} L{xm + 6:.1f},{yn - 19:.1f}" fill="none" '
     f'stroke="{ROSE_NUIT}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
     f'<rect x="{xm - 74:.1f}" y="{ym - 19:.1f}" width="148" height="38" rx="19" fill="{ROSE_NUIT}"/>'
-    f'<text x="{xm:.1f}" y="{ym + 6:.1f}" text-anchor="middle" font-size="18" font-weight="800" fill="{u.FOND_NUIT}">'
+    f'<text x="{xm:.1f}" y="{ym + 6:.1f}" text-anchor="middle" font-size="20" font-weight="800" fill="{u.FOND_NUIT}">'
     f'{fois} fois moins</text>'
-    f'<text x="{xn0 - 10:.1f}" y="{yn - 6:.1f}" text-anchor="end" font-size="17" font-weight="700" fill="{ROSE_NUIT}">'
+    f'<text x="{xn0 - 10:.1f}" y="{yn - 6:.1f}" text-anchor="end" font-size="19" font-weight="700" fill="{ROSE_NUIT}">'
     f'Nuit : {u.fr(round(nuit, -3))} / h</text>'
     # Axe et heures (une sur trois)
     f'<line x1="{X0 - 14}" y1="{BASE}" x2="{X0 + LONGUEUR + 24}" y2="{BASE}" stroke="#5A6386" stroke-width="1"/>'
-    f'<g font-size="17" fill="#9AA0B2">'
+    f'<g font-size="19" fill="#9AA0B2">'
     + "".join(f'<text x="{px(i):.1f}" y="{BASE + 28}" text-anchor="middle">{h}h</text>'
               for i, h in enumerate(heures) if h % 3 == 2)
     + '</g></svg>')

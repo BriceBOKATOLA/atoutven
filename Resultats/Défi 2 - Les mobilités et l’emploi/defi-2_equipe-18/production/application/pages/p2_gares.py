@@ -50,7 +50,7 @@ def ligne_barre(metier: str) -> str:
             f'{u.libelle_metier(metier)}<div aria-hidden="true" style="height:22px;background:#EEF0EC;border-radius:11px;'
             f'overflow:hidden"><div style="height:22px;border-radius:11px;background:{u.METIERS[metier]["donnee"]};'
             f'width:{v / 30 * 100:.1f}%"></div></div><div style="text-align:right;font-family:\'Barlow Semi Condensed\','
-            f'sans-serif;font-weight:600;font-size:28px">{u.fr(v, 1)} %</div></div>')
+            f'sans-serif;font-weight:600;font-size:22px">{u.fr(v, 1)} %</div></div>')
 
 
 st.markdown(f'<section style="background:#FFFFFF;border:1px solid #E7EAE4;border-radius:16px;padding:22px 28px;'
@@ -113,14 +113,14 @@ def graphique_flux(dest_cat) -> str:
             y_label = y_arrivee if not y_etiquettes else max(y_arrivee, y_etiquettes[-1] + FLUX_ECART_ETIQUETTES)
             y_etiquettes.append(y_label)
             etiquettes += (f'<text x="{FLUX_XT + 26}" y="{y_label + 7:.1f}" font-family="Barlow Semi Condensed, sans-serif" '
-                           f'font-size="21" font-weight="600" fill="{texte}">{u.fr(part, 1)} %</text>')
+                           f'font-size="22" font-weight="600" fill="{texte}">{u.fr(part, 1)} %</text>')
         etiquettes += (f'<rect x="{FLUX_XT - 6}" y="{yt - total / 2 - 4:.1f}" width="12" height="{total + 8:.1f}" rx="6" '
                        f'fill="#FFFFFF" stroke="#1B1F2A" stroke-width="2.5"/><text x="{FLUX_XT + 90}" y="{yt + 7}" '
-                       f'font-family="Plus Jakarta Sans, sans-serif" font-size="20" font-weight="700" fill="#1B1F2A">'
+                       f'font-family="Plus Jakarta Sans, sans-serif" font-size="21" font-weight="700" fill="#1B1F2A">'
                        f'{DESTINATIONS[t]}</text>')
     domiciles = "".join(
         maison(FLUX_XD, y, couleur) + f'<text x="{FLUX_XD - 28}" y="{y + 7}" text-anchor="end" font-family="Poppins, '
-        f'sans-serif" font-size="20" font-weight="800" fill="{texte}">{cat}</text>'
+        f'sans-serif" font-size="21" font-weight="800" fill="{texte}">{cat}</text>'
         for (cat, (couleur, texte)), y in zip(FLUX_STYLE.items(), FLUX_Y))
     description = " ; ".join(
         f"{cat} : " + ", ".join(f"{u.fr(dest_cat.loc[(cat, d)], 1)} % {d.lower()}" for d in DESTINATIONS)
@@ -195,7 +195,7 @@ stations_html = "".join(
     f'<div role="img" aria-label="{u.fr(liaisons[k])} % des trajets en voiture" style="display:grid;'
     f'grid-template-columns:repeat(5,26px);gap:4px">'
     + "".join(voiture(i < round(liaisons[k] / 10)) for i in range(10))
-    + f'</div><div style="font-family:Poppins,sans-serif;font-weight:800;font-size:30px;color:{ROUGE_VOITURE};'
+    + f'</div><div style="font-family:Poppins,sans-serif;font-weight:800;font-size:24px;color:{ROUGE_VOITURE};'
       f'line-height:1">{u.fr(liaisons[k])} %</div><div style="font-size:14px;color:#4E5466">des trajets en voiture</div>'
       f'</div>'
     for k, texte, gras, d, c in STATIONS)

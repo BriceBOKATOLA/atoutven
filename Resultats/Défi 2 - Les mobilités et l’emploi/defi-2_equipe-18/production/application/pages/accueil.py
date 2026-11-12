@@ -45,14 +45,14 @@ with gauche:
                 f'Mobilités et emploi en Île-de-France</div>', unsafe_allow_html=True)
     # Titre et formulation des chiffres repris des recommandations de Pierre THAI (captures annotées des maquettes, 11/11)
     u.bouton_ecouter("Quand le lieu de travail impose la voiture. " + message, nuit=True)
-    st.markdown(f'<h1 class="titre" style="font-size:46px;line-height:1.1;color:#F1F2F6">Quand le lieu de travail '
+    st.markdown(f'<h1 class="titre" style="font-size:30px;line-height:1.1;color:#F1F2F6">Quand le lieu de travail '
                 f'<span style="color:#F28B6B">impose la voiture</span></h1>'
                 f'<p class="description" style="line-height:1.6">{message}</p>', unsafe_allow_html=True)
     st.markdown('<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:6px">'
                 + "".join(f'<div style="position:relative;background:#1B2238;border:1px solid #262E48;border-radius:16px;'
                           f'padding:12px 16px 12px 22px"><span aria-hidden="true" style="position:absolute;left:0;top:12px;'
                           f'bottom:12px;width:5px;border-radius:0 3px 3px 0;background:{c}"></span>'
-                          f'<div style="font-family:Poppins,sans-serif;font-weight:800;font-size:28px;line-height:1.2;'
+                          f'<div style="font-family:Poppins,sans-serif;font-weight:800;font-size:22px;line-height:1.2;'
                           f'color:#F1F2F6">{v}</div><div style="font-size:14px;color:#C9CDD8">{t}</div></div>'
                           for v, t, c in chiffres)
                 + '</div>', unsafe_allow_html=True)

@@ -120,10 +120,12 @@ def appliquer_style(nuit: bool = False) -> None:
 .stApp p, .stApp li, .stApp label, .stApp td, .stApp th, [data-testid="stMarkdownContainer"] {{
   font-family: 'Plus Jakarta Sans', sans-serif; color: {encre}; font-size: 16px; }}
 [data-testid="stIconMaterial"] {{ font-family: 'Material Symbols Rounded' !important; }}
-/* Largeur du contenu limitée à 1 100 px : choix gardé par Melvyn le 2026-11-11 après essai de la pleine largeur
+/* Largeur du contenu limitée à 960 px (1 100 jusqu'au 2026-11-12) : à 100 % de zoom, l'application paraissait trop
+   grosse (Melvyn l'avait validée avec un zoom navigateur de 75 %) ; variante « réduction ciblée » choisie après
+   comparaison. Avant : 1 100 px, choix gardé par Melvyn le 2026-11-11 après essai de la pleine largeur
    (sur un écran large, les cartes et graphiques, qui suivent la largeur, devenaient énormes). */
-.block-container {{ max-width: 1100px; padding-top: 2.2rem; }}
-h1.titre {{ font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 38px; line-height: 1.15;
+.block-container {{ max-width: 960px; padding-top: 2.2rem; }}
+h1.titre {{ font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 30px; line-height: 1.15;
   color: {encre}; margin: 4px 0 8px; padding: 0; }}
 h2.sous-titre {{ font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 18px; color: {encre};
   margin: 0 0 10px; padding: 0; }}
@@ -267,7 +269,7 @@ def _ligne_de_metro(fichier_courant: str, nuit: bool) -> str:
         adresse = "./" if i == 0 else Path(fichier).stem
         pastille = (f"width:30px;height:30px;background:#C0401A;border:3px solid {encre};color:#FFFFFF;font-size:14px"
                     if courant else
-                    f"width:26px;height:26px;background:{fond_menu};border:3px solid {encre};color:{encre};font-size:12px")
+                    f"width:26px;height:26px;background:{fond_menu};border:3px solid {encre};color:{encre};font-size:14px")
         stations.append(
             f'<a href="{adresse}" target="_self" {"aria-current=\"page\"" if courant else ""} style="display:flex;'
             f'align-items:center;gap:12px;text-decoration:none;color:{encre};min-height:36px;position:relative;'
@@ -365,7 +367,7 @@ def panneau(libelle: str, valeur: str, detail: str, couleur_bande: str, couleur_
     return (f'<div class="panneau"><div style="height:6px;background:{couleur_bande}"></div>'
             f'<div style="padding:12px 20px 14px"><div style="display:flex;align-items:center;gap:8px;font-size:14px;'
             f'font-weight:600;color:{secondaire}">{pic}{libelle}</div>'
-            f'<div class="chiffre" style="font-size:52px;color:{couleur_valeur}">{valeur}</div>'
+            f'<div class="chiffre" style="font-size:42px;color:{couleur_valeur}">{valeur}</div>'
             f'<div style="font-size:14px;line-height:1.4;color:{secondaire}">{detail}</div></div></div>')
 
 

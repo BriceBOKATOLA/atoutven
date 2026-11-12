@@ -106,7 +106,7 @@ def bloc_solution(pictos, couleur_barre, couleur_texte, titre, territoire, chiff
         f'<span style="margin-left:auto;border-radius:999px;padding:3px 12px;font-size:14px;font-weight:700;'
         f'background:#EEF0EC">{territoire}</span></div>'
         f'<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:12px">'
-        f'<span style="font-family:Poppins,sans-serif;font-weight:800;font-size:40px;line-height:1;color:{couleur_texte}">'
+        f'<span style="font-family:Poppins,sans-serif;font-weight:800;font-size:32px;line-height:1;color:{couleur_texte}">'
         f'{chiffre}</span><span style="font-size:16px;line-height:1.4">{phrase}</span></div>'
         f'<div style="font-size:14px;color:#4E5466;margin-top:4px">{contexte}</div>'
         f'<div style="font-family:Poppins,sans-serif;font-size:17px;font-weight:800;line-height:1.5;margin:16px 0 10px">'

@@ -199,7 +199,7 @@ def tuile(libelle_tuile: str, valeur: str, contexte: str, couleur: str) -> str:
             f'<div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#4E5466">'
             f'<span aria-hidden="true" style="width:28px;height:28px;border-radius:50%;background:{couleur};display:inline-flex;'
             f'align-items:center;justify-content:center;flex-shrink:0">{u.icone("repere", 14)}</span>{libelle_tuile}</div>'
-            f'<div style="font-family:Poppins,sans-serif;font-weight:800;font-size:32px;line-height:1.25;margin-top:4px">'
+            f'<div style="font-family:Poppins,sans-serif;font-weight:800;font-size:26px;line-height:1.25;margin-top:4px">'
             f'{valeur}</div><div style="font-size:14px;color:#5E6475">{contexte}</div></div>')
 
 
