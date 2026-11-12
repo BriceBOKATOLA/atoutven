@@ -185,6 +185,17 @@ python3 -B -m unittest discover -s production/scripts -p 'test_build_territories
 
 Sans `--output-dir`, le script remplace `territoires.json` et `couverture.json` dans `production/datasets/src/jobseekers/`. Le graphique 2 utilise les géométries des zones de `territoires.json`, mais ses indicateurs proviennent du classeur des zones d'emploi.
 
+## Reconstituer les indicateurs du classeur des zones
+
+Le script suivant calcule les six indicateurs des zones utilisés par le site à partir des sources locales citées dans le classeur. Il produit un rapport JSON et compare les valeurs avec l'onglet « Zones d’emploi », sans modifier le classeur :
+
+```sh
+python3 production/scripts/rebuild_workbook_indicators.py --output /tmp/rhizome-indicateurs-zones.json
+python3 -m unittest discover -s production/tests -p 'test_rebuild_workbook_indicators.py' -v
+```
+
+La copie locale donne 1 080 cellules comparées sans écart, dont 457 absentes. Les valeurs vides de secteurs Urssaf sont exclues des sommes et comptées dans le rapport ; leur absence ne prouve pas qu'elles valent zéro. Les communes manquantes empêchent le calcul de certains totaux de zone. Le rapport ne reconstruit ni le classeur complet ni les téléchargements en amont.
+
 ## Site web
 
 Le [README du site](../web/README.md) décrit son installation et son export statique. Les commandes suivantes partent du dossier `defi-2_rhizome` et remplacent les trois instantanés dans `production/web/public/data/` :
