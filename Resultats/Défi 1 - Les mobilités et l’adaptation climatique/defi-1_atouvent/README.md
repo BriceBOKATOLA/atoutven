@@ -1,7 +1,7 @@
 # AtouVent : se déplacer en Île-de-France malgré la chaleur
 
 **Équipe :** Brice Bokatola, William Laine
-**Mail(s) de contact:** contact@atouvent.com
+**Mail(s) de contact:** ebangarodmilson@gmail.com
 **Défi :** Défi 1 — Les mobilités et l’adaptation climatique
 
 <p align="center">
