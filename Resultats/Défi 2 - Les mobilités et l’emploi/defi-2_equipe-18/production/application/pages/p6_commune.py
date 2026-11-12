@@ -276,7 +276,7 @@ with droite:
     # Conteneur horizontal : chaque interrupteur prend la largeur de son mot. Avec des colonnes de largeur fixe, en ligne
     # (police un peu plus large), « Employés » puis « Cadres » étaient coupés en « Emplo… » / « Cad… » (12/11).
     # Si la place manque (téléphone), les interrupteurs passent à la ligne au lieu d'être coupés.
-    with st.container(horizontal=True, gap="medium"):
+    with st.container(horizontal=True, gap="small"):   # écart réduit : les trois tiennent sur une ligne en ligne
         for lettre, nom_cat, defaut in CATEGORIES:
             st.toggle(nom_cat, value=defaut, key=f"cat_{lettre}", width="content")
     # Annonce pour les lecteurs d'écran : quand on choisit une commune ou une catégorie, le résultat est lu tout seul
