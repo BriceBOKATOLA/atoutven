@@ -182,19 +182,19 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [data-testid="stPa
      réduisait à un point sur 390 px) */
   .barre-metier {{ grid-template-columns: 112px 1fr 84px !important; gap: 8px !important; }}
   .barre-metier > div:last-child {{ white-space: nowrap; }}
-  /* Jauges de la page 3 : colonne des métiers réduite (130 px au lieu de 184) pour que les ronds soient visibles dès
-     l'ouverture ; la pastille de la bande passe sur deux lignes */
-  .jauges-p3 {{ --libelle-p3: 130px; --colonne-p3: 116px; }}
-  .jauges-p3 .zone-jauges {{ padding-top: 64px !important; }}
+  /* Barres-pilules de la page 3 (12/11) : colonnes du métier et de la valeur réduites pour que la piste garde de la
+     place ; la pastille de la bande passe sur deux lignes, calée à droite ; le repère « 50 % » est retiré (il
+     chevauchait « 100 % ») */
+  .jauges-p3 {{ --lib-p3: 0px; --ecart-lib: 0px; --val-p3: 60px; }}
+  /* Le nom du métier occupe toute une ligne au-dessus de sa barre ; 34 px d'écart pour le chiffre « avec gare » */
+  .jauges-p3 .ligne-p3 {{ grid-template-columns: 1fr var(--val-p3) !important; row-gap: 34px !important; column-gap: 16px !important; }}
+  .jauges-p3 .ligne-p3 > :first-child {{ grid-column: 1 / -1; }}
+  .jauges-p3 .axe-p3 > :first-child {{ display: none; }}
+  .jauges-p3 .ligne-p3 > :last-child {{ font-size: 26px !important; white-space: nowrap; }}
+  .jauges-p3 .zone-jauges {{ padding-top: 72px !important; }}
   .jauges-p3 .pastille-bande {{ white-space: normal !important; display: inline-block; width: 200px; flex-shrink: 0; text-align: center; }}
-  /* La pastille est calée à droite du cadre (au lieu d'être centrée sur la bande, elle sortait de l'écran) */
   .jauges-p3 .conteneur-pastille {{ left: auto !important; right: 0; width: auto !important; }}
-  /* Lignes plus hautes : le petit chiffre « avec gare » passe sous la piste, il ne chevauche plus le grand chiffre */
-  .jauges-p3 .ligne-jauge, .jauges-p3 .piste-jauge {{ height: 96px !important; }}
-  .jauges-p3 .val-avec {{ top: 66px !important; }}
-  /* Axe : « 50 % » retiré (il chevauchait « 100 % »), « 100 % en voiture » reste dans le cadre */
   .jauges-p3 .axe-milieu {{ display: none; }}
-  .jauges-p3 .axe-fin {{ right: 0 !important; }}
   /* Courbe de nuit : le cadre s'ouvre sur la fin (la nuit, le message de la page) ; on fait défiler vers la gauche
      pour voir la journée. direction: rtl place le défilement à droite, le contenu reste écrit de gauche à droite. */
   .defile-fin {{ direction: rtl; }}

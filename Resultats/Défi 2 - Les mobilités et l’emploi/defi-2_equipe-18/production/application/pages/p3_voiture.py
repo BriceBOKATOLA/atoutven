@@ -6,8 +6,8 @@ gare) à près de trois sur quatre (sans gare), quel que soit le métier. Ce n'e
 voiture, c'est l'absence de gare au lieu de travail.
 
 Une seule mesure sur la page : la part de la voiture.
-Visuel principal : haltères. Rond creux = avec gare, rond plein = sans gare : la forme distingue les deux,
-pas seulement la couleur.
+Visuel principal : barres-pilules (12/11). Barre pleine = sans gare, rond creux = avec gare : la forme distingue les
+deux, pas seulement la couleur. Bande grise « Sans gare : 71 à 77 %, quel que soit le métier » sur les trois barres.
 """
 
 import pandas as pd
@@ -32,71 +32,87 @@ u.entete(FICHIER, 'Sans gare, <span style="color:#C0401A">près de 3 trajets su
                    "employés et ouvriers vont travailler, depuis une autre commune de banlieue, dans une commune sans gare",
                    "#E4572E", "#C0401A", "train_barre"))
 
-# --- Visuel principal : jauges de la proposition validée le 2026-11-11 (canevas « Proposition p3 : jauges »,
-# inspirée de HAP Express : on met en avant l'information clé). Par rapport aux haltères de la maquette :
-#   - barres épaisses et arrondies (14 px) au lieu d'un trait fin : l'écart entre les deux situations se voit ;
-#   - le chiffre « sans gare » en gros, dans la couleur du métier ; le chiffre « avec gare » plus discret ;
-#   - une bande grise verticale couvre les 3 ronds pleins, avec la pastille « Sans gare : 71 à 77 %, quel que soit le
-#     métier » : c'est le message du titre, qu'on lit sans comparer les chiffres un à un. Bornes calculées.
-# Rond creux = lieu de travail avec gare, rond plein = sans gare : la forme distingue les deux, pas seulement la couleur.
+# --- Visuel principal : barres-pilules (planche « Proposition p3 : barres-pilules », validée par Melvyn le 2026-11-12,
+# dans le style du skill infographie-storytelling : formes larges, pastille ronde à la silhouette du métier).
+#   - une barre par métier, remplie jusqu'à la part de voiture SANS gare (couleur vive du métier) ; la pastille au bout
+#     porte la silhouette du métier ;
+#   - un rond pâle posé sur la même piste marque la part AVEC gare, son chiffre au-dessus : l'écart se lit sur une ligne ;
+#   - la bande grise verticale de la version précédente est gardée (demande de Melvyn) : elle couvre les 3 pastilles
+#     « sans gare », avec la pastille « Sans gare : 71 à 77 %, quel que soit le métier ». Bornes calculées.
+# Échelle de 0 à 100 % (honnêteté) ; formes différentes pour « avec » (rond creux) et « sans » (barre pleine) : le sens ne
+# repose pas sur la couleur seule.
 metiers = ["Cadres", "Employés", "Ouvriers"]
 large = v.pivot(index="groupe", columns="commune_de_travail", values="part_voiture_pct").loc[metiers].reset_index()
 large.columns = ["Métier", "avec", "sans"]
 BAS, HAUT = round(large["sans"].min()), round(large["sans"].max())
-LIBELLE_PX, MARGE_DROITE_PX = 184, 24   # colonne du métier (170 px + 14 d'écart) ; place pour « 100 % en voiture »
-# Variables CSS (valeur par défaut = celle de l'ordinateur) : sur téléphone, la colonne des métiers est réduite
-PISTE = f"(100% - var(--libelle-p3, {LIBELLE_PX}px) - {MARGE_DROITE_PX}px)"   # largeur de la piste, pour placer la bande au bon endroit
+PISTE_GRISE = "#E9EBE6"
+# Colonnes : métier | piste | valeur, séparées de 16 px. Variables CSS (valeurs de l'ordinateur par défaut), réduites
+# sur téléphone dans utils.py (classe jauges-p3). La largeur de la piste sert à placer la bande au bon endroit.
+COLONNES = "var(--lib-p3, 150px) 1fr var(--val-p3, 70px)"
+# Piste = largeur - colonne métier - écart après le métier - écart avant la valeur (16 px) - colonne valeur.
+# Sur téléphone, le métier passe au-dessus de la barre : colonne et écart du métier à 0 (utils.py).
+PISTE = "(100% - var(--lib-p3, 150px) - var(--ecart-lib, 16px) - 16px - var(--val-p3, 70px))"
 
 
-def ligne_jauge(metier: str, avec: float, sans: float) -> str:
-    """Une ligne : métier, piste grise, segment pâle entre les deux valeurs, rond creux (avec gare), rond plein (sans)."""
+def teinte(hexa: str, force: float) -> str:
+    """Mélange une couleur avec le blanc (force 1 = couleur pleine) : contour du rond pâle « avec gare »."""
+    r, g, b = (int(hexa[i:i + 2], 16) for i in (1, 3, 5))
+    return "#" + "".join(f"{round(255 - (255 - c) * force):02X}" for c in (r, g, b))
+
+
+def silhouette(metier: str) -> str:
+    """Silhouette blanche du métier, reprise du rond de u.libelle_metier (même dessin dans toute l'application)."""
+    rond = u.libelle_metier(metier)
+    return rond[rond.find("<svg"):rond.find("</svg>") + 6]
+
+
+def ligne_pilule(metier: str, avec: float, sans: float) -> str:
+    """Une ligne : métier, piste grise, barre vive jusqu'à « sans gare » + pastille, rond pâle « avec gare », valeur."""
     c, texte = u.METIERS[metier]["donnee"], u.METIERS[metier]["texte"]
     return (f'<div role="img" aria-label="{metier} : {avec:.0f} % en voiture quand le lieu de travail a une gare, '
-            f'{sans:.0f} % quand il n\'en a pas" style="display:grid;grid-template-columns:var(--colonne-p3, 170px) 1fr '
-            f'{MARGE_DROITE_PX}px;'
-            f'align-items:center;height:78px;position:relative" class="ligne-jauge">{u.libelle_metier(metier)}'
-            # Classes ligne-jauge, piste-jauge, val-avec : réglages propres au téléphone (utils.py, sous 600 px)
-            f'<div aria-hidden="true" class="piste-jauge" style="position:relative;height:78px;margin-left:14px">'
-            f'<div style="position:absolute;left:0;right:0;top:44px;height:14px;border-radius:7px;background:#EEF0EC"></div>'
-            f'<div style="position:absolute;top:44px;height:14px;border-radius:7px;background:{c};opacity:.35;'
-            f'left:{avec:.1f}%;width:{sans - avec:.1f}%"></div>'
-            f'<div class="val-avec" style="position:absolute;top:10px;left:calc({avec:.1f}% - 40px);width:80px;text-align:center;'
-            f'font-size:16px;font-weight:600;color:#5E6475">{avec:.0f} %</div>'
-            f'<div style="position:absolute;top:2px;left:calc({sans:.1f}% - 40px);width:80px;text-align:center;'
-            f'font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:22px;line-height:1.1;color:{texte}">'
-            f'{sans:.0f} %</div>'
-            f'<span style="position:absolute;top:37px;left:calc({avec:.1f}% - 14px);width:28px;height:28px;border-radius:50%;'
-            f'background:#FFFFFF;border:4px solid {c};box-sizing:border-box"></span>'
-            f'<span style="position:absolute;top:35px;left:calc({sans:.1f}% - 16px);width:32px;height:32px;border-radius:50%;'
-            f'background:{c};box-shadow:0 0 0 3px #FFFFFF"></span></div><span></span></div>')
+            f'{sans:.0f} % quand il n\'en a pas" class="ligne-p3" style="display:grid;grid-template-columns:{COLONNES};gap:16px;'
+            f'align-items:center;padding:22px 0 18px;position:relative;z-index:1">{u.libelle_metier(metier)}'
+            f'<div aria-hidden="true" style="position:relative;height:30px;border-radius:15px;background:{PISTE_GRISE}">'
+            f'<div style="position:absolute;left:0;top:0;bottom:0;width:{sans:.1f}%;border-radius:15px;background:{c}"></div>'
+            f'<span style="position:absolute;top:3px;left:calc({avec:.1f}% - 12px);width:24px;height:24px;border-radius:50%;'
+            f'background:#FFFFFF;border:4px solid {teinte(c, .45)};box-sizing:border-box"></span>'
+            f'<span style="position:absolute;top:-26px;left:calc({avec:.1f}% - 40px);width:80px;text-align:center;font-size:15px;'
+            f'font-weight:700;color:#5E6475">{avec:.0f} %</span>'
+            f'<span style="position:absolute;top:-5px;left:calc({sans:.1f}% - 20px);width:40px;height:40px;border-radius:50%;'
+            f'background:{c};box-shadow:0 0 0 4px #FFFFFF;display:flex;align-items:center;justify-content:center">'
+            f'{silhouette(metier)}</span></div>'
+            f'<div aria-hidden="true" style="font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:32px;'
+            f'color:{texte};text-align:right">{sans:.0f} %</div></div>')
 
 
-bande_gauche = f"calc(var(--libelle-p3, {LIBELLE_PX}px) + {PISTE} * {BAS / 100:.2f} - 18px)"
-bande_largeur = f"calc({PISTE} * {(HAUT - BAS) / 100:.2f} + 36px)"
-st.markdown(f'<section class="defile-mobile jauges-p3" style="--largeur-mobile:340px;background:#FFFFFF;border:1px solid #E7EAE4;border-radius:16px;padding:22px 28px;'
-            f'display:flex;flex-direction:column;gap:10px"><h2 class="sous-titre" style="margin:0">Part des trajets faits '
-            f'en voiture, de banlieue à banlieue, selon le lieu de travail</h2>'
-            f'<div style="display:flex;flex-wrap:wrap;gap:22px;font-size:15px;font-weight:600">'
-            f'<span style="display:inline-flex;align-items:center;gap:8px">{u.badge_mode("train")}'
-            f'<span aria-hidden="true" style="width:18px;height:18px;border-radius:50%;border:3px solid #1B1F2A;'
-            f'box-sizing:border-box;display:inline-block"></span>Le lieu de travail a une gare</span>'
-            f'<span style="display:inline-flex;align-items:center;gap:8px">{u.badge_mode("train_barre")}'
-            f'<span aria-hidden="true" style="width:20px;height:20px;border-radius:50%;background:#1B1F2A;'
-            f'display:inline-block"></span>Il n\'en a pas</span></div>'
-            f'<div class="zone-jauges" style="position:relative;padding-top:44px">'
-            f'<div aria-hidden="true" style="position:absolute;top:0;bottom:26px;left:{bande_gauche};width:{bande_largeur};'
-            f'background:#EEF0EC;border-radius:14px"></div>'
-            f'<div class="conteneur-pastille" style="position:absolute;top:8px;left:{bande_gauche};width:{bande_largeur};display:flex;'
-            f'justify-content:center"><span class="pastille-bande" style="white-space:nowrap;background:#1B1F2A;color:#FFFFFF;border-radius:999px;'
-            f'padding:4px 14px;font-size:14px;font-weight:700">Sans gare : {BAS} à {HAUT} %, quel que soit le métier</span></div>'
-            f'<div style="position:relative">' + "".join(ligne_jauge(r.Métier, r.avec, r.sans) for r in large.itertuples())
-            + f'</div><div aria-hidden="true" style="display:grid;grid-template-columns:var(--colonne-p3, 170px) 1fr '
-              f'{MARGE_DROITE_PX}px;'
-              f'font-size:14px;color:#5E6475;padding-top:6px"><span></span><div style="position:relative;height:22px;'
-              f'margin-left:14px;border-top:1px solid #DADDD6"><span style="position:absolute;left:0;top:4px">0 %</span>'
-              f'<span class="axe-milieu" style="position:absolute;left:50%;top:4px;transform:translateX(-50%)">50 %</span>'
-              f'<span class="axe-fin" style="position:absolute;right:-24px;top:4px">100 % en voiture</span></div><span></span></div>'
-              f'</div></section>', unsafe_allow_html=True)
+bande_gauche = f"calc(var(--lib-p3, 150px) + var(--ecart-lib, 16px) + {PISTE} * {BAS / 100:.2f} - 24px)"
+bande_largeur = f"calc({PISTE} * {(HAUT - BAS) / 100:.2f} + 48px)"
+legende = (f'<div style="display:flex;flex-wrap:wrap;gap:22px;font-size:15px;font-weight:700">'
+           f'<span style="display:inline-flex;align-items:center;gap:8px">{u.badge_mode("train", 26)}'
+           f'<span aria-hidden="true" style="width:18px;height:18px;border-radius:50%;border:4px solid #9BC7DB;'
+           f'box-sizing:border-box;display:inline-block"></span>Le lieu de travail a une gare</span>'
+           f'<span style="display:inline-flex;align-items:center;gap:8px">{u.badge_mode("train_barre", 26)}'
+           f'<span aria-hidden="true" style="width:34px;height:14px;border-radius:7px;background:#3A8FB7;display:inline-block">'
+           f'</span>Il n\'en a pas</span></div>')
+st.markdown(f'<section class="defile-mobile jauges-p3" style="--largeur-mobile:290px;background:#FFFFFF;border:1px solid #E7EAE4;'
+            f'border-radius:16px;padding:22px 28px;display:flex;flex-direction:column;gap:14px">'
+            f'<h2 class="sous-titre" style="margin:0">Part des trajets faits en voiture, de banlieue à banlieue, selon le lieu '
+            f'de travail</h2>{legende}'
+            f'<div class="zone-jauges" style="position:relative;padding-top:52px">'
+            f'<div aria-hidden="true" style="position:absolute;top:0;bottom:0;left:{bande_gauche};width:{bande_largeur};'
+            f'background:#EEF0EC;border-radius:16px;z-index:0"></div>'
+            f'<div class="conteneur-pastille" style="position:absolute;top:10px;left:{bande_gauche};width:{bande_largeur};'
+            f'display:flex;justify-content:center;z-index:2"><span class="pastille-bande" style="white-space:nowrap;'
+            f'background:#1B1F2A;color:#FFFFFF;border-radius:999px;padding:5px 14px;font-size:15px;font-weight:800">'
+            f'Sans gare : {BAS} à {HAUT} %, quel que soit le métier</span></div>'
+            + "".join(ligne_pilule(r.Métier, r.avec, r.sans) for r in large.itertuples()) + '</div>'
+            f'<div aria-hidden="true" class="ligne-p3 axe-p3" style="display:grid;grid-template-columns:{COLONNES};gap:16px;'
+            f'font-size:14px;color:#5E6475">'
+            f'<span></span><div style="position:relative;height:22px;border-top:1px solid #DADDD6;padding-top:4px">'
+            f'<span style="position:absolute;left:0">0 %</span>'
+            f'<span class="axe-milieu" style="position:absolute;left:50%;transform:translateX(-50%)">50 %</span>'
+            f'<span style="position:absolute;right:0">100 % en voiture</span></div><span></span></div></section>',
+            unsafe_allow_html=True)
 u.tableau(pd.DataFrame({"Métier": metiers,
                         "Lieu de travail avec gare (%)": [f"{a:.0f}" for a in large["avec"]],
                         "Lieu de travail sans gare (%)": [f"{s:.0f}" for s in large["sans"]]}))

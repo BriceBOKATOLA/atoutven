@@ -59,9 +59,9 @@ ATTENDU = {
         ("bande de couleur à gauche de la page", 'class="bande-page"'),
         ("titre nuancé (relecture du 2026-11-12 : 71 à 77 %, pas « tout le monde »)", "trajets sur 4"),
         ("panneau-chiffre", "Personnes concernées"),
-        ("haltères avec légende gare / sans gare", "Le lieu de travail a une gare"),
-        ("jauges dessinées comme la maquette (axe 0 / 50 / 100 %)", "100 % en voiture"),
-        ("bande « sans gare » des jauges validées le 2026-11-11", "quel que soit le métier"),
+        ("barres-pilules avec légende gare / sans gare (12/11)", "Le lieu de travail a une gare"),
+        ("barres-pilules, axe 0 / 50 / 100 % (12/11)", "100 % en voiture"),
+        ("bande « sans gare » gardée sur les barres-pilules (12/11)", "quel que soit le métier"),
         ("voiture selon la destination (à déplier)", "la voiture selon la destination"),
     ],
     "pages/p4_nuit.py": [
