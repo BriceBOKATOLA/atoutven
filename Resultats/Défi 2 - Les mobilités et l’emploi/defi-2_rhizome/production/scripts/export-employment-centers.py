@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract the local GeoPackage and 2026 departmental indicators using only Python's standard library."""
+"""Extract the local GeoPackage and 2025 departmental indicators using only Python's standard library."""
 import argparse
 import ast
 import csv
@@ -12,7 +12,8 @@ import zipfile
 from pathlib import Path
 
 PRODUCTION = Path(__file__).resolve().parents[1]
-DEPARTMENT_SHEET = 'Par département 2ème&3ème trime'
+DEPARTMENT_SHEET = 'Sheet3'
+FAILURES_SHEET = 'Par département 2ème&3ème trime'
 NS = {'m': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
 DEPARTMENTS = [('75', 'Paris'), ('77', 'Seine-et-Marne'), ('78', 'Yvelines'), ('91', 'Essonne'), ('92', 'Hauts-de-Seine'), ('93', 'Seine-Saint-Denis'), ('94', 'Val-de-Marne'), ('95', 'Val-d’Oise')]
 
@@ -53,11 +54,11 @@ def geometry(blob):
         raise ValueError('Unexpected bytes after WKB geometry')
     return result
 
-def sheet_rows(path):
+def sheet_rows(path, sheet_name=DEPARTMENT_SHEET):
     with zipfile.ZipFile(path) as archive:
         strings = [''.join(item.itertext()) for item in ET.fromstring(archive.read('xl/sharedStrings.xml')).findall('m:si', NS)]
         workbook = ET.fromstring(archive.read('xl/workbook.xml'))
-        sheet = next(s for s in workbook.findall('m:sheets/m:sheet', NS) if s.get('name') == DEPARTMENT_SHEET)
+        sheet = next(s for s in workbook.findall('m:sheets/m:sheet', NS) if s.get('name') == sheet_name)
         relationship = sheet.get('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id')
         relations = ET.fromstring(archive.read('xl/_rels/workbook.xml.rels'))
         target = next(r.get('Target') for r in relations if r.get('Id') == relationship)
@@ -94,19 +95,20 @@ def interior_center(geom):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--production-dir', type=Path, default=PRODUCTION)
-    parser.add_argument('--workbook', type=Path, help='departmental floral indicator workbook (2026 departmental tab)')
+    parser.add_argument('--workbook', type=Path, help='departmental floral indicator workbook (2025 departmental tab)')
     parser.add_argument('--source', type=Path, help='folder of the plate 06 GeoPackage and CSV')
     parser.add_argument('--plate-script', type=Path, help='plate 06 script holding the regional constants')
     parser.add_argument('--indicators', type=Path, help='four-petal indicator configuration JSON')
     parser.add_argument('--output', type=Path, help='JSON destination (default: web/public/data/employment-centers-departments.json)')
     args = parser.parse_args()
     local = args.production_dir / 'datasets/src/employment-centers'
-    args.workbook = args.workbook or local / 'Représention Florale  (1).xlsx'
+    args.workbook = args.workbook or local / 'indicateurs-departementaux-2025-2026.xlsx'
     args.source = args.source or args.production_dir / 'datasets/clean/06_employment_centers_2015_2025'
     args.plate_script = args.plate_script or args.production_dir / 'scripts/06_employment_centers.py'
     args.indicators = args.indicators or local / 'indicateurs.json'
     args.output = args.output or args.production_dir / 'web/public/data/employment-centers-departments.json'
     rows = sheet_rows(args.workbook)
+    failure_rows = sheet_rows(args.workbook, FAILURES_SHEET)
     config = json.loads(args.indicators.read_text(encoding='utf-8'))
     assert len(config) == 4, 'Exactly four petals are required'
     connection = sqlite3.connect(f'file:{args.source / "06_poles_emploi.gpkg"}?mode=ro', uri=True)
@@ -123,11 +125,13 @@ def main():
     lines = layer('reseau_2025', 'res_com,mode,an')
     departments = layer('departements', 'code,nom')
     values = {}
-    for index, (code, name) in enumerate(DEPARTMENTS, 5):
+    for index, (code, name) in enumerate(DEPARTMENTS, 4):
         assert rows[index]['A'].strip(), f'Missing department at row {index}'
+        assert rows[index]['A'].strip() == failure_rows[index + 1]['A'].strip(), f'Department mismatch for {name}'
         values[code] = {}
         for metric in config:
-            raw = rows[index].get(metric['column'], '').strip()
+            row = failure_rows[index + 1] if metric['id'] == 'defaillances' else rows[index]
+            raw = row.get(metric['column'], '').strip()
             values[code][metric['id']] = float(raw.replace(',', '.')) if raw else None
     for department in departments:
         department['indicators'] = values[department['code']]
@@ -143,10 +147,11 @@ def main():
     # Preserve the regional figures of the original panel. INSEE regional totals
     # in the plate 06 script are not the sum of the available communal records.
     constants = {}
-    for node in ast.parse(args.plate_script.read_text()).body:
+    for node in ast.parse(args.plate_script.read_text(encoding="utf-8")).body:
         if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) and node.targets[0].id in {'INSEE', 'DEFM'}:
             constants[node.targets[0].id] = ast.literal_eval(node.value)
-    ae_rows = list(csv.DictReader((args.source / 'auto_entrepreneurs_par_departement_urssaf.csv').open(encoding='utf-8-sig'), delimiter=';'))
+    with (args.source / 'auto_entrepreneurs_par_departement_urssaf.csv').open(encoding='utf-8-sig') as stream:
+        ae_rows = list(csv.DictReader(stream, delimiter=';'))
     def comparison(label, start, end, years, source):
         return dict(label=label, start=start, end=end, years=years, source=source)
     # Producer and period as printed on plate 06; file names stay in the README.
