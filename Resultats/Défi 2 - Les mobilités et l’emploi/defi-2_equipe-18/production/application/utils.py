@@ -593,9 +593,20 @@ def tableau(df: pd.DataFrame, titre: str = "Voir les données du graphique", leg
         st.markdown(table_html(df, legende or defaut[:1].upper() + defaut[1:]), unsafe_allow_html=True)
 
 
-@st.cache_data
 def lire(nom: str) -> pd.DataFrame:
-    """Lit un fichier de résultats du dossier donnees/ (une seule lecture, partagée par toutes les pages)."""
+    """Lit un fichier de résultats du dossier donnees/ (une seule lecture, partagée par toutes les pages).
+
+    Comme pour svg_base64 : la date de modification et la taille du fichier font partie de la clé du cache. Le
+    2026-11-12, Streamlit Cloud servait encore l'ancien communes_residence.csv après sa mise à jour (cache par nom
+    seulement), et la page 6 plantait (KeyError sur les nouvelles colonnes par catégorie).
+    """
+    infos = (DONNEES / nom).stat()
+    return _lire_en_cache(nom, infos.st_mtime_ns, infos.st_size)
+
+
+@st.cache_data
+def _lire_en_cache(nom: str, date_modification: int, taille: int) -> pd.DataFrame:
+    """Lecture réelle, mise en cache selon (nom, date de modification, taille) ; les deux derniers ne servent qu'à la clé."""
     return pd.read_csv(DONNEES / nom, encoding="utf-8-sig")
 
 
