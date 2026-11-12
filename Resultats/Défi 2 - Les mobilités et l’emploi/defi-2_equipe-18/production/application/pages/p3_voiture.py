@@ -128,6 +128,13 @@ st.markdown(f'<section class="defile-mobile jauges-p3" style="--largeur-mobile:2
             f'<span class="axe-milieu" style="position:absolute;left:50%;transform:translateX(-50%)">50 %</span>'
             f'<span style="position:absolute;right:0">100 % en voiture</span></div><span></span></div></section>',
             unsafe_allow_html=True)
+# Sonification : pour chaque métier, la note « avec gare » puis la note « sans gare » (échelle de 0 à 100 %)
+u.bouton_sonification(
+    "Pour chaque métier, deux notes : d'abord quand le lieu de travail a une gare, puis quand il n'en a pas. Plus le son "
+    "est aigu, plus la voiture est utilisée.",
+    [p for m in metiers for p in ((f"{m}, avec gare : {u.pc(part_v[(m, 'avec gare')])}", part_v[(m, 'avec gare')] / 100),
+                                  (f"sans gare : {u.pc(part_v[(m, 'sans gare')])}", part_v[(m, 'sans gare')] / 100))],
+    "Pour chaque métier, la deuxième note est plus aiguë : sans gare, la voiture l'emporte, cadres compris.")
 u.tableau(pd.DataFrame({"Métier": metiers,
                         "Lieu de travail avec gare (%)": [f"{a:.0f}" for a in large["avec"]],
                         "Lieu de travail sans gare (%)": [f"{s:.0f}" for s in large["sans"]]}))

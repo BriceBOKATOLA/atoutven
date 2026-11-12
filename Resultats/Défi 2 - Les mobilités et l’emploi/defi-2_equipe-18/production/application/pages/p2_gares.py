@@ -80,6 +80,12 @@ st.markdown(f'<section style="background:#FFFFFF;border:1px solid #E7EAE4;border
             + '<p style="margin:0;font-size:14px;line-height:1.5;color:#5E6475">Emplois situés en Île-de-France hors '
               'Paris, quel que soit le lieu de résidence. Commune avec gare : au moins un arrêt de métro, de train, de RER '
               'ou de tramway (407 communes sur 1 266).</p></section>', unsafe_allow_html=True)
+# Sonification : une note par métier, sur l'échelle des barres (0 à 30 %)
+u.bouton_sonification(
+    "Écoutez la part des emplois situés dans une commune sans gare, pour chaque métier : plus le son est aigu, plus la "
+    "part est forte.",
+    [(f"{m} : {u.pc(part_sg[m], 1)}", part_sg[m] / 30) for m in metiers],
+    f"Le son monte des cadres aux ouvriers : les ouvriers travaillent {combien} plus souvent dans une commune sans gare.")
 u.tableau(pd.DataFrame({
     "Métier": metiers,
     "Emplois hors Paris": [u.fr(round(h21.loc[m, "emplois"], -3)) for m in metiers],

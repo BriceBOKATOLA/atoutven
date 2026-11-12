@@ -170,6 +170,12 @@ with st.container(border=True, key="carte_velo"):
         60, " %",
         "les communes en orange forment un anneau autour de Paris : c'est là que le vélo peut remplacer le plus de "
         "trajets en voiture. Chaque numéro est le rang de la commune dans le classement à droite."), unsafe_allow_html=True)
+    # Sonification : les 5 communes du classement, échelle des barres du classement (0 à 60 %)
+    u.bouton_sonification(
+        "Les 5 communes où la part des trajets en voiture de moins de 5 kilomètres est la plus forte, de la première à la "
+        "cinquième. Plus le son est aigu, plus la part est forte.",
+        [(f"{r.nom} : {u.fr(r.part_moins_5km_pct)} %", r.part_moins_5km_pct / 60)
+         for r in velo.head(NB_COMMUNES).itertuples()], "")
     u.tableau(velo.head(20).assign(part=lambda d: d["part_moins_5km_pct"].map(lambda x: f"{u.fr(x)} %"))
               .rename(columns={"nom": "Commune", "part": "Trajets en voiture de moins de 5 km"})
               [["Commune", "Trajets en voiture de moins de 5 km"]],
@@ -204,6 +210,12 @@ with st.container(border=True, key="carte_navette"):
         "plus le cercle est grand, plus la commune compte d'emplois sans gare. Les communes qui en comptent le plus sont en "
         "grande couronne, près de la petite couronne : ce seraient les premiers arrêts d'une navette. Chaque numéro est le rang de la commune dans le classement à droite."),
         unsafe_allow_html=True)
+    # Sonification : les 5 communes sans gare qui comptent le plus d'emplois, échelle des barres du classement
+    u.bouton_sonification(
+        "Les 5 communes sans gare qui comptent le plus de postes d'employés et d'ouvriers, de la première à la cinquième. "
+        "Plus le son est aigu, plus la commune compte de postes.",
+        [(f"{r.nom} : {u.fr(round(r.emplois_sur_place, -2))} postes", r.emplois_sur_place / (communes['emplois_sur_place'].max() * 1.1))
+         for r in communes.head(NB_COMMUNES).itertuples()], "")
     u.tableau(communes.head(20).assign(emplois=lambda d: d["emplois_sur_place"].map(lambda x: u.fr(round(x, -2))))
               .rename(columns={"nom": "Commune", "emplois": "Postes d'employés et d'ouvriers"})
               [["Commune", "Postes d'employés et d'ouvriers"]],

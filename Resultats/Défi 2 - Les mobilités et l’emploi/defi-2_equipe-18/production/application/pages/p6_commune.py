@@ -399,6 +399,14 @@ st.markdown(f'<div class="pile-mobile" style="display:grid;grid-template-columns
             f'<div style="display:flex;flex-direction:column;gap:14px">{principales}{gare}</div></div>',
             unsafe_allow_html=True)
 
+# Sonification : les principales communes de travail (même échelle que les barres de la liste)
+if len(top):
+    u.bouton_sonification(
+        f"Les principales communes de travail des {groupe} {de_commune(r['nom'])}, de la première à la "
+        f"{'sixième' if len(top) == 6 else 'dernière'}. Plus le son est aigu, plus la part des habitants qui y travaillent "
+        f"est forte.",
+        [(f"{t.nom_travail} : {pct(t.part_pct)}", t.part_pct / echelle) for t in top.itertuples()], "")
+
 # Alternative accessible à la carte : toutes les communes colorées, avec leur part et la présence d'une gare
 u.tableau(pd.DataFrame({
     "Commune de travail": dest["nom_travail"],
