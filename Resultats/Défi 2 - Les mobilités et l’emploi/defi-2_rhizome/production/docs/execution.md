@@ -173,6 +173,18 @@ python3 -m unittest discover -s production/tests -p 'test_build_defm_series.py' 
 
 Le test compare les données produites au JSON conservé. Les agrégats ne suivent pas le seuil de 300. Pour reproduire les séries historiques, le script exclut deux codes absents de toutes les années du CSV : 93059 dans le groupe T11 et 91182 dans le groupe T12. Ces séries sont donc incomplètes ; le script signale ces exclusions et refuse les autres observations manquantes détectées. La note descriptive est recopiée du fichier conservé. Les groupes restent des données préparées dont la construction initiale manque.
 
+## Reconstituer les données des territoires
+
+Le générateur utilise quatre fichiers locaux dans `production/datasets/src/`. Il ne télécharge pas les données et ne reconstruit pas les GeoJSON préparés en amont. Pour vérifier le résultat sans remplacer les données du projet :
+
+```sh
+python3 production/scripts/build_territories.py --output-dir /tmp/rhizome-territoires
+cmp /tmp/rhizome-territoires/territoires.json production/datasets/src/jobseekers/territoires.json
+python3 -B -m unittest discover -s production/scripts -p 'test_build_territories.py' -v
+```
+
+Sans `--output-dir`, le script remplace `territoires.json` et `couverture.json` dans `production/datasets/src/jobseekers/`. Le graphique 2 utilise les géométries des zones de `territoires.json`, mais ses indicateurs proviennent du classeur des zones d'emploi.
+
 ## Site web
 
 Le [README du site](../web/README.md) décrit son installation et son export statique. Les commandes suivantes partent du dossier `defi-2_rhizome` et remplacent les trois instantanés dans `production/web/public/data/` :
