@@ -185,7 +185,8 @@ st.markdown(
     f'display:flex;flex-direction:column;gap:10px">'
     f'<figcaption style="display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;color:#F1F2F6">'
     f'{u.badge_mode("navette", nuit=True)}Offre de transport prévue chaque heure (bus, métros, trains, trams), un jour '
-    f'de semaine, toute l\'Île-de-France</figcaption>{legende_courbe}{svg}'
+    f'de semaine, toute l\'Île-de-France</figcaption>{legende_courbe}'
+    f'<div class="defile-mobile defile-fin" style="--largeur-mobile:840px">{svg}</div>'
     f'<p style="margin:0;font-size:15px;line-height:1.5;color:#C9CDD8">{resume}</p>'
     # Source des plages (règle CLAUDE.md : aucune définition sans source)
     f'<p style="margin:0;font-size:14px;line-height:1.5;color:#9AA0B2">Soir et nuit selon l\'INSEE (enquête Emploi) : '

@@ -174,6 +174,34 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [data-testid="stPa
 @media (max-width: 600px) {{
   [style*="repeat(2"], [style*="repeat(3"], [style*="repeat(5"] {{ grid-template-columns: 1fr !important; }}
   .trait-ligne {{ display: none !important; }}
+  /* Grilles « carte + colonne » (pages 5 et 6) : l'une sous l'autre, sinon chaque colonne fait 150 px */
+  .pile-mobile {{ grid-template-columns: 1fr !important; }}
+  /* Barres par métier (page 2) : libellé et valeur plus étroits, pour que la barre garde de la place (elle se
+     réduisait à un point sur 390 px) */
+  .barre-metier {{ grid-template-columns: 112px 1fr 84px !important; gap: 8px !important; }}
+  .barre-metier > div:last-child {{ white-space: nowrap; }}
+  /* Jauges de la page 3 : colonne des métiers réduite (130 px au lieu de 184) pour que les ronds soient visibles dès
+     l'ouverture ; la pastille de la bande passe sur deux lignes */
+  .jauges-p3 {{ --libelle-p3: 130px; --colonne-p3: 116px; }}
+  .jauges-p3 .zone-jauges {{ padding-top: 64px !important; }}
+  .jauges-p3 .pastille-bande {{ white-space: normal !important; display: inline-block; width: 200px; flex-shrink: 0; text-align: center; }}
+  /* La pastille est calée à droite du cadre (au lieu d'être centrée sur la bande, elle sortait de l'écran) */
+  .jauges-p3 .conteneur-pastille {{ left: auto !important; right: 0; width: auto !important; }}
+  /* Lignes plus hautes : le petit chiffre « avec gare » passe sous la piste, il ne chevauche plus le grand chiffre */
+  .jauges-p3 .ligne-jauge, .jauges-p3 .piste-jauge {{ height: 96px !important; }}
+  .jauges-p3 .val-avec {{ top: 66px !important; }}
+  /* Axe : « 50 % » retiré (il chevauchait « 100 % »), « 100 % en voiture » reste dans le cadre */
+  .jauges-p3 .axe-milieu {{ display: none; }}
+  .jauges-p3 .axe-fin {{ right: 0 !important; }}
+  /* Courbe de nuit : le cadre s'ouvre sur la fin (la nuit, le message de la page) ; on fait défiler vers la gauche
+     pour voir la journée. direction: rtl place le défilement à droite, le contenu reste écrit de gauche à droite. */
+  .defile-fin {{ direction: rtl; }}
+  .defile-fin > * {{ direction: ltr; }}
+  /* Graphiques dessinés en largeur (flux, courbe de nuit, jauges, tableau des départs) : ils gardent une largeur
+     minimale lisible et défilent de côté dans leur cadre, au lieu de rétrécir jusqu'à des textes de 5 px
+     (mesuré le 2026-11-12 sur 390 px). La largeur minimale est donnée par chaque élément (--largeur-mobile). */
+  .defile-mobile {{ overflow-x: auto; }}
+  .defile-mobile > * {{ min-width: var(--largeur-mobile, 640px); }}
   h1.titre {{ font-size: 30px; }}
 }}
 /* Cartes agrandissables (zoom_cartes.js) : le cadre coupe la carte agrandie ; boutons ronds en haut à droite */

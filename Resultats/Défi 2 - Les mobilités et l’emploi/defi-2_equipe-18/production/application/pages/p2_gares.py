@@ -46,7 +46,7 @@ def ligne_barre(metier: str) -> str:
     """Une ligne du graphique : métier, barre, valeur ; décrite en mots pour les lecteurs d'écran."""
     v = h21.loc[metier, "part_sans_gare_pct"]
     return (f'<div role="img" aria-label="{metier} : {u.fr(v, 1)} % des emplois hors Paris dans une commune sans gare" '
-            f'style="display:grid;grid-template-columns:170px 1fr 80px;gap:14px;align-items:center">'
+            f'class="barre-metier" style="display:grid;grid-template-columns:170px 1fr 80px;gap:14px;align-items:center">'
             f'{u.libelle_metier(metier)}<div aria-hidden="true" style="height:22px;background:#EEF0EC;border-radius:11px;'
             f'overflow:hidden"><div style="height:22px;border-radius:11px;background:{u.METIERS[metier]["donnee"]};'
             f'width:{v / 30 * 100:.1f}%"></div></div><div style="text-align:right;font-family:\'Barlow Semi Condensed\','
@@ -151,7 +151,7 @@ with st.expander("Pour aller plus loin : de banlieue à banlieue"):
         f'<p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#4E5466">Dans <span style="background:#B23A86;'
         f'color:#FFFFFF;border-radius:8px;padding:0 7px;font-weight:700">{sur_dix} communes sur 10</span>, plus de la '
         f'moitié des employés et ouvriers travaillent dans une autre commune de banlieue.</p>'
-        f'{LEGENDE_FLUX}{graphique_flux(dest_cat)}'
+        f'{LEGENDE_FLUX}<div class="defile-mobile" style="--largeur-mobile:800px">{graphique_flux(dest_cat)}</div>'
         f'<p style="margin:6px 0 0;font-size:14px;color:#5E6475">Chaque maison : les actifs de banlieue d\'une catégorie '
         f'(100 %), qui travaillent en Île-de-France. Épaisseur d\'une branche = part de la catégorie qui va à ce lieu de '
         f'travail. En couleur, les deux catégories comparées ; les employés en gris.</p>'
@@ -269,7 +269,8 @@ with st.expander("Pour aller plus loin : la ponctualité des lignes de RER et de
     st.markdown(
         f'<h3 style="margin:4px 0 12px;font-family:Poppins,sans-serif;font-size:21px;font-weight:800">Près d\'une gare, '
         f'encore faut-il que le train soit à l\'heure</h3>'
-        f'<div role="table" aria-label="Ponctualité des 13 lignes de RER et de train" style="background:{FOND_PANNEAU};'
+        f'<div role="table" aria-label="Ponctualité des 13 lignes de RER et de train" class="defile-mobile" '
+        f'style="--largeur-mobile:440px;background:{FOND_PANNEAU};'
         f'border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 34px;'
         f'color:#F1F2F6"><div>{colonne(lignes_triees[:moitie])}</div><div>{colonne(lignes_triees[moitie:])}</div></div>'
         f'<p style="margin:12px 0 0;font-size:15px;line-height:1.5"><strong>Lecture :</strong> lignes classées de la '

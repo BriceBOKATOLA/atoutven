@@ -44,20 +44,23 @@ large = v.pivot(index="groupe", columns="commune_de_travail", values="part_voitu
 large.columns = ["Métier", "avec", "sans"]
 BAS, HAUT = round(large["sans"].min()), round(large["sans"].max())
 LIBELLE_PX, MARGE_DROITE_PX = 184, 24   # colonne du métier (170 px + 14 d'écart) ; place pour « 100 % en voiture »
-PISTE = f"(100% - {LIBELLE_PX + MARGE_DROITE_PX}px)"   # largeur de la piste, pour placer la bande au bon endroit
+# Variables CSS (valeur par défaut = celle de l'ordinateur) : sur téléphone, la colonne des métiers est réduite
+PISTE = f"(100% - var(--libelle-p3, {LIBELLE_PX}px) - {MARGE_DROITE_PX}px)"   # largeur de la piste, pour placer la bande au bon endroit
 
 
 def ligne_jauge(metier: str, avec: float, sans: float) -> str:
     """Une ligne : métier, piste grise, segment pâle entre les deux valeurs, rond creux (avec gare), rond plein (sans)."""
     c, texte = u.METIERS[metier]["donnee"], u.METIERS[metier]["texte"]
     return (f'<div role="img" aria-label="{metier} : {avec:.0f} % en voiture quand le lieu de travail a une gare, '
-            f'{sans:.0f} % quand il n\'en a pas" style="display:grid;grid-template-columns:170px 1fr {MARGE_DROITE_PX}px;'
-            f'align-items:center;height:78px;position:relative">{u.libelle_metier(metier)}'
-            f'<div aria-hidden="true" style="position:relative;height:78px;margin-left:14px">'
+            f'{sans:.0f} % quand il n\'en a pas" style="display:grid;grid-template-columns:var(--colonne-p3, 170px) 1fr '
+            f'{MARGE_DROITE_PX}px;'
+            f'align-items:center;height:78px;position:relative" class="ligne-jauge">{u.libelle_metier(metier)}'
+            # Classes ligne-jauge, piste-jauge, val-avec : réglages propres au téléphone (utils.py, sous 600 px)
+            f'<div aria-hidden="true" class="piste-jauge" style="position:relative;height:78px;margin-left:14px">'
             f'<div style="position:absolute;left:0;right:0;top:44px;height:14px;border-radius:7px;background:#EEF0EC"></div>'
             f'<div style="position:absolute;top:44px;height:14px;border-radius:7px;background:{c};opacity:.35;'
             f'left:{avec:.1f}%;width:{sans - avec:.1f}%"></div>'
-            f'<div style="position:absolute;top:10px;left:calc({avec:.1f}% - 40px);width:80px;text-align:center;'
+            f'<div class="val-avec" style="position:absolute;top:10px;left:calc({avec:.1f}% - 40px);width:80px;text-align:center;'
             f'font-size:16px;font-weight:600;color:#5E6475">{avec:.0f} %</div>'
             f'<div style="position:absolute;top:2px;left:calc({sans:.1f}% - 40px);width:80px;text-align:center;'
             f'font-family:\'Barlow Semi Condensed\',sans-serif;font-weight:600;font-size:28px;line-height:1.1;color:{texte}">'
@@ -68,9 +71,9 @@ def ligne_jauge(metier: str, avec: float, sans: float) -> str:
             f'background:{c};box-shadow:0 0 0 3px #FFFFFF"></span></div><span></span></div>')
 
 
-bande_gauche = f"calc({LIBELLE_PX}px + {PISTE} * {BAS / 100:.2f} - 18px)"
+bande_gauche = f"calc(var(--libelle-p3, {LIBELLE_PX}px) + {PISTE} * {BAS / 100:.2f} - 18px)"
 bande_largeur = f"calc({PISTE} * {(HAUT - BAS) / 100:.2f} + 36px)"
-st.markdown(f'<section style="background:#FFFFFF;border:1px solid #E7EAE4;border-radius:16px;padding:22px 28px;'
+st.markdown(f'<section class="defile-mobile jauges-p3" style="--largeur-mobile:340px;background:#FFFFFF;border:1px solid #E7EAE4;border-radius:16px;padding:22px 28px;'
             f'display:flex;flex-direction:column;gap:10px"><h2 class="sous-titre" style="margin:0">Part des trajets faits '
             f'en voiture, de banlieue à banlieue, selon le lieu de travail</h2>'
             f'<div style="display:flex;flex-wrap:wrap;gap:22px;font-size:15px;font-weight:600">'
@@ -80,18 +83,19 @@ st.markdown(f'<section style="background:#FFFFFF;border:1px solid #E7EAE4;border
             f'<span style="display:inline-flex;align-items:center;gap:8px">{u.badge_mode("train_barre")}'
             f'<span aria-hidden="true" style="width:20px;height:20px;border-radius:50%;background:#1B1F2A;'
             f'display:inline-block"></span>Il n\'en a pas</span></div>'
-            f'<div style="position:relative;padding-top:44px">'
+            f'<div class="zone-jauges" style="position:relative;padding-top:44px">'
             f'<div aria-hidden="true" style="position:absolute;top:0;bottom:26px;left:{bande_gauche};width:{bande_largeur};'
             f'background:#EEF0EC;border-radius:14px"></div>'
-            f'<div style="position:absolute;top:8px;left:{bande_gauche};width:{bande_largeur};display:flex;'
-            f'justify-content:center"><span style="white-space:nowrap;background:#1B1F2A;color:#FFFFFF;border-radius:999px;'
+            f'<div class="conteneur-pastille" style="position:absolute;top:8px;left:{bande_gauche};width:{bande_largeur};display:flex;'
+            f'justify-content:center"><span class="pastille-bande" style="white-space:nowrap;background:#1B1F2A;color:#FFFFFF;border-radius:999px;'
             f'padding:4px 14px;font-size:14px;font-weight:700">Sans gare : {BAS} à {HAUT} %, quel que soit le métier</span></div>'
             f'<div style="position:relative">' + "".join(ligne_jauge(r.Métier, r.avec, r.sans) for r in large.itertuples())
-            + f'</div><div aria-hidden="true" style="display:grid;grid-template-columns:170px 1fr {MARGE_DROITE_PX}px;'
+            + f'</div><div aria-hidden="true" style="display:grid;grid-template-columns:var(--colonne-p3, 170px) 1fr '
+              f'{MARGE_DROITE_PX}px;'
               f'font-size:14px;color:#5E6475;padding-top:6px"><span></span><div style="position:relative;height:22px;'
               f'margin-left:14px;border-top:1px solid #DADDD6"><span style="position:absolute;left:0;top:4px">0 %</span>'
-              f'<span style="position:absolute;left:50%;top:4px;transform:translateX(-50%)">50 %</span>'
-              f'<span style="position:absolute;right:-24px;top:4px">100 % en voiture</span></div><span></span></div>'
+              f'<span class="axe-milieu" style="position:absolute;left:50%;top:4px;transform:translateX(-50%)">50 %</span>'
+              f'<span class="axe-fin" style="position:absolute;right:-24px;top:4px">100 % en voiture</span></div><span></span></div>'
               f'</div></section>', unsafe_allow_html=True)
 u.tableau(pd.DataFrame({"Métier": metiers,
                         "Lieu de travail avec gare (%)": [f"{a:.0f}" for a in large["avec"]],

@@ -273,7 +273,8 @@ gare = (f'<section aria-label="Desserte par le train" style="background:#FFFFFF;
         f'<div style="font-size:14px;color:#5E6475">Commune avec gare : au moins un arrêt de métro, RER, train ou tram '
         f'(offre IDFM 2025). Part des emplois des habitants situés dans une commune sans gare.</div></section>')
 
-st.markdown(f'<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px">{figure}'
+st.markdown(f'<div class="pile-mobile" style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);'
+            f'gap:18px">{figure}'
             f'<div style="display:flex;flex-direction:column;gap:14px">{principales}{gare}</div></div>',
             unsafe_allow_html=True)
 
