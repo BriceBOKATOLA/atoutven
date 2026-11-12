@@ -6,7 +6,7 @@ Les formats de rendu sont précisés dans les [instructions de dépôt](../../..
 
 ## Planches
 
-Les six planches, leurs données et leurs scripts sont décrits dans [docs/visualisation.md](docs/visualisation.md). La documentation présente les sources, les limites et les commandes de reproduction.
+Les cinq planches, leurs données et leurs scripts sont décrits dans [docs/visualisation.md](docs/visualisation.md). La documentation présente les sources, les limites et les commandes de reproduction.
 
 Les [instructions d’exécution](docs/execution.md) détaillent les commandes, les dépendances et les étapes manquantes.
 

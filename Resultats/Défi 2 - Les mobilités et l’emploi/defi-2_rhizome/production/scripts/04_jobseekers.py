@@ -69,6 +69,6 @@ ptext(fig, 0.39, "Autour du Tram T4, l'emploi salarié a progressé\nplus vite q
 ptitle(fig, 0.215, "Précaution")
 ptext(fig, 0.19, "2015 : rupture de série. 2025 : inscriptions\nautomatiques (loi pour le plein emploi).\nOn compare les moyennes du 4e trimestre\n2016 et 2024.", 9, MUTE)
 footer(fig, "Sources : DARES / France Travail, « Inscrits à France Travail – données communales » (catégories A, B, C, données brutes arrondies au multiple de 5, moyennes du 4e trimestre 2016 et 2024), data.dares.travail-emploi.gouv.fr ; "
-            "Île-de-France Mobilités, tracés du réseau ferré et emplacement des gares. Les agrégats régionaux sont des sommes de valeurs communales arrondies. Paris regroupe ses 20 arrondissements. Écart d'emploi du T4 : voir planche 03.")
+            "Île-de-France Mobilités, tracés du réseau ferré et emplacement des gares. Les agrégats régionaux sont des sommes de valeurs communales arrondies. Paris regroupe ses 20 arrondissements. Emploi salarié privé : Urssaf, effectifs par commune.")
 fig.savefig(PNG, dpi=300, facecolor=NIGHT); fig.savefig(PDF, facecolor=NIGHT)
 print("ok", round(idf, 1), round(t4, 1), round(rest, 1))

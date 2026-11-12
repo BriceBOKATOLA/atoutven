@@ -1,4 +1,4 @@
-"""Génère les six planches dans pitch/."""
+"""Génère les cinq planches dans pitch/."""
 
 import subprocess
 import sys
@@ -9,7 +9,6 @@ PRODUCTION = Path(__file__).resolve().parent.parent
 SCRIPTS = [
     "01_transport_extensions.py",
     "02_employment_growth.py",
-    "03_employment_comparison.py",
     "04_jobseekers.py",
     "05_transport_networks.py",
     "06_employment_centers.py",
@@ -23,7 +22,7 @@ def main():
         if result.returncode:
             print(f"Échec de {script} (code {result.returncode}).", file=sys.stderr)
             return result.returncode
-    print("Les six planches sont disponibles dans production/pitch/.")
+    print("Les cinq planches sont disponibles dans production/pitch/.")
     return 0
 
 

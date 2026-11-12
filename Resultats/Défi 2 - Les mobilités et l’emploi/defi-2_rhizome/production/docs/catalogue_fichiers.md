@@ -8,7 +8,7 @@ Ce catalogue décrit les fichiers présents dans le dossier de production. Les c
 flowchart LR
     A[Sources externes] --> B[Copies et données préparées dans datasets/src et datasets/clean/shared]
     B --> C[Chargement et standardisation dans map_utils.py]
-    C --> D[Filtres et calculs des scripts de planche 01 à 06]
+    C --> D[Filtres et calculs des scripts des cinq planches]
     D --> E[Cartes PNG et PDF]
     B --> F[CSV et GeoPackages par planche]
     F --> G[Projets QGIS]

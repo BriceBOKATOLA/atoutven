@@ -15,20 +15,19 @@ Sur Windows, remplacez `.venv/bin/python` par `.venv\Scripts\python.exe` dans le
 
 ## Générer les planches
 
-Pour générer les six planches et enregistrer les PNG et PDF directement dans `production/pitch/`, lancez :
+Pour générer les cinq planches et enregistrer les PNG et PDF directement dans `production/pitch/`, lancez :
 
 ```sh
 .venv/bin/python production/scripts/generate_pitch.py
 ```
 
-La commande fonctionne quel que soit le dossier courant si le chemin vers le script est adapté. Elle remplace les fichiers de même nom dans `pitch/png/` et `pitch/PDF/`. Elle s'arrête à la première erreur ; les planches déjà générées restent enregistrées. Le PDF des demandeurs porte le numéro 04 et celui de la comparaison de l'emploi porte le numéro 03.
+La commande fonctionne quel que soit le dossier courant si le chemin vers le script est adapté. Elle remplace les fichiers de même nom dans `pitch/png/` et `pitch/PDF/`. Elle s'arrête à la première erreur ; les planches déjà générées restent enregistrées. Le PDF des demandeurs porte le numéro 04.
 
 Pour générer une seule planche dans `production/pitch/`, lancez le script correspondant :
 
 ```sh
 .venv/bin/python production/scripts/01_transport_extensions.py
 .venv/bin/python production/scripts/02_employment_growth.py
-.venv/bin/python production/scripts/03_employment_comparison.py
 .venv/bin/python production/scripts/04_jobseekers.py
 .venv/bin/python production/scripts/05_transport_networks.py
 .venv/bin/python production/scripts/06_employment_centers.py
@@ -38,14 +37,13 @@ Pour générer une seule planche dans `production/pitch/`, lancez le script corr
 |---|---|---|
 | `01_transport_extensions.py` | Extensions du réseau | `01_reseau_transport_extens.png`, `01_reseau_transport_extens.pdf` |
 | `02_employment_growth.py` | Évolution de l'emploi | `02_emploi_progress.png`, `02_emploi_progress.pdf` |
-| `03_employment_comparison.py` | Comparaison des groupes de communes | `03_avant_apres.png`, `03_avant_apres.pdf` |
 | `04_jobseekers.py` | Demandeurs d'emploi | `04_demandeurs_emplois.png`, `04_demandeurs_emplois.pdf` |
 | `05_transport_networks.py` | Réseaux en 2015 et 2025 | `05_tous_reseaux_2015_2025.png`, `05_tous_reseaux_2015_2025.pdf` |
 | `06_employment_centers.py` | Pôles d'emploi | `06_poles_emploi_2015_2025.png`, `06_poles_emploi_2015_2025.pdf` |
 
 La planche 01 utilise les mêmes données et chiffres que la carte web : 15 lignes, 125 gares et 118 km dans l'instantané actuel. Pour mettre à jour cet instantané après une modification des données sources, exécutez d'abord `.venv/bin/python production/scripts/export-network.py`. Le script 01 accepte `--network-data` pour lire un autre instantané et `--output-dir` pour enregistrer ses deux fichiers dans un autre dossier.
 
-Les dossiers de destination sont créés automatiquement. Les fichiers portant ces noms sont remplacés. Les six scripts exportent désormais les PNG à **300 dpi**, soit **5 400 × 3 450 pixels** pour leurs figures de 18 × 11,5 pouces. La commande groupée utilise ces mêmes scripts. Les PDF restent produits par Matplotlib. Cette correction ne modifie pas les livrables déjà présents : leurs métadonnées et leur correspondance avec le code courant restent à vérifier séparément.
+Les dossiers de destination sont créés automatiquement. Les fichiers portant ces noms sont remplacés. Les cinq scripts exportent désormais les PNG à **300 dpi**, soit **5 400 × 3 450 pixels** pour leurs figures de 18 × 11,5 pouces. La commande groupée utilise ces mêmes scripts. Les PDF restent produits par Matplotlib. Cette correction ne modifie pas les livrables déjà présents : leurs métadonnées et leur correspondance avec le code courant restent à vérifier séparément.
 
 `map_theme.py` et `map_utils.py` sont des modules communs, appelés par les scripts de planches. Ils ne sont pas des commandes de production autonomes.
 
@@ -57,9 +55,9 @@ Les tests utilisent l'interpréteur de l'environnement installé :
 .venv/bin/python -m unittest discover -s production/tests -v
 ```
 
-`test_plate_resolution.py` exécute les instructions d'export des six scripts sur une figure Matplotlib réelle. Il vérifie les dimensions, les métadonnées de résolution du PNG (tolérance de 0,01 dpi liée à l'encodage en pixels par mètre) et la signature PDF. Il ne charge pas les données cartographiques. `test_generate_pitch.py` vérifie l'orchestration et l'arrêt sur erreur avec des scripts de substitution.
+`test_plate_resolution.py` exécute les instructions d'export des cinq scripts sur une figure Matplotlib réelle. Il vérifie les dimensions, les métadonnées de résolution du PNG (tolérance de 0,01 dpi liée à l'encodage en pixels par mètre) et la signature PDF. Il ne charge pas les données cartographiques. `test_generate_pitch.py` vérifie l'orchestration et l'arrêt sur erreur avec des scripts de substitution.
 
-Pour vérifier aussi le chargement et le rendu des six scripts réels, exécutez depuis `defi-2_rhizome` cette copie temporaire. Elle utilise les données locales et supprime ses exports à la fin. Les fichiers de `production/pitch/` ne sont pas remplacés.
+Pour vérifier aussi le chargement et le rendu des cinq scripts réels, exécutez depuis `defi-2_rhizome` cette copie temporaire. Elle utilise les données locales et supprime ses exports à la fin. Les fichiers de `production/pitch/` ne sont pas remplacés.
 
 ```sh
 .venv/bin/python - <<'PY'
@@ -84,7 +82,7 @@ with tempfile.TemporaryDirectory(prefix="rhizome-plates-") as temp:
     subprocess.run([sys.executable, str(root / "scripts/generate_pitch.py")],
                    check=True, env=env)
     images = sorted((root / "pitch/png").glob("*.png"))
-    assert len(images) == 6
+    assert len(images) == 5
     for path in images:
         with Image.open(path) as image:
             assert image.size == (5400, 3450), (path, image.size)
@@ -109,7 +107,7 @@ Les cinq fichiers `.qgz` et leurs GeoPackages correspondants sont dans `producti
 /path/to/qgis-python production/scripts/build_qgis_projects.py
 ```
 
-Remplacez `/path/to/qgis-python` par l'interpréteur de votre installation QGIS. Sa configuration dépend du système et de la distribution QGIS ; l'environnement virtuel des cartes ne fournit pas PyQGIS. Cette commande n'a pas été testée ici. Le GeoPackage de la planche 03 n'est pas présent : ce script ne crée pas de projet QGIS pour elle.
+Remplacez `/path/to/qgis-python` par l'interpréteur de votre installation QGIS. Sa configuration dépend du système et de la distribution QGIS ; l'environnement virtuel des cartes ne fournit pas PyQGIS. Cette commande n'a pas été testée ici.
 
 ## Récapitulatif
 
@@ -135,7 +133,7 @@ Les conversions EPSG:2154, le nettoyage des noms et l'extraction des années son
 
 Certains chiffres régionaux et textes des planches sont écrits en dur, notamment dans `06_employment_centers.py` : modifier les données ne les met pas tous à jour. Les exports existants ne sont pas garantis identiques à ceux que produirait une nouvelle exécution.
 
-Le 12 novembre 2026, les six scripts de cartes ont été exécutés avec succès par `generate_pitch.py` dans une copie temporaire de `scripts/` et `datasets/`, avec l'interpréteur `production/.venv/bin/python` déjà disponible (Python 3.15.2, Matplotlib 3.11.2, GeoPandas 1.2.0). Les six PNG mesurent 5 400 × 3 450 pixels et déclarent 299,9994 dpi, valeur d'encodage correspondant au réglage 300 dpi ; les six PDF ont une signature valide. Les empreintes SHA-256 des fichiers existants dans `production/pitch/` sont restées identiques. Les imports explicites de `BASE` et `CLEAN` dans les planches 02, 03, 04 et 06 corrigent les erreurs de chargement rencontrées pendant ce contrôle.
+Avant la suppression de la planche 03, le 12 novembre 2026, les six scripts de cartes alors présents ont été exécutés avec succès par `generate_pitch.py` dans une copie temporaire de `scripts/` et `datasets/`, avec l'interpréteur `production/.venv/bin/python` déjà disponible (Python 3.15.2, Matplotlib 3.11.2, GeoPandas 1.2.0). Les six PNG mesurent 5 400 × 3 450 pixels et déclarent 299,9994 dpi, valeur d'encodage correspondant au réglage 300 dpi ; les six PDF ont une signature valide. Les empreintes SHA-256 des fichiers existants dans `production/pitch/` sont restées identiques. Les imports explicites de `BASE` et `CLEAN` dans les planches 02, 03, 04 et 06 corrigent les erreurs de chargement rencontrées pendant ce contrôle.
 
 Les deux tests Python ont réussi. Les polices Barlow et Barlow Condensed sont absentes de cet environnement : le rendu utilise une substitution. Le résultat n'a pas fait l'objet d'une comparaison visuelle avec les exports historiques. Le script QGIS n'a pas été exécuté ; son fonctionnement reste à confirmer avec PyQGIS. Le test du récapitulatif ne peut plus être exécuté depuis la disparition de `scripts_recap`. Ce contrôle des cartes ne vérifie pas l'installation des dépendances dans un nouvel environnement ni les téléchargements depuis les producteurs.
 

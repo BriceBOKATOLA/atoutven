@@ -112,7 +112,6 @@ root.appendChild(QgsRuleBasedRenderer.Rule(fill(COMM), filterExp="ELSE", label="
 c.setRenderer(r)
 finish(p, [dep_, cer, lig, old, c], f"{O}/02_employment_growth/02_emploi.qgz", "02 — Où l'emploi a progressé depuis 2015")
 
-# La planche 03 ne dispose pas de GeoPackage dans les données fournies.
 
 # ---------- 04 demandeurs
 p = QgsProject(); g = f"{O}/04_jobseekers/04_demandeurs.gpkg"
