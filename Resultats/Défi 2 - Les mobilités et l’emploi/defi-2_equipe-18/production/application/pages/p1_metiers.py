@@ -126,6 +126,11 @@ st.markdown('<div class="carte"><h2 class="sous-titre">Télétravail selon la ca
             '(métiers de bureau, de commerce et de service : vendeurs, caissiers, aides-soignants, agents d\'accueil, '
             'agents de sécurité…) et <strong>ouvriers</strong> (usine, chantier, entrepôt, conduite de véhicules…).</p>'
             '</div>', unsafe_allow_html=True)
+# Sonification (le « plus » validé le 2026-11-12) : une note par métier, échelle de 0 à 100 % comme les silhouettes
+u.bouton_sonification(
+    "Écoutez les trois métiers : plus le son est aigu, plus la part de salariés en télétravail est forte.",
+    [(f"{m} : {p} %", p / 100) for m, p in TELETRAVAIL_PCT.items()],
+    "Le son descend des cadres aux ouvriers : le télétravail est surtout pour les cadres.")
 u.tableau(pd.DataFrame({"Métier": list(TELETRAVAIL_PCT),
                         "Télétravail au moins 1 jour par semaine (%)": list(TELETRAVAIL_PCT.values()),
                         "Actifs résidant en Île-de-France": [u.fr(actifs[m.rstrip("s") if m != "Cadres" else m]) for m in TELETRAVAIL_PCT]}))

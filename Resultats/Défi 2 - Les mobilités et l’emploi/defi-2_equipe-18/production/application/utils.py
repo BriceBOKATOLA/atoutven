@@ -454,6 +454,69 @@ def a_retenir(retenir: str) -> str:
     return "À retenir : " + _premiere_minuscule(retenir)
 
 
+def bouton_sonification(intro: str, points: list, conclusion: str, duree_note: float = 0.6,
+                        nuit: bool = False) -> None:
+    """Bouton « Écouter le graphique en sons » : sonification du graphique (le « plus » validé par Melvyn, 12/11).
+
+    Inspiré des bonnes pratiques existantes (module de sonification de Highcharts, Audio Graphs d'Apple), sans les
+    recréer : une voix explique la règle (intro), puis chaque valeur devient une note, plus aiguë quand la valeur est
+    plus haute, et la voix conclut. Une personne qui ne voit pas le graphique entend l'écart ou la chute d'un coup.
+    points : liste de (texte dit avant la note ou "" pour aucun, valeur entre 0 et 1).
+    Hauteur : de 220 Hz (valeur 0) à 880 Hz (valeur 1), soit deux octaves, échelle logarithmique comme l'oreille.
+    Web Audio API et synthèse vocale du navigateur : aucun fichier son, aucun service extérieur. Second clic : arrêt.
+    """
+    couleur, fond = ("#F1F2F6", "#1E2640") if nuit else (ENCRE, "#FFFFFF")
+    libelle = "Écouter le graphique en sons"
+    st.iframe(f"""
+<style>button:focus-visible {{ outline: 3px solid {"#8FC3DE" if nuit else "#1F6A8C"}; outline-offset: 3px; }}
+body {{ margin: 0; padding: 4px; }}</style>
+<button id="b" type="button" aria-pressed="false" style="display:inline-flex;align-items:center;gap:6px;
+ min-height:44px;padding:8px 16px;border:2px solid {couleur};border-radius:999px;background:{fond};color:{couleur};
+ font:700 15px 'Plus Jakarta Sans',sans-serif;cursor:pointer">
+ <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+ stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/>
+ <circle cx="18" cy="16" r="3"/></svg><span id="t">{libelle}</span></button>
+<script>
+const intro = {json.dumps(intro)}, conclusion = {json.dumps(conclusion)}, points = {json.dumps(points)};
+const duree = {duree_note}, libelle = {json.dumps(libelle)};
+const b = document.getElementById('b'), t = document.getElementById('t'), s = window.speechSynthesis;
+let actif = false, audio = null;
+const voix = () => s.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('fr'));
+// Dit un texte puis appelle suite() (rien à dire : suite() tout de suite)
+function dire(texte, suite) {{
+  if (!actif) return;
+  if (!texte) {{ suite(); return; }}
+  const u = new SpeechSynthesisUtterance(texte); u.lang = 'fr-FR'; u.rate = 0.95;
+  const v = voix(); if (v) u.voice = v;
+  u.onend = () => suite(); s.speak(u);
+}}
+// Joue une note : fréquence de 220 à 880 Hz selon la valeur (0 à 1), attaque et fin adoucies (pas de clic)
+function note(valeur, suite) {{
+  if (!actif) return;
+  const f = 220 * Math.pow(2, 2 * Math.max(0, Math.min(1, valeur)));
+  const o = audio.createOscillator(), g = audio.createGain(), t0 = audio.currentTime;
+  o.type = 'sine'; o.frequency.value = f;
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.25, t0 + 0.03);
+  g.gain.setValueAtTime(0.25, t0 + duree - 0.08); g.gain.linearRampToValueAtTime(0, t0 + duree);
+  o.connect(g); g.connect(audio.destination); o.start(t0); o.stop(t0 + duree);
+  o.onended = () => setTimeout(suite, 60);
+}}
+function arreter() {{ actif = false; s.cancel(); t.textContent = libelle; b.setAttribute('aria-pressed', 'false'); }}
+function jouer(i) {{
+  if (i >= points.length) {{ dire(conclusion, arreter); return; }}
+  dire(points[i][0], () => note(points[i][1], () => jouer(i + 1)));
+}}
+b.onclick = () => {{
+  if (actif) {{ arreter(); return; }}
+  actif = true; s.cancel();
+  audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+  audio.resume();
+  t.textContent = 'Arrêter'; b.setAttribute('aria-pressed', 'true');
+  dire(intro, () => jouer(0));
+}};
+</script>""", height=52, alt=f"Bouton « {libelle} » : sonification du graphique")
+
+
 def ecouter_partie(texte: str, nuit: bool = False) -> None:
     """Bouton « Écouter cette partie », en tête d'un bloc « Pour aller plus loin » (validé le 2026-11-12)."""
     bouton_ecouter(oral(texte), nuit, "Écouter cette partie")

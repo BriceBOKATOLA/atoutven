@@ -207,6 +207,16 @@ st.markdown(
     f'<p style="margin:0;font-size:14px;line-height:1.5;color:#9AA0B2">Soir et nuit selon l\'INSEE (enquête Emploi) : '
     f'soir de 20h à minuit, nuit de minuit à 5h. Le Code du travail retient une plage plus large pour la nuit '
     f'(21h-6h).</p></figure>', unsafe_allow_html=True)
+# Sonification (le « plus » validé le 2026-11-12) : une note par heure, de 5h à 4h comme la courbe ; quelques heures
+# repères sont dites avant leur note (début, heure de pointe du matin, minuit)
+REPERES_SONORES = {5: "5 heures du matin", 8: "8 heures", 0: "minuit"}
+plus_haut = max(valeurs)
+u.bouton_sonification(
+    "Chaque note est une heure, de 5 heures du matin à 4 heures du matin le lendemain. Plus le son est aigu, plus il y "
+    "a de passages prévus.",
+    [(REPERES_SONORES.get(h, ""), v / plus_haut) for h, v in zip(heures, valeurs)],
+    f"Après minuit, le son tombe : {round(100 / rapport)} fois moins de passages qu'aux heures de pointe.",
+    duree_note=0.35, nuit=True)
 u.tableau(offre.sort_values("ordre")[["Heure", "Moment", "Passages par heure"]])
 
 u.encadres(retenir, "On compte l'offre de transport prévue, pas qui la prend ni pourquoi : tous les voyageurs de nuit ne "
