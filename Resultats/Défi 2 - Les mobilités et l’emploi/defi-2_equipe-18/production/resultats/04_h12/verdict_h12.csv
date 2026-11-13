@@ -1,0 +1,5 @@
+﻿variable,indicateur,spearman,baisse_Q1_pct,baisse_Q4_pct,ecart_Q4_Q1_points,verdict
+part_cadres_emplois_pct,baisse_vendredi_pct,0.07592567600989968,8.23269816331785,10.126975979501136,1.8942778161832852,RÉFUTÉE
+part_cadres_habitants_pct,baisse_vendredi_pct,-0.03863620049273487,8.372829695905985,7.105455611721277,-1.2673740841847074,RÉFUTÉE
+part_cadres_emplois_pct,baisse_lundi_pct,0.4980083368869455,3.1686436948992256,8.713249189515773,5.5446054946165475,CONFIRMÉE
+part_cadres_habitants_pct,baisse_lundi_pct,0.6221379776214063,3.279138751760561,10.666577025886872,7.3874382741263105,CONFIRMÉE

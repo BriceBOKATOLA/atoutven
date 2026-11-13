@@ -1,0 +1,13 @@
+﻿groupe,seuil_voiture_pct,communes_avec_gare,communes_au_dessus,part_communes_pct,part_trajets_pct,voiture_avec_gare_pct,voiture_sans_gare_pct,exemples
+Cadres,60.0,228,148,64.91,31.0,46.84,75.79,"Vélizy-Villacoublay, Massy, Versailles"
+Cadres,66.7,228,120,52.63,21.62,46.84,75.79,"Évry-Courcouronnes, Montigny-le-Bretonneux, Roissy-en-France"
+Cadres,70.0,228,108,47.37,19.07,46.84,75.79,"Évry-Courcouronnes, Montigny-le-Bretonneux, Roissy-en-France"
+Employés,60.0,251,129,51.39,34.94,50.43,68.29,"Roissy-en-France, Évry-Courcouronnes, Tremblay-en-France"
+Employés,66.7,251,86,34.26,24.19,50.43,68.29,"Roissy-en-France, Évry-Courcouronnes, Tremblay-en-France"
+Employés,70.0,251,62,24.7,15.49,50.43,68.29,"Roissy-en-France, Melun, Meaux"
+Ouvriers,60.0,226,125,55.31,49.26,58.59,70.87,"Roissy-en-France, Rungis, Tremblay-en-France"
+Ouvriers,66.7,226,88,38.94,31.25,58.59,70.87,"Roissy-en-France, Rungis, Tremblay-en-France"
+Ouvriers,70.0,226,67,29.65,20.45,58.59,70.87,"Tremblay-en-France, Saint-Ouen-l'Aumône, Mitry-Mory"
+Ensemble,60.0,290,183,63.1,35.35,50.61,72.56,"Roissy-en-France, Massy, Évry-Courcouronnes"
+Ensemble,66.7,290,151,52.07,27.18,50.61,72.56,"Roissy-en-France, Évry-Courcouronnes, Tremblay-en-France"
+Ensemble,70.0,290,122,42.07,20.58,50.61,72.56,"Roissy-en-France, Évry-Courcouronnes, Tremblay-en-France"

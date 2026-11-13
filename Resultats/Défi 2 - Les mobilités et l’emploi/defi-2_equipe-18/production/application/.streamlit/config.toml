@@ -1,0 +1,17 @@
+# Thème de l'application (charte du projet, pages de jour).
+# La page « Les trajets de nuit » passe en fond nuit par du CSS (utils.appliquer_style(nuit=True)) :
+# Streamlit n'accepte qu'un seul thème par application.
+[theme]
+base = "light"
+backgroundColor = "#F6F7F4"            # fond jour, blanc légèrement froid
+secondaryBackgroundColor = "#ECEEE9"   # colonne du menu
+textColor = "#1B1F2A"                  # encre principale (contraste 15:1)
+primaryColor = "#C0401A"               # vermillon foncé : lisible sur le fond (4,8:1)
+font = "sans serif"
+
+[client]
+toolbarMode = "minimal"                # pas de menu développeur pour le public
+showSidebarNavigation = false          # le menu est dessiné par utils.menu() (ligne de métro)
+
+[server]
+headless = true

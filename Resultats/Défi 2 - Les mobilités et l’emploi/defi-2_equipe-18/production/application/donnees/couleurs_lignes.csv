@@ -1,0 +1,49 @@
+﻿ligne,mode,court,fond,texte,texte_modifie,contour,contraste_texte,contraste_fond_blanc
+CDG VAL,train,CDG VAL,#5CC5ED,#1B1F2A,True,True,8.36,1.97
+Métro 1,metro,1,#FFBE00,#1B1F2A,False,True,9.89,1.66
+Métro 10,metro,10,#DC9600,#1B1F2A,False,True,6.59,2.5
+Métro 11,metro,11,#6E491E,#FFFFFF,False,False,7.97,7.97
+Métro 12,metro,12,#00643C,#FFFFFF,False,False,7.27,7.27
+Métro 13,metro,13,#82C8E6,#1B1F2A,False,True,8.9,1.85
+Métro 14,metro,14,#640082,#FFFFFF,False,False,11.26,11.26
+Métro 2,metro,2,#0055C8,#FFFFFF,False,False,6.7,6.7
+Métro 3,metro,3,#6E6E00,#FFFFFF,False,False,5.39,5.39
+Métro 3B,metro,3B,#82C8E6,#1B1F2A,False,True,8.9,1.85
+Métro 4,metro,4,#A0006E,#FFFFFF,False,False,7.72,7.72
+Métro 5,metro,5,#FF5A00,#1B1F2A,False,False,5.26,3.13
+Métro 6,metro,6,#82DC73,#1B1F2A,False,True,9.74,1.69
+Métro 7,metro,7,#FF82B4,#1B1F2A,False,True,7.13,2.31
+Métro 7B,metro,7B,#82DC73,#1B1F2A,False,True,9.74,1.69
+Métro 8,metro,8,#D282BE,#1B1F2A,False,True,6.02,2.74
+Métro 9,metro,9,#D2D200,#1B1F2A,False,True,10.16,1.62
+ORLYVAL,train,ORLYVAL,#5EC5ED,#1B1F2A,True,True,8.37,1.97
+RER A,train,A,#EB2132,#FFFFFF,False,False,4.38,4.38
+RER B,train,B,#5091CB,#FFFFFF,False,False,3.36,3.36
+RER C,train,C,#FFCC30,#1B1F2A,False,True,10.92,1.51
+RER D,train,D,#008B5B,#FFFFFF,False,False,4.34,4.34
+RER E,train,E,#B94E9A,#FFFFFF,False,False,4.55,4.55
+TER,train,TER,#AAAAAA,#1B1F2A,False,True,7.08,2.32
+Train H,train,H,#84653D,#FFFFFF,False,False,5.37,5.37
+Train J,train,J,#CEC73D,#1B1F2A,False,True,9.3,1.77
+Train K,train,K,#9B9842,#FFFFFF,False,False,3.02,3.02
+Train L,train,L,#C4A4CC,#1B1F2A,False,True,7.47,2.2
+Train N,train,N,#00B297,#1B1F2A,True,True,6.12,2.69
+Train P,train,P,#F58F53,#1B1F2A,False,True,7.0,2.35
+Train R,train,R,#F49FB3,#1B1F2A,False,True,8.19,2.01
+Train U,train,U,#B6134C,#FFFFFF,False,False,6.59,6.59
+Train V,train,V,#9F9825,#FFFFFF,False,False,3.0,3.0
+Tram T1,tram,T1,#0055C8,#FFFFFF,False,False,6.7,6.7
+Tram T10,tram,T10,#6E6E00,#FFFFFF,False,False,5.39,5.39
+Tram T11,tram,T11,#FF5A00,#1B1F2A,False,False,5.26,3.13
+Tram T12,tram,T12,#A50034,#FFFFFF,False,False,7.93,7.93
+Tram T13,tram,T13,#8D653D,#FFFFFF,False,False,5.17,5.17
+Tram T14,tram,T14,#00A092,#FFFFFF,False,False,3.26,3.26
+Tram T2,tram,T2,#A0006E,#FFFFFF,False,False,7.72,7.72
+Tram T3a,tram,T3a,#FF5A00,#1B1F2A,False,False,5.26,3.13
+Tram T3b,tram,T3b,#00643C,#FFFFFF,False,False,7.27,7.27
+Tram T4,tram,T4,#DC9600,#1B1F2A,False,True,6.59,2.5
+Tram T5,tram,T5,#640082,#FFFFFF,False,False,11.26,11.26
+Tram T6,tram,T6,#FF0000,#FFFFFF,False,False,4.0,4.0
+Tram T7,tram,T7,#6E491E,#FFFFFF,False,False,7.97,7.97
+Tram T8,tram,T8,#6E6E00,#FFFFFF,False,False,5.39,5.39
+Tram T9,tram,T9,#3C91DC,#FFFFFF,False,False,3.35,3.35
