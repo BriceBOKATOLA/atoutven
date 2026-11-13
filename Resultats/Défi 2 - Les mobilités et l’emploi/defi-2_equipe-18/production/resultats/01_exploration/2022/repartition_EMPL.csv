@@ -1,0 +1,10 @@
+﻿code,libelle,nb_lignes,effectif_pondere,part_pct,prudence
+16,"Emplois sans limite de durée, CDI, titulaire de la fonction publique",1291820,4362233.410397641,76.83577360146155,False
+15,"Autres emplois à durée limitée, CDD, contrat court, saisonnier, vacataire, etc.",130565,431544.2779655314,7.6011609928372055,False
+21,Non salariés : Indépendants,119687,406618.9970974383,7.162130556462857,False
+22,Non salariés : Employeurs,58028,208384.746802705,3.670459996286857,False
+11,En contrat d'apprentissage ou de professionnalisation,52636,162091.39179246954,2.855055268896468,False
+12,Placés par une agence d'intérim,18476,59898.86563927342,1.0550503025064049,False
+14,Stagiaires rémunérés en entreprise,9781,30207.419378331437,0.5320692906770214,False
+13,"Emplois aidés (contrat unique d'insertion, d'initiative emploi, d'accompagnement dans l'emploi, avenir, etc.)",3392,11592.290477842784,0.2041849949053309,False
+23,Non salariés : Aides familiaux,1313,4775.500115648164,0.08411499596630896,False

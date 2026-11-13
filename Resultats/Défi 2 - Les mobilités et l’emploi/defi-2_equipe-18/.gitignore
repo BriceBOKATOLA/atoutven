@@ -1,0 +1,15 @@
+# Fichiers exclus du dépôt, pour le dossier de l'équipe 18 uniquement
+
+# Données brutes : trop volumineuses (plus de 600 Mo) et republiables par leurs producteurs.
+# Le script production/src/00_telecharger_donnees.py les télécharge depuis les sources officielles.
+production/data/brut/
+
+# Environnement Python et caches générés automatiquement
+.venv/
+__pycache__/
+*.pyc
+
+# Fichiers de configuration locaux d'outils
+.claude/
+.vscode/
+.idea/

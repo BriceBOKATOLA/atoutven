@@ -1,0 +1,14 @@
+﻿ligne_nom,service,ligne,ponctualite_pct,mois,emplois_eo_desservis,rang_emplois,dessert_le_plus
+RER C,RER,C,87.05,12,222741.78,1,True
+RER A,RER,A,87.86,12,188360.95,2,True
+Train L,Transilien,L,93.37,12,183361.52,3,True
+RER D,RER,D,82.54,12,170425.33,4,True
+RER B,RER,B,85.44,12,155476.53,5,False
+RER E,RER,E,89.92,12,140044.59,6,False
+Train J,Transilien,J,91.19,12,118016.29,7,False
+Train P,Transilien,P,90.64,12,114390.74,8,False
+Train H,Transilien,H,94.41,12,89859.84,9,False
+Train N,Transilien,N,94.08,12,79781.79,10,False
+Train U,Transilien,U,92.44,12,72520.64,11,False
+Train R,Transilien,R,87.62,12,29503.55,12,False
+Train K,Transilien,K,93.87,12,21690.4,13,False
