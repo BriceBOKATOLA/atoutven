@@ -1,6 +1,6 @@
 """
 11_tester_h24_ponctualite.py : test de H24 (ponctualité des lignes et emplois desservis), selon le protocole écrit
-dans hypotheses.md (section J) avant ce script. Reprend l'idée et le premier travail de Maroua Zoubir.
+dans hypotheses.md (section J) avant ce script.
 
 Question : les lignes de RER et Transilien qui desservent le plus d'emplois d'employés et d'ouvriers (hors Paris)
 sont-elles moins ponctuelles que les autres ?

@@ -2,7 +2,7 @@
 09_tester_h22_revenu.py : test de H22 (revenu et choix de la voiture), selon le protocole écrit
 AVANT de télécharger les données de revenu (hypotheses.md, section H).
 
-Test A (hypothèse proposée par Pierre THAI) : les actifs des communes modestes prennent-ils moins la voiture
+Test A : les actifs des communes modestes prennent-ils moins la voiture
              (la voiture comme « luxe ») ? Employés et ouvriers, trajets de banlieue à banlieue.
 Test B (contrôle du résultat principal) : à revenu de commune égal, l'absence de gare au lieu de travail
              fait-elle toujours monter la part de la voiture ?

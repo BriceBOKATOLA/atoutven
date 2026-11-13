@@ -4,7 +4,7 @@ conclusion.py : terminus du récit.
 Message : ce n'est pas le métier, c'est le lieu de travail qui décide. Le réseau mène à Paris, pas aux emplois de
 banlieue.
 
-Version validée par Melvyn le 2026-11-12 (canevas « Proposition conclusion : schéma compact et chiffré ») : la
+Version validée par l'équipe le 2026-11-12 (canevas « Proposition conclusion : schéma compact et chiffré ») : la
 conclusion CONCLUT au lieu de résumer les pages (l'ancien plan de ligne répétait tous leurs chiffres, « trop de
 saturation »). Elle contient :
   - un schéma en aiguillage : les trois métiers arrivent au même aiguillage, le lieu de travail ; les chiffres sont sur
@@ -145,7 +145,7 @@ st.markdown(f'<section aria-labelledby="titre-changements" style="margin-top:8px
             f'<p style="margin:22px 0 0;font-size:14px;color:{GRIS}"><b style="color:#4E5466">15 hypothèses</b> testées, dont '
             f'<b style="color:#4E5466">5 réfutées</b>, critères écrits avant d\'ouvrir les données · '
             # Nouvel onglet : GitHub refuse de s'afficher dans le cadre de Streamlit Cloud. « (nouvel onglet) » retiré du
-            # texte visible (demande de Melvyn, 12/11 : l'onglet s'ouvre de lui-même) ; il reste dans le nom lu par les
+            # texte visible (demande de l'équipe, 12/11 : l'onglet s'ouvre de lui-même) ; il reste dans le nom lu par les
             # lecteurs d'écran (aria-label), qui ne voient pas l'onglet s'ouvrir (RGAA, critère 13.2)
             f'<a style="color:#4E5466" href="https://github.com/Melvy-hub/hackaviz_2026-equipe-18" target="_blank" '
             f'rel="noopener noreferrer" aria-label="code et données sur GitHub (nouvel onglet)">code et données sur '

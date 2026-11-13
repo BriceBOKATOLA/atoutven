@@ -1,7 +1,7 @@
 """
 preparer_liaisons_banlieue.py : données du bloc « travailler dans un autre département de banlieue » (page 2).
 
-Validé par Melvyn le 2026-11-11 (canevas « Proposition p2 : ligne « plus on s'éloigne » + tableau des départs »), à la
+Validé par l'équipe le 2026-11-11 (canevas « Proposition p2 : ligne « plus on s'éloigne » + tableau des départs »), à la
 place des tableaux 8 x 8 par département, jugés trop techniques.
 
 Population : employés et ouvriers qui habitent en banlieue et travaillent dans un AUTRE département de banlieue

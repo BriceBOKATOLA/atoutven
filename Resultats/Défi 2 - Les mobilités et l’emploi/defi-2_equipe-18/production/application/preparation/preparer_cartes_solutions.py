@@ -1,7 +1,7 @@
 """
 preparer_cartes_solutions.py : les deux cartes de la page 5 (« Les solutions »), dessinées pour être lues d'un coup d'œil.
 
-Même méthode que les cartes de la nuit et de « Chercher ma commune », validée par Melvyn le 2026-11-11 : on ne
+Même méthode que les cartes de la nuit et de « Chercher ma commune », validée par l'équipe le 2026-11-11 : on ne
 colore que ce qui porte le message, et des repères numérotés (1 à 5) placés sur la carte renvoient au classement
 affiché à côté. Les numéros remplacent les noms écrits sur la carte : en petite couronne, les communes sont si
 petites que les noms se chevaucheraient.
@@ -62,7 +62,7 @@ def repere(x: float, y: float, numero: int, k: float = 1.0) -> str:
     """Repère numéroté : rond encre cerné de blanc, numéro blanc (lisible sur toutes les couleurs de la carte).
 
     k = échelle du repère. La vue cadrée agrandit toute la carte (environ 2,5 fois) : on y dessine des repères plus
-    petits pour qu'ils gardent à l'écran une taille proche de la vue entière (remarque de Melvyn, 11/11 : repères
+    petits pour qu'ils gardent à l'écran une taille proche de la vue entière (remarque de l'équipe, 11/11 : repères
     « extrêmement gros » en vue cadrée).
     """
     return (f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{9 * k:.2f}" fill="{ENCRE}" stroke="#FFFFFF" stroke-width="{2 * k:.2f}"/>'
@@ -156,7 +156,7 @@ def main() -> None:
             positions.append((x, y, rayon, i + 1))
 
     def reperes_navettes(k: float) -> str:
-        """Numéro écrit DANS chacun des 5 plus grands cercles (remarque de Melvyn, 11/11) : un petit repère posé à côté
+        """Numéro écrit DANS chacun des 5 plus grands cercles (remarque de l'équipe, 11/11) : un petit repère posé à côté
         faisait deux objets pour une seule commune, et on ne comprenait pas le lien. Taille du chiffre proportionnelle
         au cercle, sans plafond : le chiffre remplit le rond aux trois quarts."""
         return "".join(

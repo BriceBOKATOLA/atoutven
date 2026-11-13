@@ -91,7 +91,7 @@ u.menu(FICHIER)
 
 actifs = u.lire("parts_modales_par_gs.csv").set_index("GS")["effectif_pondere"]
 sur_place = actifs["Employé"] + actifs["Ouvrier"]
-# Formulations reprises des recommandations de Pierre THAI (captures annotées des maquettes, 11/11)
+# Formulations reprises des recommandations de l'équipe (captures annotées des maquettes, 11/11)
 retenir = "Sans télétravail, chaque journée travaillée commence par un trajet."
 
 # « Surtout » et non « réservé » : 48 % des cadres ne télétravaillent pas ; titre affirmatif plutôt qu'une question
@@ -119,7 +119,7 @@ st.markdown('<div class="carte"><h2 class="sous-titre">Télétravail selon la ca
             + "".join(silhouette(m, p) for m, p in TELETRAVAIL_PCT.items())
             + '</div><p style="font-size:14px;color:#5E6475;margin:12px 0 0">Le niveau de remplissage indique la part de '
               'télétravailleurs dans chaque catégorie (calculé sur la surface de la silhouette).</p>'
-            # Noms officiels de l'INSEE, gardés tels quels (choix de Melvyn, 11/11 : « ce n'est pas à nous de créer des
+            # Noms officiels de l'INSEE, gardés tels quels (choix de l'équipe, 11/11 : « ce n'est pas à nous de créer des
             # noms »). Définition des trois groupes, car « employé » prête à confusion : tous sont salariés.
             '<p style="font-size:14px;color:#5E6475;margin:6px 0 0">Catégories officielles de l\'INSEE (PCS 2020) : '
             '<strong>cadres</strong> (ingénieurs, cadres d\'entreprise, professeurs…), <strong>employés</strong> '

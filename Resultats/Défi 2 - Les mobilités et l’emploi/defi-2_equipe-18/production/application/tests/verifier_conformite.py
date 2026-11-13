@@ -52,8 +52,8 @@ ATTENDU = {
         ("barres par métier", "Part des emplois hors Paris situés dans une commune sans gare"),
         ("barres dessinées comme la maquette (rond du métier, fond gris clair)", "grid-template-columns:170px 1fr 80px"),
         ("graphique de flux de banlieue à banlieue (validé le 2026-11-11, remplace la carte)", "Où travaillent les actifs de banlieue"),
-        # Tableaux par département retirés le 2026-11-11 (jugés trop techniques par Melvyn)
-        ("ponctualité des lignes (travail de Maroua, validé le 2026-11-11)", "encore faut-il que le train soit"),
+        # Tableaux par département retirés le 2026-11-11 (jugés trop techniques par l'équipe)
+        ("ponctualité des lignes (validé le 2026-11-11)", "encore faut-il que le train soit"),
         ("étiquette allégée « Top 4 postes » (option A validée le 2026-11-12)", "Top 4 postes"),
     ],
     "pages/p3_voiture.py": [

@@ -49,12 +49,12 @@ u.entete(FICHIER, 'Sans gare, <span style="color:#C0401A">près de 3 trajets su
                    "employés et ouvriers vont travailler, depuis une autre commune de banlieue, dans une commune sans gare",
                    "#E4572E", "#C0401A", "train_barre"), commentaire=commentaire)
 
-# --- Visuel principal : barres-pilules (planche « Proposition p3 : barres-pilules », validée par Melvyn le 2026-11-12,
+# --- Visuel principal : barres-pilules (planche « Proposition p3 : barres-pilules », validée par l'équipe le 2026-11-12,
 # dans le style du skill infographie-storytelling : formes larges, pastille ronde à la silhouette du métier).
 #   - une barre par métier, remplie jusqu'à la part de voiture SANS gare (couleur vive du métier) ; la pastille au bout
 #     porte la silhouette du métier ;
 #   - un rond pâle posé sur la même piste marque la part AVEC gare, son chiffre au-dessus : l'écart se lit sur une ligne ;
-#   - la bande grise verticale de la version précédente est gardée (demande de Melvyn) : elle couvre les 3 pastilles
+#   - la bande grise verticale de la version précédente est gardée (demande de l'équipe) : elle couvre les 3 pastilles
 #     « sans gare », avec la pastille « Sans gare : 71 à 77 %, quel que soit le métier ». Bornes calculées.
 # Échelle de 0 à 100 % (honnêteté) ; formes différentes pour « avec » (rond creux) et « sans » (barre pleine) : le sens ne
 # repose pas sur la couleur seule.

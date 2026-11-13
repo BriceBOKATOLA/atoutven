@@ -96,7 +96,7 @@ SOURCES = [
          where='transportmode in ("rail","metro","tram")'),
      "Couleurs officielles des lignes de métro, RER, train et tram (licence ODbL)"),
     # SNCF, régularité mensuelle Transilien (licence ODbL) : ponctualité par mois et par ligne, RER et Transilien
-    # (script 11 ; idée et premier travail de Maroua Zoubir). API du portail open data de la SNCF.
+    # (script 11). API du portail open data de la SNCF.
     ("sncf_ponctualite", "ponctualite_mensuelle_transilien.csv",
      url("https://ressources.data.sncf.com/api/explore/v2.1/catalog/datasets/ponctualite-mensuelle-transilien/exports/csv",
          delimiter=";"),

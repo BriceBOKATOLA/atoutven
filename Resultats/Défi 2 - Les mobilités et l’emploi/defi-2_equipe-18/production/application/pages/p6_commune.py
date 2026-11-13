@@ -1,7 +1,7 @@
 """
 p6_commune.py : station 6, « Chercher ma commune ».
 
-Le lecteur choisit sa commune et sa ou ses catégories (interrupteurs Cadres, Employés, Ouvriers : demande de Melvyn
+Le lecteur choisit sa commune et sa ou ses catégories (interrupteurs Cadres, Employés, Ouvriers : demande de l'équipe
 du 2026-11-12, les cadres manquaient ; employés et ouvriers allumés à l'ouverture, comme le récit). La page montre,
 pour les actifs des catégories allumées qui y habitent (effectifs additionnés, puis parts calculées) :
   - trois tuiles : combien ils sont, la part qui reste dans la commune, la part qui va à Paris ;
@@ -241,7 +241,7 @@ if allumees:
 else:
     resume_complet = resume_court = ("Aucune catégorie n'est allumée : allumez au moins un des interrupteurs Cadres, "
                                      "Employés ou Ouvriers.")
-# Commentaire de la page (texte validé le 2026-11-12, avec la consigne pour la barre de recherche demandée par Melvyn)
+# Commentaire de la page (texte validé le 2026-11-12, avec la consigne pour la barre de recherche demandée par l'équipe)
 commentaire = u.commentaire_page(
     FICHIER, "Et chez vous ?",
     "Pour choisir une commune, allez dans la barre de recherche « Rechercher une commune », à côté du titre, ou juste "
@@ -269,7 +269,7 @@ with droite:
     codes = sorted(communes_brut.index[avec_actifs], key=lambda c: communes_brut.loc[c, "nom"])
     code = st.selectbox("Rechercher une commune", codes, index=codes.index(CODE_DEFAUT), format_func=libelle,
                         key="commune", placeholder="Tapez le nom d'une commune")
-    # Un interrupteur par catégorie (choix de Melvyn) : vrais widgets, lus « interrupteur, activé » par les lecteurs
+    # Un interrupteur par catégorie (choix de l'équipe) : vrais widgets, lus « interrupteur, activé » par les lecteurs
     # d'écran et utilisables au clavier ; une ou plusieurs catégories allumées
     st.markdown('<div style="font-size:14px;font-weight:600;color:#4E5466;margin-bottom:-14px">Catégories affichées</div>',
                 unsafe_allow_html=True)
@@ -367,7 +367,7 @@ principales = (f'<section aria-label="Principales communes de travail" style="ba
 lignes = [x for x in str(r["lignes"]).split(", ") if x and x != "nan"]
 # Lignes en pictogrammes (planche validée) ; au-delà de 8 (Paris…), on écrit combien d'autres lignes s'arrêtent
 if not r["gare"]:
-    # Marqueur visuel (remarque de Melvyn, 11/11) : le « Non » seul passait inaperçu à côté des pictogrammes de ligne.
+    # Marqueur visuel (remarque de l'équipe, 11/11) : le « Non » seul passait inaperçu à côté des pictogrammes de ligne.
     # Pictogramme « train barré » de la charte (carré encre = un mode), comme aux pages 2 et 3, avec son texte.
     reponse_gare = (f'<div style="display:flex;align-items:center;gap:8px;margin-top:4px">{u.badge_mode("train_barre", 34)}'
                     f'<span style="font-weight:700;font-size:16px">Non, aucune gare</span></div>')
@@ -383,7 +383,7 @@ gare = (f'<section aria-label="Desserte par le train" style="background:#FFFFFF;
         f'<div style="background:#F2F3F0;border-radius:12px;padding:10px 12px"><div style="font-size:14px;color:#4E5466">'
         f'{nom}</div>{reponse_gare}</div>'
         f'<div style="background:#F2F3F0;border-radius:12px;padding:10px 12px"><div style="font-size:14px;color:#4E5466">'
-        # Même marqueur que la case voisine (remarque de Melvyn, 11/11) : pictogramme « train barré » + valeur, et une
+        # Même marqueur que la case voisine (remarque de l'équipe, 11/11) : pictogramme « train barré » + valeur, et une
         # petite barre pour situer la part d'un coup d'œil (piste grise = 100 %)
         f'Ses communes de travail sans gare</div><div style="display:flex;align-items:center;gap:8px;margin-top:4px">'
         f'{u.badge_mode("train_barre", 34)}<span style="font-weight:700;font-size:16px">'

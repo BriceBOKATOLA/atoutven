@@ -8,7 +8,7 @@ ouvriers qui ont un emploi (recensement 2023, mobilités professionnelles), sép
   - combien travaillent dans chacune de leurs communes de travail (carte et liste « principales communes ») ;
 et, pour la commune elle-même : a-t-elle une gare, et quelles lignes (métro, RER, train, tram) s'y arrêtent.
 
-Filtre par catégorie (demande de Melvyn, 2026-11-12 : les cadres manquaient, chacun doit pouvoir choisir sa catégorie).
+Filtre par catégorie (demande de l'équipe, 2026-11-12 : les cadres manquaient, chacun doit pouvoir choisir sa catégorie).
 La page laisse allumer une ou plusieurs catégories ; elle additionne alors leurs EFFECTIFS puis calcule les parts.
 On stocke donc des effectifs (pondérés, arrondis au dixième) et non des parts : deux parts ne s'additionnent pas.
 

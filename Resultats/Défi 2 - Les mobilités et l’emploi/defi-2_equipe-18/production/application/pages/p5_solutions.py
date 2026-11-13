@@ -4,7 +4,7 @@ p5_solutions.py : station 5, « Les solutions ».
 Message : chaque territoire a sa solution. Le vélo là où les trajets en voiture sont courts (petite couronne),
 des navettes là où les emplois sont loin des gares (grande couronne).
 
-Version validée par Melvyn le 2026-11-11 (canevas « Proposition p5, version 2 »), inspirée de HAP Express :
+Version validée par l'équipe le 2026-11-11 (canevas « Proposition p5, version 2 »), inspirée de HAP Express :
   - titre avec les deux chiffres clés en pastille, chaque pourcentage dit sur quoi il porte (total écrit dessous) ;
   - chaque solution = une tuile (barre de couleur, pictogramme de mode, chiffre en Poppins, territoire où agir) ;
   - cartes lisibles d'un coup d'œil : 2 couleurs ou 2 tons, repères numérotés 1 à 5 qui renvoient au classement
@@ -25,7 +25,7 @@ import utils as u
 FICHIER = "pages/p5_solutions.py"
 NB_COMMUNES = 5          # communes du classement, numérotées comme les repères de la carte
 ORANGE_TEXTE = "#C0401A"  # couleur du bloc vélo (texte, contraste 5,3:1)
-ROSE = "#B23A86"          # couleur du bloc navettes (texte, contraste 5,6:1), demandée par Melvyn le 11/11
+ROSE = "#B23A86"          # couleur du bloc navettes (texte, contraste 5,6:1), demandée par l'équipe le 11/11
 
 u.appliquer_style()
 u.menu(FICHIER)
@@ -48,7 +48,7 @@ def pct(x: float) -> str:
 
 def pastille(texte: str, couleur: str) -> str:
     """Chiffre clé dans une pastille (HAP Express). Fine (peu de marge, texte gras mais pas extra-gras) : sur un titre
-    de deux lignes, une pastille épaisse débordait sur la ligne voisine (remarque de Melvyn, 11/11)."""
+    de deux lignes, une pastille épaisse débordait sur la ligne voisine (remarque de l'équipe, 11/11)."""
     return (f'<span style="background:{couleur};color:#FFFFFF;border-radius:8px;padding:0 7px;font-weight:700;'
             f'white-space:nowrap">{texte}</span>')
 
@@ -114,7 +114,7 @@ def bloc_solution(pictos, couleur_barre, couleur_texte, titre, territoire, chiff
                   titre_carte, carte, alt, elements_legende, titre_classement, lignes, maximum, unite, lecture) -> str:
     """Une solution : tuile (HAP Express), puis carte zoomable et classement côte à côte, puis la phrase « Lecture ».
 
-    origine : ligne « D'où vient ce chiffre ? » (validée par Melvyn le 2026-11-12) ; des lecteurs ne comprenaient pas
+    origine : ligne « D'où vient ce chiffre ? » (validée par l'équipe le 2026-11-12) ; des lecteurs ne comprenaient pas
     d'où venaient les grands chiffres de la page (source, ce qui est compté, lien avec le chiffre du titre).
     """
     nom_carte = f"{carte}{'' if entiere else '_cadree'}.svg"

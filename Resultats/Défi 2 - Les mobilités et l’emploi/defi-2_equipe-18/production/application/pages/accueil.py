@@ -43,7 +43,7 @@ with gauche:
                 f'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" '
                 f'stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M13 5l7 7-7 7"/></svg></span>'
                 f'Mobilités et emploi en Île-de-France</div>', unsafe_allow_html=True)
-    # Titre et formulation des chiffres repris des recommandations de Pierre THAI (captures annotées des maquettes, 11/11)
+    # Titre et formulation des chiffres repris des recommandations de l'équipe (captures annotées des maquettes, 11/11)
     # Commentaire de l'accueil (texte validé le 2026-11-12) : message, les quatre chiffres, la carte, comment commencer
     millions = f"{(actifs['Employé'] + actifs['Ouvrier']) / 1e6:.0f} millions"
     commentaire = u.oral(

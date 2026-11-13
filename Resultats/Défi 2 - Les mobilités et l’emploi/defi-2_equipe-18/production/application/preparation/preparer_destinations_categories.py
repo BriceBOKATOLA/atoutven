@@ -1,7 +1,7 @@
 """
 preparer_destinations_categories.py : données du graphique de flux « de banlieue à banlieue » (page 2).
 
-Validé par Melvyn le 2026-11-11 (canevas « Proposition p2 : un seul graphique de flux »), à la place de la carte en
+Validé par l'équipe le 2026-11-11 (canevas « Proposition p2 : un seul graphique de flux »), à la place de la carte en
 5 nuances et des deux tableaux 8 x 8 par département, jugés trop techniques.
 
 Deux calculs, sur les actifs qui habitent en banlieue (Île-de-France hors Paris), recensement 2023 :

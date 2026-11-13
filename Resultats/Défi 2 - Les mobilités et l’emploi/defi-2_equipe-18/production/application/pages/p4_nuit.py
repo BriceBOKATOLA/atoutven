@@ -38,7 +38,7 @@ pointe = offre[offre["tranche_horaire"].isin(TRANCHES_POINTE)]["passages_semaine
 rapport = 100 * nuit / pointe
 dimanche = 100 * offre["passages_dimanche"].sum() / offre["passages_semaine"].sum()
 
-# Vocabulaire « offre de transport de nuit » (demande de Melvyn, 11/11) : plus juste que « bus et trains », car on
+# Vocabulaire « offre de transport de nuit » (demande de l'équipe, 11/11) : plus juste que « bus et trains », car on
 # compte tous les passages prévus (bus, métros, trains, trams)
 retenir = (f"L'offre de transport de nuit s'affaiblit sur l'ensemble de l'Île-de-France, pas seulement là où travaillent "
            f"les ouvriers. Ce qui "
@@ -58,10 +58,10 @@ commentaire = u.commentaire_page(
     u.a_retenir(retenir),
     "Limite : on compte l'offre prévue, pas qui la prend ni pourquoi.",
     a_deplier=("la carte de la nuit et le dimanche",))
-# « 13 fois moins » plutôt que « 8 % des passages » : le pourcentage avait été mal compris (remarque de Pierre THAI, 11/11)
+# « 13 fois moins » plutôt que « 8 % des passages » : le pourcentage avait été mal compris (remarque de l'équipe, 11/11)
 u.entete(FICHIER, f'La nuit, une offre de transport <span style="color:{ROSE_NUIT}">{round(100 / rapport)} fois moins'
                   f'</span> importante',
-         # « Heures de pointe » plutôt que « pointe » (mot jugé incompréhensible par Melvyn, 11/11)
+         # « Heures de pointe » plutôt que « pointe » (mot jugé incompréhensible par l'équipe, 11/11)
          description, retenir,
          u.panneau("Travaillent la nuit", f"{TRAVAIL_NUIT_PCT['Ouvriers']} %",
                    f"des ouvriers (cadres : {TRAVAIL_NUIT_PCT['Cadres']} %), au moins une fois par mois", ROSE_NUIT,
@@ -117,7 +117,7 @@ def lisse(points: list) -> str:
 
 pts = [(px(i), py(x)) for i, x in enumerate(valeurs)]
 n0 = I_NUIT[0]
-# Soir selon l'INSEE (enquête Emploi) : de 20h à minuit (validé par Melvyn le 11/11, planche « journée, soir et nuit »)
+# Soir selon l'INSEE (enquête Emploi) : de 20h à minuit (validé par l'équipe le 11/11, planche « journée, soir et nuit »)
 s0 = heures.index(DEBUT_SOIR)
 SOIR = "#A58BC9"     # mauve, entre le gris du reste de la journée et le rose de la nuit
 xs0 = px(s0) - PAS / 2
@@ -171,7 +171,7 @@ svg = (
     + "".join(f'<text x="{px(i):.1f}" y="{BASE + 28}" text-anchor="middle">{h}h</text>'
               for i, h in enumerate(heures) if h % 3 == 2)
     + '</g></svg>')
-# Légende du graphique (demandée par Melvyn le 11/11) : trait de journée, trait et points de nuit, pointillés.
+# Légende du graphique (demandée par l'équipe le 11/11) : trait de journée, trait et points de nuit, pointillés.
 # Chaque élément visuel a son libellé écrit : l'information n'est jamais portée par la couleur seule.
 def element_legende(dessin: str, libelle: str) -> str:
     """Une entrée de légende : petit dessin SVG (décoratif) suivi de son libellé écrit."""
@@ -190,8 +190,8 @@ legende_courbe = ('<div style="display:flex;flex-wrap:wrap;gap:8px">'
                                     "Nuit (minuit-5h)")
                   + element_legende('<line x1="2" y1="7" x2="26" y2="7" stroke="#F1F2F6" stroke-width="1.5" '
                                     'stroke-dasharray="5 4"/>', "Moyenne de 7h à 10h")
-                  + '</div>')   # libellés courts (demande de Melvyn, 11/11) : le graphique les précise déjà
-# Phrase qui résume le graphique (demande de Melvyn, 11/11). Sans chiffre : « 13 fois moins » et le niveau de nuit
+                  + '</div>')   # libellés courts (demande de l'équipe, 11/11) : le graphique les précise déjà
+# Phrase qui résume le graphique (demande de l'équipe, 11/11). Sans chiffre : « 13 fois moins » et le niveau de nuit
 # sont déjà dans le titre et sur la courbe (règle : ne pas répéter la même information sur une page)
 resume = ("<strong>Lecture :</strong> l'offre de transport culmine vers 8h et vers 18h, baisse le "
           "soir, puis s'effondre après minuit jusqu'à 5h.")

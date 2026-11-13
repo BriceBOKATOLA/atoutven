@@ -23,7 +23,7 @@ u.menu(FICHIER)
 h21 = u.lire("h21_emplois_sans_gare.csv").set_index("groupe")
 sans_gare_sur_place = h21.loc["Employés et ouvriers", "emplois_sans_gare"]
 
-# Formulations reprises des recommandations de Pierre THAI (captures annotées des maquettes, 11/11). « Presque deux fois » : le rapport réel est calculé
+# Formulations reprises des recommandations de l'équipe (captures annotées des maquettes, 11/11). « Presque deux fois » : le rapport réel est calculé
 # (23,4 % / 13,0 % = 1,8) ; « 1 sur 4 contre 1 sur 8 » laissait croire à un rapport de 2 exactement.
 rapport = h21.loc["Ouvriers", "part_sans_gare_pct"] / h21.loc["Cadres", "part_sans_gare_pct"]
 combien = "presque deux fois" if 1.7 <= rapport < 2 else f"{u.fr(rapport, 1)} fois"
@@ -203,7 +203,7 @@ with st.expander("Pour aller plus loin : de banlieue à banlieue"):
                              .assign(**{d: lambda df, d=d: df[d].map(lambda x: f"{u.fr(x, 1)} %") for d in DESTINATIONS}),
                              "Lieu de travail des actifs de banlieue, par catégorie"), unsafe_allow_html=True)
 
-# Détail par département (tableaux 8 x 8 de la maquette) retiré le 2026-11-11 : jugé trop technique par Melvyn.
+# Détail par département (tableaux 8 x 8 de la maquette) retiré le 2026-11-11 : jugé trop technique par l'équipe.
 # À sa place, validé le même jour (canevas « Proposition p2 : ligne « plus on s'éloigne » + tableau des départs ») :
 # une ligne de métro de Paris vers l'extérieur, trois stations de plus en plus marquées, et pour chacune 10 voitures
 # dont autant de pleines que de dixièmes de trajets faits en voiture. Données : preparation/preparer_liaisons_banlieue.py.
@@ -265,10 +265,10 @@ with st.expander("Pour aller plus loin : travailler dans un autre département d
         f'Chaque voiture pleine = 1 trajet sur 10 fait en voiture. Petite couronne : Hauts-de-Seine, Seine-Saint-Denis, '
         f'Val-de-Marne ; grande couronne : Seine-et-Marne, Yvelines, Essonne, Val-d\'Oise.</p>', unsafe_allow_html=True)
 
-# --- Ponctualité des lignes (idée et premier travail de Maroua Zoubir ; script 11). Tableau des départs validé le
+# --- Ponctualité des lignes (script 11). Tableau des départs validé le
 # 2026-11-11 (canevas « Proposition p2 : ligne « plus on s'éloigne » + tableau des départs ») à la place des points
 # alignés : fond sombre, pastille de chaque ligne à sa couleur officielle, part de voyageurs à l'heure (avec le signe %,
-# demandé par Melvyn) et « en retard : 1 sur X ». Chiffres en Barlow, la police des chiffres de la charte.
+# demandé par l'équipe) et « en retard : 1 sur X ». Chiffres en Barlow, la police des chiffres de la charte.
 # « Dessert le plus de postes » : notre classement (4 premières lignes par postes desservis), pas une catégorie officielle.
 ponct = u.lire("ponctualite_lignes.csv").set_index("ligne_nom").sort_values("ponctualite_pct")
 couleurs_lignes = u.lire("couleurs_lignes.csv").set_index("ligne")
@@ -335,8 +335,7 @@ with st.expander("Pour aller plus loin : la ponctualité des lignes de RER et de
         f'sont surtout des RER, moins ponctuels que les Transilien.</p>'
         f'<p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:#5E6475">Limite : 13 lignes seulement '
         f'(RER A à E, Transilien H, J, K, L, N, P, R, U). Le métro, le tram, le bus et la ligne V ne sont pas publiés '
-        f'dans ce jeu de données de la SNCF. La ponctualité ne dit pas qui voyage. Idée et premier travail : Maroua '
-        f'Zoubir.</p>', unsafe_allow_html=True)
+        f'dans ce jeu de données de la SNCF. La ponctualité ne dit pas qui voyage.</p>', unsafe_allow_html=True)
     # Tableau affiché directement : Streamlit n'accepte pas un bloc à déplier (u.tableau) dans un autre.
     # Vrai tableau HTML ; colonnes « En retard » et « Top 4 postes » ajoutées pour reprendre tout ce que montre le
     # panneau visuel (masqué aux lecteurs d'écran)
