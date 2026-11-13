@@ -1,0 +1,11 @@
+# Fichiers générés par Next.js et TypeScript.
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+# Instantanés de données et captures générés.
+public/data/
+.playwright-mcp/
+# Cache généré par le contrôle visuel.
+.impeccable/hook.cache.json

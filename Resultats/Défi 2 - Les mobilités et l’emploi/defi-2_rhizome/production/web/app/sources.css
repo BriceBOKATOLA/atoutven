@@ -1,0 +1,48 @@
+/* Retain each map's scope root and keep the story theme outside the atlas plates. */
+@scope (:root, .chart-two, .chart-three) to (.chart-two, .chart-three) {
+  .network-map-sources,
+  footer.chart-sources {
+    padding: 24px 0 32px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .network-map-sources h4,
+  .chart-sources h2 {
+    margin: 0 0 16px;
+    letter-spacing: normal;
+  }
+  .network-map-sources .sources-grid,
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .network-map-sources .source-group,
+  .source-group {
+    min-width: 0;
+  }
+  .network-map-sources p,
+  .chart-sources p {
+    max-width: 65ch;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .network-map-sources p + p,
+  .chart-sources p + p {
+    margin-top: 12px;
+  }
+  .network-map-sources strong,
+  .chart-sources strong {
+    font-weight: 600;
+  }
+}
+
+/* Keep the container override after its shared base rule in every import. */
+@scope (.chart-two, .chart-three) {
+  @container chart-frame (max-width: 800px) {
+    .sources-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+}

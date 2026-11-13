@@ -1,0 +1,238 @@
+{
+ "Câble C1 (2025)": {
+  "line": "Câble C1",
+  "an": 2025,
+  "codes": [
+   "94028",
+   "94044",
+   "94074",
+   "94078"
+  ],
+  "communes": [
+   "Créteil",
+   "Limeil-Brévannes",
+   "Valenton",
+   "Villeneuve-Saint-Georges"
+  ]
+ },
+ "M11 (2024)": {
+  "line": "M11",
+  "an": 2024,
+  "codes": [
+   "93045",
+   "93048",
+   "93063",
+   "93064"
+  ],
+  "communes": [
+   "Les Lilas",
+   "Montreuil",
+   "Romainville",
+   "Rosny-sous-Bois"
+  ]
+ },
+ "M12 (2022)": {
+  "line": "M12",
+  "an": 2022,
+  "codes": [
+   "93001"
+  ],
+  "communes": [
+   "Aubervilliers"
+  ]
+ },
+ "M14 (2020)": {
+  "line": "M14",
+  "an": 2020,
+  "codes": [
+   "93070"
+  ],
+  "communes": [
+   "Saint-Ouen-sur-Seine"
+  ]
+ },
+ "M14 (2024)": {
+  "line": "M14",
+  "an": 2024,
+  "codes": [
+   "91479",
+   "93066",
+   "94021",
+   "94038",
+   "94043",
+   "94073",
+   "94076"
+  ],
+  "communes": [
+   "Chevilly-Larue",
+   "L'Haÿ-les-Roses",
+   "Le Kremlin-Bicêtre",
+   "Paray-Vieille-Poste",
+   "Saint-Denis",
+   "Thiais",
+   "Villejuif"
+  ]
+ },
+ "M4 (2022)": {
+  "line": "M4",
+  "an": 2022,
+  "codes": [
+   "92007"
+  ],
+  "communes": [
+   "Bagneux"
+  ]
+ },
+ "RER E (2024)": {
+  "line": "RER E",
+  "an": 2024,
+  "codes": [
+   "92050",
+   "92062"
+  ],
+  "communes": [
+   "Nanterre",
+   "Puteaux"
+  ]
+ },
+ "T1 (2019)": {
+  "line": "T1",
+  "an": 2019,
+  "codes": [
+   "92004"
+  ],
+  "communes": [
+   "Asnières-sur-Seine"
+  ]
+ },
+ "T10 (2023)": {
+  "line": "T10",
+  "an": 2023,
+  "codes": [
+   "92002",
+   "92019",
+   "92023",
+   "92060"
+  ],
+  "communes": [
+   "Antony",
+   "Châtenay-Malabry",
+   "Clamart",
+   "Le Plessis-Robinson"
+  ]
+ },
+ "T11 (2017)": {
+  "line": "T11",
+  "an": 2017,
+  "codes": [
+   "93027",
+   "93029",
+   "93031",
+   "93059",
+   "93072",
+   "93079"
+  ],
+  "communes": [
+   "Drancy",
+   "La Courneuve",
+   "Pierrefitte-sur-Seine",
+   "Stains",
+   "Villetaneuse",
+   "Épinay-sur-Seine"
+  ]
+ },
+ "T12 (2023)": {
+  "line": "T12",
+  "an": 2023,
+  "codes": [
+   "91136",
+   "91161",
+   "91182",
+   "91216",
+   "91228",
+   "91286",
+   "91345",
+   "91377",
+   "91434",
+   "91521",
+   "91687"
+  ],
+  "communes": [
+   "Champlan",
+   "Chilly-Mazarin",
+   "Courcouronnes",
+   "Grigny",
+   "Longjumeau",
+   "Massy",
+   "Morsang-sur-Orge",
+   "Ris-Orangis",
+   "Viry-Châtillon",
+   "Épinay-sur-Orge",
+   "Évry-Courcouronnes"
+  ]
+ },
+ "T13 (2022)": {
+  "line": "T13",
+  "an": 2022,
+  "codes": [
+   "78043",
+   "78224",
+   "78367",
+   "78455",
+   "78545",
+   "78551",
+   "78646"
+  ],
+  "communes": [
+   "Bailly",
+   "L'Étang-la-Ville",
+   "Mareil-Marly",
+   "Noisy-le-Roi",
+   "Saint-Cyr-l'École",
+   "Saint-Germain-en-Laye",
+   "Versailles"
+  ]
+ },
+ "T4 (2019)": {
+  "line": "T4",
+  "an": 2019,
+  "codes": [
+   "93014",
+   "93046",
+   "93047"
+  ],
+  "communes": [
+   "Clichy-sous-Bois",
+   "Livry-Gargan",
+   "Montfermeil"
+  ]
+ },
+ "T6 (2016)": {
+  "line": "T6",
+  "an": 2016,
+  "codes": [
+   "78686"
+  ],
+  "communes": [
+   "Viroflay"
+  ]
+ },
+ "T9 (2021)": {
+  "line": "T9",
+  "an": 2021,
+  "codes": [
+   "94022",
+   "94041",
+   "94054",
+   "94073",
+   "94081"
+  ],
+  "communes": [
+   "Choisy-le-Roi",
+   "Ivry-sur-Seine",
+   "Orly",
+   "Thiais",
+   "Vitry-sur-Seine"
+  ]
+ }
+}

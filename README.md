@@ -35,7 +35,7 @@ Ce guide des participant.e.s vous aidera tout au long de ce Hackaviz et dans sa 
 
 ## Les défis
 
-Au cours de ces deux semaines de Hackaviz, vous relevez un défi en équipe. L'objectif est de proposer un projet qui répondre à un des 4 défis proposés. [Les défis sont présentés dans ce document](Docs/Présentation_des_défis). 
+Au cours de ces deux semaines de Hackaviz, vous relevez un défi en équipe. L'objectif est de proposer un projet qui répondre à un des 4 défis proposés. [Les défis sont présentés dans ce document](Docs/Présentation_des_défis.md).
 
 - **Défi 1** - Les mobilités et l’**adaptation climatique** 
 - **Défi 2** - Les mobilités et l’**emploi** 
@@ -92,7 +92,7 @@ _Vous pouvez également joindre une courte vidéo de démonstration de votre dat
 
 Rappel : 
 - **Pour le README, veuillez [utiliser ce modèle](https://github.com/hackathons-mobilites/hackaviz_2026/blob/main/Docs/Template%20README%202026.md)** (il vous servira pour l'envoi de votre projet à la fin du Hackaviz.
-- Ajoutez le topic *hackathonmobilites2025* à la description de votre répertoire (voir image ci-dessous)
+- Ajoutez le topic *hackathonmobilites2026* à la description de votre répertoire (voir image ci-dessous)
 - **Ajoutez le lien de votre répertoire** dans vos diapositives de pitch + vos canal slack en message épinglé
 
 ### L'accessibilité des datavisualisations

@@ -1,4 +1,4 @@
-![Logo du Hackathon Mobilités](Images/logo_rectangle.png)
+![Logo du Hackathon Mobilités](../Images/logo_rectangle.png)
 
 #  RÈGLEMENT DU HACKATHON MOBILITÉS 2026
 

@@ -1,0 +1,39 @@
+# Données et conditions de réutilisation
+
+Le projet décrit l'évolution du réseau et de l'emploi en Île-de-France. Les données rapprochent des situations territoriales ; elles ne mesurent ni les trajets individuels ni un effet causal des transports sur l'emploi. Le [catalogue des données](docs/catalogue_fichiers.md) décrit les entrées, les transformations et les limites des cartes.
+
+## Sources principales
+
+| Producteur et données | Utilisation | Conditions de la source |
+|---|---|---|
+| Île-de-France Mobilités : [tracés du réseau ferré](https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/) et [gares par ligne](https://data.iledefrance-mobilites.fr/explore/dataset/emplacement-des-gares-idf/) | Lignes, gares et dates de mise en service. | [Licence Ouverte 2.0](https://github.com/etalab/licence-ouverte/blob/master/LO.md). |
+| Urssaf : [effectifs salariés privés par commune](https://www.data.gouv.fr/datasets/nombre-detablissements-employeurs-et-effectifs-salaries-du-secteur-prive-par-commune-x-ape-au-31-12-depuis-2006) et [auto-entrepreneurs par département](https://www.data.gouv.fr/datasets/auto-entrepreneurs-par-departement) | Emploi privé, pôles et indicateurs des zones et départements. | [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/) : attribution et partage des bases dérivées dans les conditions de la licence. |
+| Urssaf : [déclarations préalables à l'embauche](https://www.data.gouv.fr/datasets/declarations-prealables-a-lembauche-par-departement-x-grand-secteur) | Séries conservées dans `territoires.json`, non reprises dans le site actuel. | ODbL 1.0. |
+| [Dares / France Travail : inscrits par commune](https://www.data.gouv.fr/datasets/inscrits-a-france-travail-donnees-communales-trimestrielles-brutes) | Catégories A, B et C, moyennes du 4e trimestre 2016 et 2024, arrondies au multiple de cinq. | Licence Ouverte 2.0. |
+| Insee : [emploi au lieu de travail](https://catalogue-donnees.insee.fr/fr/catalogue/recherche/DS_RP_EMPLOI_LT_PRINC), [chômage par zone](https://www.insee.fr/fr/statistiques/1893230), [recensement 2016](https://www.insee.fr/fr/statistiques/4171446) et [tableau de bord régional](https://www.insee.fr/fr/statistiques/2109644) | Emploi total et non-salariés en 2017 et 2023, indicateurs des zones et des départements. | [Licence Ouverte 2.0](https://www.insee.fr/fr/information/2008466), sauf indication contraire : mentionner « Source : Insee » et la dernière mise à jour lorsqu'elle est connue. |
+| Observatoire de la création d’entreprise, Bpifrance Création : fiches Île-de-France de [juillet](https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202507.pdf), [août](https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202508.pdf) et [septembre 2025](https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202509.pdf) | Créations d'entreprises au 3e trimestre 2025. Ces premières publications reposent sur des données Insee provisoires. | La page 10 de chaque fiche autorise la reproduction collective de la publication avec la citation qu'elle précise. Les références complètes figurent ci-dessous et dans le site. |
+| [France GeoJSON](https://github.com/gregoiredavid/france-geojson) : IGN Admin Express COG et codes Insee 2018 | Fonds communaux et départementaux des cartes 1 et 3. | Les géométries communales du GeoPackage partagé et les huit contours départementaux correspondent à France GeoJSON. Cette correspondance ne démontre pas à elle seule l'origine de chaque copie locale. |
+| [Etalab : découpage administratif](https://github.com/etalab/decoupage-administratif) | Noms officiels des communes. | Licence Ouverte 2.0 pour les données ; MIT pour le code. |
+| [Dares / France Travail : offres brutes trimestrielles](https://www.data.gouv.fr/datasets/offres-collectees-et-satisfaites-par-france-travail-brutes-trimestrielles) | Séries conservées dans `territoires.json`, non reprises dans le site actuel. | La fiche de ce jeu n'indique pas de licence. |
+
+## Données du site web
+
+Les trois instantanés ci-dessous sont fournis avec le site. Les scripts indiqués utilisent les fichiers préparés de `production/datasets/` et ne téléchargent pas les sources. Les [instructions d'exécution](production/web/README.md#préparer-les-données-et-la-carte-statique) expliquent comment les régénérer.
+
+| Instantané | Contenu et sources |
+|---|---|
+| [rail-network.json](production/web/public/data/rail-network.json) | Réseau et gares IDFM, noms et fonds communaux et départementaux. Les six tronçons du prolongement de la ligne 11 sans date sont exclus du total, mais les gares figurent sur la carte. Le T14 est classé dans le réseau ancien. Script : `production/scripts/export-network.py`. |
+| [jobseekers-employment-zones.json](production/web/public/data/jobseekers-employment-zones.json) | Demandeurs d'emploi Dares, indicateurs des zones issus d'un classeur local, dont les effectifs privés Urssaf, et géométries locales. Les valeurs manquantes restent distinctes de zéro. Script : `production/scripts/export-jobseekers.py`. |
+| [employment-centers-departments.json](production/web/public/data/employment-centers-departments.json) | Pôles et effectifs Urssaf, réseau, fonds de carte et indicateurs départementaux Insee et Bpifrance. Les défaillances couvrent les douze mois jusqu'en août 2026 ; les autres indicateurs départementaux datent de 2025. Script : `production/scripts/export-employment-centers.py`. |
+
+Les deux derniers instantanés contiennent des données Urssaf et leurs transformations. Les données et bases dérivées Urssaf sont soumises à l'ODbL. Ces fichiers combinent d'autres sources : les conditions de l'ensemble ne peuvent pas être garanties tant que les droits des copies géographiques et des classeurs ne sont pas tous établis. L'[avis de réutilisation des données du site](production/web/public/data/LICENCES.txt) accompagne les fichiers JSON.
+
+## Conditions de réutilisation
+
+- **Code et documentation :** [MIT](LICENSE). Cette licence ne remplace pas les conditions des données et des dépendances tierces.
+- **Urssaf :** citer Urssaf et l'ODbL. Pour les bases dérivées utilisées publiquement, respecter notamment les obligations d'attribution, de partage à l'identique et de mise à disposition prévues par l'[ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). Les JSON et les scripts de transformation sont fournis dans le dépôt.
+- **Bpifrance Création :** citer l'Observatoire de la création d’entreprise, *La création d’entreprise en Île-de-France*, chiffres de juillet 2025, Bpifrance Création, août 2025 ; chiffres d'août 2025, Bpifrance Création, septembre 2025 ; et chiffres de septembre 2025, Bpifrance Création, octobre 2025. Ces conditions concernent les publications citées, pas l'ensemble des classeurs de l'équipe.
+- **Highcharts Maps :** la bibliothèque n'est pas couverte par la licence MIT du projet. Le [contrat Highsoft](https://shop.highcharts.com/license-eula) définit les usages personnels et éducatifs autorisés. Le droit applicable au contexte du Hackaviz, au site public et à la distribution de la bibliothèque reste à confirmer, ainsi que sa compatibilité avec le [règlement](../../../Docs/Règlement_2026.md).
+- **Copies et classeurs :** la correspondance des contours du GeoPackage partagé avec France GeoJSON ne documente pas tous les droits des fichiers combinés. La source des contours communaux du graphique 2, les droits des classeurs complets et le producteur et la licence de `rivieres_idf.geojson` restent à établir. Les rivières ne sont pas incluses dans l'instantané du réseau.
+
+Les [conditions des données de production](production/datasets/LICENCES.txt) recensent les bases Urssaf et les autres sources conservées. La présence d'une source publique ne donne pas automatiquement une licence à tous les fichiers qui la combinent.

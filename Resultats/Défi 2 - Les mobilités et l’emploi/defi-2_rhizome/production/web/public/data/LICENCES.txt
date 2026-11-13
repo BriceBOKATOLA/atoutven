@@ -1,0 +1,41 @@
+EcloWork — conditions de réutilisation des données du site
+
+Les trois fichiers JSON sont disponibles dans ce même dossier. Ils combinent plusieurs sources. Les conditions ci-dessous s'appliquent aux sources et aux droits de base identifiés ; elles n'autorisent pas la réutilisation d'éléments dont les droits restent inconnus. La licence MIT du code ne couvre pas automatiquement les données.
+
+rail-network.json
+- Réseau et gares : Île-de-France Mobilités, Licence Ouverte 2.0.
+  https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/
+  https://data.iledefrance-mobilites.fr/explore/dataset/emplacement-des-gares-idf/
+- Fonds géographiques : les contours communaux du GeoPackage partagé et les huit contours départementaux correspondent aux données France GeoJSON, IGN Admin Express COG et codes Insee 2018.
+  https://github.com/gregoiredavid/france-geojson
+- Noms officiels : découpage administratif Etalab / Insee, Licence Ouverte 2.0.
+  https://github.com/etalab/decoupage-administratif
+Ce JSON ne contient pas les effectifs Urssaf. La correspondance géométrique ne prouve pas l'origine historique des copies.
+
+jobseekers-employment-zones.json et employment-centers-departments.json
+- Effectifs salariés privés et auto-entrepreneurs : Urssaf, ODbL 1.0.
+  https://www.data.gouv.fr/datasets/nombre-detablissements-employeurs-et-effectifs-salaries-du-secteur-prive-par-commune-x-ape-au-31-12-depuis-2006
+  https://www.data.gouv.fr/datasets/auto-entrepreneurs-par-departement
+- Les données Urssaf et les bases dérivées concernées sont soumises à l'ODbL 1.0. La licence prévoit notamment l'attribution, le partage à l'identique et la mise à disposition de la base dérivée complète ou des modifications lisibles par machine. Les JSON sont les bases diffusées ; les scripts de transformation disponibles sont dans le dépôt du projet.
+  https://opendatacommons.org/licenses/odbl/1-0/
+- Demandeurs d'emploi : Dares / France Travail, Licence Ouverte 2.0.
+  https://www.data.gouv.fr/datasets/inscrits-a-france-travail-donnees-communales-trimestrielles-brutes
+- Données Insee identifiées : Licence Ouverte 2.0 sauf indication contraire. Mentionner « Source : Insee » et la dernière mise à jour lorsqu'elle est connue.
+  https://www.insee.fr/fr/information/2008466
+- Réseau et gares : Île-de-France Mobilités, Licence Ouverte 2.0.
+  https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/
+  https://data.iledefrance-mobilites.fr/explore/dataset/emplacement-des-gares-idf/
+- Les droits des géométries préparées et des contributions propres aux classeurs ne sont pas tous établis. L'ODbL applicable aux données Urssaf ne règle pas les droits des autres éléments.
+
+Créations d'entreprises du troisième trimestre 2025
+Les fiches de l'Observatoire de la création d’entreprise, Bpifrance Création, autorisent la reproduction collective de leurs publications avec les citations suivantes :
+- La création d’entreprise en Île-de-France, chiffres de juillet 2025. Bpifrance Création, août 2025.
+  https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202507.pdf
+- La création d’entreprise en Île-de-France, chiffres d'août 2025. Bpifrance Création, septembre 2025.
+  https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202508.pdf
+- La création d’entreprise en Île-de-France, chiffres de septembre 2025. Bpifrance Création, octobre 2025.
+  https://bpifrance-creation.fr/sites/default/files/oce/OCE_FSM_%C3%8Ele-de-France_202509.pdf
+Ces autorisations concernent les publications citées ; elles ne constituent pas une licence globale pour les classeurs complets.
+
+Licence Ouverte 2.0 : https://github.com/etalab/licence-ouverte/blob/master/LO.md
+Dépôt du projet et scripts : https://github.com/HuangMichel/hackaviz_2026
