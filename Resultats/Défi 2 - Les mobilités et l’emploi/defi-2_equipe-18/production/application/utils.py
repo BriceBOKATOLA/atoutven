@@ -1,5 +1,5 @@
 """
-utils.py : tout ce qui est commun aux pages de l'application « Le lieu de travail décide ».
+utils.py : tout ce qui est commun aux pages de l'application « Trajemploi » (slogan : « L'emploi au-delà du rail »).
 (Nom provisoire, choisi le 11/11 pour remplacer « Sur place, loin du réseau » : « sur place » était du jargon.)
 
 - la charte (couleurs, polices) et le style CSS appliqué à chaque page ;
@@ -121,8 +121,8 @@ def appliquer_style(nuit: bool = False) -> None:
   font-family: 'Plus Jakarta Sans', sans-serif; color: {encre}; font-size: 16px; }}
 [data-testid="stIconMaterial"] {{ font-family: 'Material Symbols Rounded' !important; }}
 /* Largeur du contenu limitée à 960 px (1 100 jusqu'au 2026-11-12) : à 100 % de zoom, l'application paraissait trop
-   grosse (Melvyn l'avait validée avec un zoom navigateur de 75 %) ; variante « réduction ciblée » choisie après
-   comparaison. Avant : 1 100 px, choix gardé par Melvyn le 2026-11-11 après essai de la pleine largeur
+   grosse (l'équipe l'avait validée avec un zoom navigateur de 75 %) ; variante « réduction ciblée » choisie après
+   comparaison. Avant : 1 100 px, choix gardé par l'équipe le 2026-11-11 après essai de la pleine largeur
    (sur un écran large, les cartes et graphiques, qui suivent la largeur, devenaient énormes). */
 .block-container {{ max-width: 960px; padding-top: 2.2rem; }}
 h1.titre {{ font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 30px; line-height: 1.15;
@@ -252,7 +252,10 @@ def menu(fichier_courant: str, nuit: bool = False) -> None:
     with st.sidebar:
         st.markdown(f'<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'
                     f'{badge_mode("train", 42, nuit)}<div><div style="font-family:Poppins,sans-serif;font-weight:800;'
-                    f'font-size:16px;color:{"#F1F2F6" if nuit else ENCRE}">Le lieu de travail décide</div>'
+                    f'font-size:16px;color:{"#F1F2F6" if nuit else ENCRE}">Trajemploi</div>'
+                    # Slogan sous le nom (choix de l'équipe, 13/11), puis le cadre du projet
+                    f'<div style="font-size:14px;font-weight:600;color:{"#F1F2F6" if nuit else ENCRE}">'
+                    "L'emploi au-delà du rail</div>"
                     f'<div style="font-size:14px;color:{"#9AA0B2" if nuit else GRIS_TEXTE}">Hackaviz IDFM 2026 · Défi 2</div>'
                     f'</div></div>', unsafe_allow_html=True)
         st.markdown(_ligne_de_metro(fichier_courant, nuit), unsafe_allow_html=True)
@@ -299,7 +302,7 @@ def _ligne_de_metro(fichier_courant: str, nuit: bool) -> str:
 ZOOM_CARTES_JS = (DOSSIER / "zoom_cartes.js").read_text(encoding="utf-8")
 
 
-# Choix de la voix, commun au bouton « Écouter » et à la sonification. Règle (Melvyn, 13/11) : JAMAIS de voix étrangère,
+# Choix de la voix, commun au bouton « Écouter » et à la sonification. Règle (l'équipe, 13/11) : JAMAIS de voix étrangère,
 # l'application est faite pour les Franciliens. Constat d'un utilisateur sur téléphone : accent anglais. Cause : sur
 # téléphone, la liste des voix arrive en retard ; au clic elle était vide, aucune voix française n'était choisie et le
 # téléphone lisait avec sa voix par défaut. Donc : on attend la liste (événement voiceschanged, 1,5 s au plus, sans
@@ -422,7 +425,7 @@ def _sans_balises(texte: str) -> str:
 # ---------------------------------------------------------------------------
 # Commentaire de page (lecture à voix haute et description pour les lecteurs d'écran)
 # ---------------------------------------------------------------------------
-# Textes validés par Melvyn le 2026-11-12. Le bouton « Écouter » lisait seulement le titre, la description et le
+# Textes validés par l'équipe le 2026-11-12. Le bouton « Écouter » lisait seulement le titre, la description et le
 # « À retenir » : jamais le graphique, le panneau-chiffre ni la suite. Le commentaire suit l'ordre de lecture d'un
 # voyant : où je suis, la réponse, le graphique raconté, le panneau-chiffre, « À retenir », « Limite », ce qu'il y a à
 # déplier, la station suivante. La partie « graphique » sert aussi de description du graphique pour les lecteurs
@@ -487,7 +490,7 @@ def a_retenir(retenir: str) -> str:
 
 def bouton_sonification(intro: str, points: list, conclusion: str, duree_note: float = 0.6,
                         nuit: bool = False) -> None:
-    """Bouton « Écouter le graphique en sons » : sonification du graphique (le « plus » validé par Melvyn, 12/11).
+    """Bouton « Écouter le graphique en sons » : sonification du graphique (le « plus » validé par l'équipe, 12/11).
 
     Inspiré des bonnes pratiques existantes (module de sonification de Highcharts, Audio Graphs d'Apple), sans les
     recréer : une voix explique la règle (intro), puis chaque valeur devient une note, plus aiguë quand la valeur est
@@ -613,15 +616,15 @@ def navigation_bas(fichier: str) -> None:
 
 
 # Mention courte d'accessibilité en pied de page (seule mention autorisée : l'accessibilité est intégrée à chaque
-# page, jamais une page à part ; décision de Melvyn du 2026-11-10). Elle dit ce qui est fait ET ce qui reste imparfait.
-# Rédigée pour le visiteur (demande de Melvyn, 12/11) : pas de détail technique sur l'outil (« éléments de Streamlit »),
+# page, jamais une page à part ; décision de l'équipe du 2026-11-10). Elle dit ce qui est fait ET ce qui reste imparfait.
+# Rédigée pour le visiteur (demande de l'équipe, 12/11) : pas de détail technique sur l'outil (« éléments de Streamlit »),
 # qui ne lui apprend rien ; seulement ce qui est fait et ce qui reste vraiment à faire.
 MENTION_ACCESSIBILITE = ("Accessibilité numérique : commentaire à écouter et description de chaque graphique, graphiques "
                          "à écouter en sons, tableaux de données, navigation au clavier, information jamais portée par la "
                          "couleur seule. Reste à faire : un test par des personnes non voyantes, avec leur lecteur d'écran.")
 
 
-# Liens des sources (demande de Melvyn, 12/11) : le texte des sources reste le même, un lien est posé derrière chaque
+# Liens des sources (demande de l'équipe, 12/11) : le texte des sources reste le même, un lien est posé derrière chaque
 # nom de source. Adresses reprises des README de l'équipe et des données, vérifiées le 2026-11-12 (réponse 200 et titre
 # de la page). Les libellés longs passent avant les courts (« INSEE, recensement 2023, mobilités professionnelles »
 # avant « INSEE, recensement 2023 »). Seuil de 5 km (Insee Première n° 1835) : pas d'adresse vérifiée, laissé sans lien.

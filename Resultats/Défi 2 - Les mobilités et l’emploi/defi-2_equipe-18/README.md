@@ -1,4 +1,6 @@
-# Le réseau mène à Paris, pas aux emplois de banlieue
+# Trajemploi
+
+**L'emploi au-delà du rail**
 
 **Équipe :** équipe 18 : Melvyn MOTHO, Pierre THAI, Maroua Zoubir
 **Mail(s) de contact :** melvynmotho@gmail.com
