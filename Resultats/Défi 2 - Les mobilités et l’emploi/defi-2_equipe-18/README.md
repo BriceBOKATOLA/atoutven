@@ -8,7 +8,7 @@
 
 Une application web en forme de récit, qui montre que l'accès à l'emploi en transports en commun dépend moins du métier que du lieu de travail : hors de Paris, les emplois sans gare sont surtout ceux des employés et des ouvriers, et sans gare, la voiture s'impose pour tous.
 
-**Application en ligne :** [hackaviz2026-equipe-18-test.streamlit.app](https://hackaviz2026-equipe-18-test.streamlit.app/) · **Code :** [`production/application/`](production/application/)
+**Application en ligne :** [hackaviz2026-trajemploi-idfm.streamlit.app](https://hackaviz2026-trajemploi-idfm.streamlit.app/) · **Code :** [`production/application/`](production/application/)
 
 ## Présentation du projet
 
